@@ -320,12 +320,13 @@
       const wm = v => v === 'sym'
         ? `<div class="lm-wm sym" style="--lc:${COR}">${brand[0]}</div>`
         : `<div class="lm-wm ${v}" style="--lc:${COR}"><span class="lm-word">${brand.toLowerCase()}</span><span class="lm-by">by contourline</span></div>`;
+      const mk = (id, t, size, ext, ar, variant, darkBg) => ({ id, t, size, date:'01/06/2026', ext, ar, variant, color:COR, word:brand, darkBg, th: wm(variant) });
       const SAMPLES = [
-        { t:`Favicon ${brand}`,               size:'12.7 KB',  date:'01/06/2026', ext:'PNG', ar:1,   th: wm('sym')   },
-        { t:`${brand} by Contourline`,        size:'776.1 KB', date:'01/06/2026', ext:'PNG', ar:2.7, th: wm('dark')  },
-        { t:`${brand} by Contourline`,        size:'39.5 KB',  date:'01/06/2026', ext:'PNG', ar:2.7, th: wm('color') },
-        { t:`${brand} by Contourline Branca`, size:'33.2 KB',  date:'01/06/2026', ext:'PNG', ar:2.4, th: wm('white') },
-        { t:`${brand} by Contourline`,        size:'120 KB',   date:'01/06/2026', ext:'SVG', ar:2.7, th: wm('dark')  },
+        mk('wm0', `Favicon ${brand}`,               '12.7 KB',  'PNG', 1,   'sym',   false),
+        mk('wm1', `${brand} by Contourline`,        '776.1 KB', 'PNG', 2.7, 'dark',  false),
+        mk('wm2', `${brand} by Contourline`,        '39.5 KB',  'PNG', 2.7, 'color', false),
+        mk('wm3', `${brand} by Contourline Branca`, '33.2 KB',  'PNG', 2.4, 'white', true),
+        mk('wm4', `${brand} by Contourline`,        '120 KB',   'SVG', 2.7, 'dark',  false),
       ];
       return {
         title: 'Logos ' + brand,
@@ -360,6 +361,22 @@
           <div class="masonry lg-grid" id="brand-logos" data-brand="${brand}"><div class="pf-loading">Carregando logos…</div></div>
         </div>`,
         init: () => { window.initBrandLogos && window.initBrandLogos(brand, SAMPLES); },
+      };
+    },
+
+    /* ---------- FAVORITOS (coleções do usuário) ---------- */
+    favoritos() {
+      return {
+        title: 'Favoritos',
+        crumbs: `<i data-icon="heart" data-cls="ic ic-sm"></i><a href="#/">PartnerZone</a><span>›</span><span class="here">Favoritos</span>`,
+        html: `
+        <div class="folder-page" data-enter>
+          <h1 class="fp-title">Favoritos</h1>
+          <div class="fp-sub">Suas coleções — selecione imagens em qualquer pasta e toque em <b>Favoritar</b> para montar suas playlists.</div>
+          <div class="fp-rule"></div>
+          <div id="fav-page"><div class="pf-loading">Carregando coleções…</div></div>
+        </div>`,
+        init: () => { window.initFavoritos && window.initFavoritos(); },
       };
     },
 
@@ -592,6 +609,7 @@
     if (!p.length || p[0] === 'home')   return Views.home();
     if (p[0] === 'buscar')              return Views.buscar();
     if (p[0] === 'sql')                 return Views.sql();
+    if (p[0] === 'favoritos')           return Views.favoritos();
     if (p[0] === 'marca')               return p[2] === 'logos' ? Views.marcaLogos(p[1]) : Views.marca(p[1]);
     if (p[0] === 'cadastro')            return Views.cadastro();
     if (p[0] === 'equipamentos')        return Views.equipamentos();
@@ -603,6 +621,7 @@
   function route() {
     const parts = parseHash();
     recordRecent(parts);
+    try { Sel.clear(); } catch (_) {}   // zera seleção ao trocar de página (some a barra do rodapé)
     const view = resolve(parts);
     const main = document.getElementById('view');
     const crumbs = document.getElementById('crumbs');

@@ -184,26 +184,43 @@
 .lm-wm .lm-by { font-size: 9px; font-weight: 500; letter-spacing: .06em; opacity: .65; }
 .lm-wm.dark { color: #111827; }
 .lm-wm.color { color: var(--lc, #2f7ff2); }
-.lm-wm.white { color: #fff; background: #0f2a5c; padding: 12px 18px; border-radius: 10px; }
+.lm-wm.white { color: #fff; }
 .lm-wm.sym { font-size: 40px; color: var(--lc, #2f7ff2); }
 
 /* ----- GALERIA MASONRY de logos ----- */
 .lg-grid { width: 100%; }
 .lg-item { cursor: pointer; }
-.lg-thumb { position: relative; border-radius: 14px; overflow: hidden; display: grid; place-items: center; padding: 14px;
-  border: 1px solid var(--border); transition: border-color .18s, box-shadow .18s, transform .18s;
-  background: repeating-conic-gradient(#e7ecf3 0% 25%, #ffffff 0% 50%) 50% / 24px 24px; }
+/* fundo ADAPTÁVEL: claro p/ logo escura, escuro p/ logo clara (sem mais quadriculado) */
+.lg-thumb { position: relative; border-radius: 14px; overflow: hidden; display: grid; place-items: center; padding: 16px;
+  border: 1px solid var(--border); transition: border-color .18s, box-shadow .18s, transform .18s; }
+.lg-thumb.light { background: #f4f6fb; }
+.lg-thumb.dark  { background: #0e1b30; border-color: #1d2c47; }
 .lg-item:hover .lg-thumb { border-color: var(--accent-border); box-shadow: 0 16px 36px -22px var(--accent); transform: translateY(-3px); }
-.lg-thumb img { max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; }
+/* logo no TAMANHO real (não estica logo pequena) — cap em 78% da caixa */
+.lg-thumb img { max-width: 84%; max-height: 78%; width: auto; height: auto; object-fit: contain; }
 .lg-ext { position: absolute; right: 8px; bottom: 8px; font-size: 9.5px; font-weight: 800; letter-spacing: .08em; color: #fff;
-  padding: 3px 8px; border-radius: 6px; background: rgba(8,15,30,.66); backdrop-filter: blur(3px); }
-.lg-del { position: absolute; top: 8px; right: 8px; width: 28px; height: 28px; display: grid; place-items: center; cursor: pointer;
-  color: #fff; background: rgba(8,15,30,.5); border: none; border-radius: 8px; opacity: 0; transition: opacity .18s, background .18s; }
-.lg-item:hover .lg-del { opacity: 1; }
-.lg-del:hover { background: var(--error); }
+  padding: 3px 8px; border-radius: 6px; background: rgba(8,15,30,.6); backdrop-filter: blur(3px); }
+/* checkbox de seleção (canto sup. esq.) */
+.lg-check { position: absolute; top: 8px; left: 8px; width: 26px; height: 26px; display: grid; place-items: center; cursor: pointer;
+  color: transparent; background: rgba(255,255,255,.7); border: 1.5px solid rgba(120,140,170,.6); border-radius: 8px;
+  opacity: 0; transition: opacity .15s, background .15s, color .15s, border-color .15s; }
+.lg-thumb.dark .lg-check { background: rgba(20,30,50,.55); border-color: rgba(180,200,230,.5); }
+.lg-item:hover .lg-check { opacity: 1; }
+.lg-check .ic { width: 15px; height: 15px; }
+.lg-item.sel .lg-check { opacity: 1; color: #fff; background: var(--accent); border-color: var(--accent); }
+.lg-item.sel .lg-thumb { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent) inset; }
+/* ferramentas (favoritar / remover) canto sup. dir. */
+.lg-tools { position: absolute; top: 8px; right: 8px; display: flex; gap: 6px; opacity: 0; transition: opacity .15s; }
+.lg-item:hover .lg-tools { opacity: 1; }
+.lg-tools button, .lg-dl, .lg-unfav { width: 28px; height: 28px; display: grid; place-items: center; cursor: pointer;
+  color: #fff; background: rgba(8,15,30,.5); border: none; border-radius: 8px; transition: background .15s, color .15s; }
+.lg-fav:hover { background: #e0397a; }
+.lg-del:hover, .lg-unfav:hover { background: var(--error); }
+.lg-dl:hover { background: var(--accent); }
 .lg-cap { padding: 9px 4px 2px; }
 .lg-cap b { display: block; font-size: 13px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .lg-cap span { font-size: 11px; color: var(--text-faint); }
+.lg-miss { color: var(--text-faint); }
 
 /* lista */
 .lg-grid.list { display: flex; flex-direction: column; gap: 10px; }
@@ -211,10 +228,26 @@
   background: var(--surface); border: 1px solid var(--border); }
 .lg-grid.list .lg-item:hover { border-color: var(--accent-border); }
 .lg-grid.list .lg-thumb { width: 120px; height: 74px; flex-shrink: 0; padding: 8px; }
-.lg-grid.list .lg-thumb .lg-del { opacity: 1; width: 24px; height: 24px; }
+.lg-grid.list .lg-tools, .lg-grid.list .lg-check { opacity: 1; position: static; }
 .lg-grid.list .lg-cap { flex: 1; padding: 0; }
 .lg-grid.list .lm-wm .lm-word { font-size: 16px; }
 .lg-grid.list .lm-wm.sym { font-size: 26px; }
+
+/* ----- página FAVORITOS ----- */
+.fp-sub { font-size: 13.5px; color: var(--text-muted); margin-top: 6px; }
+.fav-col { margin-bottom: 30px; }
+.fav-col-head { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 14px; flex-wrap: wrap; }
+.fav-col-head h2 { font-size: 20px; font-weight: 800; }
+.fav-col-head > div:first-child span { font-size: 12px; color: var(--text-faint); }
+.fav-col-actions { display: flex; gap: 8px; }
+.fav-col-actions .btn { height: 38px; margin: 0; width: auto; }
+.fav-blank { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px; padding: 60px 20px; }
+.fav-blank-ic { width: 60px; height: 60px; border-radius: 16px; display: grid; place-items: center; color: #e0397a;
+  background: rgba(224,57,122,.12); border: 1px solid rgba(224,57,122,.28); }
+.fav-blank-ic .ic { width: 30px; height: 30px; }
+.fav-blank b { font-size: 17px; font-weight: 700; }
+.fav-blank p { font-size: 13px; color: var(--text-muted); max-width: 420px; line-height: 1.5; }
+.fav-blank .btn { margin-top: 8px; width: auto; }
 
 @media (max-width: 1200px) {
   .brand-cats { grid-template-columns: repeat(3, 1fr); }

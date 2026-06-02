@@ -74,7 +74,7 @@ const NAV = [
     { icon:'home', text:'Início', route:'#/' },
     { icon:'file', text:'Solicitações' },
     { icon:'search', text:'Buscar', route:'#/buscar' },
-    { icon:'heart', text:'Favoritos' },
+    { icon:'heart', text:'Favoritos', route:'#/favoritos' },
     { icon:'building', text:'Institucional', dynamic:'marcas' },
   ]},
   { label:'Área do Cliente', items:[
@@ -361,6 +361,8 @@ function initShell() {
   initUpload();
   initPdfModal();
   initImgModal();
+  initFavModal();
+  Sel.init();
 }
 
 /* ============================================================
@@ -664,21 +666,142 @@ const LogosDB = (() => {
   };
 })();
 
-/* mede a proporção (w/h) de um arquivo de imagem */
-function imgAR(file) {
+/* analisa imagem: proporção (w/h) + se a "tinta" é clara (→ fundo escuro) */
+function analyzeImg(file) {
   return new Promise(res => {
     const u = URL.createObjectURL(file), im = new Image();
-    im.onload = () => { const ar = (im.naturalWidth && im.naturalHeight) ? im.naturalWidth / im.naturalHeight : 1.6; URL.revokeObjectURL(u); res(+ar.toFixed(3)); };
-    im.onerror = () => { URL.revokeObjectURL(u); res(1.6); };
+    im.onload = () => {
+      const ar = (im.naturalWidth && im.naturalHeight) ? im.naturalWidth / im.naturalHeight : 1.6;
+      let darkBg = false;
+      try {
+        const S = 40, c = document.createElement('canvas'); c.width = S; c.height = S;
+        const x = c.getContext('2d'); x.drawImage(im, 0, 0, S, S);
+        const d = x.getImageData(0, 0, S, S).data; let s = 0, n = 0;
+        for (let i = 0; i < d.length; i += 4) { if (d[i + 3] < 40) continue; s += 0.2126 * d[i] + 0.7152 * d[i + 1] + 0.0722 * d[i + 2]; n++; }
+        if (n > 20) darkBg = (s / n) > 150;   // tinta clara → precisa de fundo escuro
+      } catch (_) {}
+      URL.revokeObjectURL(u); res({ ar: +ar.toFixed(3), darkBg });
+    };
+    im.onerror = () => { URL.revokeObjectURL(u); res({ ar: 1.6, darkBg: false }); };
     im.src = u;
   });
 }
 function dateBR() { const d = new Date(); const p = n => String(n).padStart(2, '0'); return p(d.getDate()) + '/' + p(d.getMonth() + 1) + '/' + d.getFullYear(); }
+function safeName(s) { return (s || 'logo').replace(/[\\/:*?"<>|]/g, '_'); }
+function fileName(it) { return safeName(it.title || it.t) + '.' + ((it.ext || 'png') + '').toLowerCase(); }
 
-/* pasta de Logos da marca — GALERIA MASONRY (igual Biblioteca) + lightbox */
+/* ---- FAVORITOS (coleções do usuário, no localStorage) ---- */
+const Favorites = {
+  read() { try { return JSON.parse(localStorage.getItem('cl-fav') || '{}'); } catch (_) { return {}; } },
+  write(o) { try { localStorage.setItem('cl-fav', JSON.stringify(o)); } catch (_) { Toast.error('Sem espaço para salvar favoritos.'); } },
+  create(n) { const o = this.read(); if (!o[n]) o[n] = []; this.write(o); },
+  add(n, items) { const o = this.read(); const a = o[n] || []; const keys = new Set(a.map(favKey)); items.forEach(it => { if (!keys.has(favKey(it))) a.push(it); }); o[n] = a; this.write(o); },
+  removeItem(n, key) { const o = this.read(); if (o[n]) o[n] = o[n].filter(it => favKey(it) !== key); this.write(o); },
+  removeCollection(n) { const o = this.read(); delete o[n]; this.write(o); },
+};
+function favKey(it) { return it.kind + ':' + it.brand + ':' + (it.id || it.title); }
+function favItem(x) {
+  const b = { kind: x.kind, brand: x.brand, folder: x.folder || 'Logos', id: x.id, title: x.title || x.t, ext: x.ext, size: x.size, ar: x.ar, darkBg: !!x.darkBg };
+  if (x.kind === 'wm') { b.variant = x.variant; b.color = x.color; b.word = x.word; b.wm = x.wm; }
+  return b;
+}
+
+/* ---- DOWNLOAD (1 = direto · vários = ZIP) — sempre na melhor qualidade ---- */
+let _jszip;
+function loadJSZip() {
+  if (_jszip) return _jszip;
+  _jszip = new Promise((res, rej) => { const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js'; s.onload = () => res(window.JSZip); s.onerror = rej; document.head.appendChild(s); });
+  return _jszip;
+}
+function downloadBlob(blob, name) {
+  const u = URL.createObjectURL(blob), a = document.createElement('a');
+  a.href = u; a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(u), 5000);
+}
+/* desenha a wordmark de amostra num PNG (pra ter o que baixar) */
+function wmToBlob(it) {
+  return new Promise(res => {
+    const ar = it.ar || 2.4, W = 1000, H = Math.max(320, Math.round(W / ar));
+    const c = document.createElement('canvas'); c.width = W; c.height = H; const x = c.getContext('2d');
+    x.fillStyle = it.darkBg ? '#0f1b30' : '#ffffff'; x.fillRect(0, 0, W, H);
+    x.textAlign = 'center'; x.textBaseline = 'middle';
+    x.fillStyle = it.variant === 'white' ? '#ffffff' : it.variant === 'color' ? (it.color || '#2f7ff2') : '#111827';
+    if (it.variant === 'sym') { x.font = '800 ' + Math.round(H * 0.5) + 'px Inter, Arial, sans-serif'; x.fillText(((it.word || 'C')[0] || 'C').toUpperCase(), W / 2, H / 2); }
+    else {
+      x.font = '800 ' + Math.round(H * 0.2) + 'px Inter, Arial, sans-serif'; x.fillText((it.word || 'contourline').toUpperCase(), W / 2, H * 0.46);
+      x.globalAlpha = .7; x.font = '500 ' + Math.round(H * 0.06) + 'px Inter, Arial, sans-serif'; x.fillText('by contourline', W / 2, H * 0.64); x.globalAlpha = 1;
+    }
+    c.toBlob(b => res(b), 'image/png');
+  });
+}
+async function itemBlob(it) {
+  if (it.kind === 'img') {
+    if (it.blob) return it.blob;
+    try { const arr = await LogosDB.get(it.brand) || []; const r = arr.find(x => x.id === it.id); return r ? r.blob : null; } catch (_) { return null; }
+  }
+  return wmToBlob(it);
+}
+async function downloadItems(items) {
+  items = (items || []).filter(Boolean); if (!items.length) return;
+  if (items.length === 1) {
+    const blob = await itemBlob(items[0]); if (!blob) { Toast.error('Não consegui preparar o arquivo.'); return; }
+    downloadBlob(blob, fileName(items[0])); Toast.success('Baixando ' + fileName(items[0])); return;
+  }
+  const t = Toast.loading('Compactando ' + items.length + ' arquivos…', { closable: true });
+  try {
+    const JSZip = await loadJSZip(); const zip = new JSZip(); const used = {};
+    for (const it of items) { const blob = await itemBlob(it); if (!blob) continue;
+      let nm = fileName(it); const base = nm; if (used[base]) nm = nm.replace(/(\.\w+)$/, '-' + (used[base] + 1) + '$1'); used[base] = (used[base] || 0) + 1;
+      zip.file(nm, blob); }
+    const out = await zip.generateAsync({ type: 'blob' }); downloadBlob(out, 'logos.zip');
+    t.update({ type: 'success', msg: 'ZIP pronto — ' + items.length + ' arquivos.', duration: 3500 });
+  } catch (_) { t.update({ type: 'error', msg: 'Falha ao compactar.', duration: 3500 }); }
+}
+
+/* ---- SELEÇÃO MÚLTIPLA + barra no rodapé ---- */
+const Sel = {
+  map: new Map(), bar: null, nEl: null, ctx: null,
+  init() {
+    this.bar = document.getElementById('selbar'); if (!this.bar) return;
+    this.nEl = document.getElementById('selbar-n');
+    document.getElementById('selbar-clear')?.addEventListener('click', () => this.clear());
+    document.getElementById('selbar-dl')?.addEventListener('click', () => downloadItems([...this.map.values()]));
+    document.getElementById('selbar-fav')?.addEventListener('click', () => openFavModal([...this.map.values()]));
+  },
+  attach(ctx) { this.ctx = ctx; this.map.clear(); this.sync(); },
+  toggle(key, item) { if (this.map.has(key)) this.map.delete(key); else this.map.set(key, item); this.sync(); return this.map.has(key); },
+  drop(key) { this.map.delete(key); this.sync(); },
+  has(key) { return this.map.has(key); },
+  clear() { this.map.clear(); this.sync(); this.ctx && this.ctx.refresh && this.ctx.refresh(); },
+  sync() { const n = this.map.size; if (this.bar) { this.bar.classList.toggle('show', n > 0); if (this.nEl) this.nEl.textContent = n; const d = document.getElementById('selbar-dl'); if (d) d.innerHTML = svgIcon('download', 'ic ic-sm') + (n > 1 ? ' Baixar ZIP' : ' Baixar'); } },
+};
+
+/* ---- modal "Favoritar" (escolher/criar coleção) ---- */
+let _favPending = [];
+function renderFavList() {
+  const el = document.getElementById('fav-list'); if (!el) return;
+  const cols = Favorites.read(), names = Object.keys(cols);
+  el.innerHTML = names.length ? names.map(n =>
+    `<button class="favc-row" data-name="${n}"><span class="favc-ic">${svgIcon('heart')}</span><div class="favc-meta"><b>${n}</b><span>${cols[n].length} item(ns)</span></div><span class="favc-add">${svgIcon('plus','ic ic-sm')}</span></button>`).join('')
+    : `<div class="fav-empty">Você ainda não tem coleções. Crie uma acima ☝</div>`;
+  renderIcons(el);
+}
+function openFavModal(items) { _favPending = (items || []).filter(Boolean); renderFavList(); UI.openModal('modal-fav'); }
+function initFavModal() {
+  const bd = document.getElementById('modal-fav'); if (!bd) return;
+  const create = () => { const inp = document.getElementById('fav-new-name'); const nm = (inp.value || '').trim(); if (!nm) return; Favorites.create(nm); inp.value = ''; renderFavList(); Sound.click && Sound.click(); };
+  document.getElementById('fav-new-go')?.addEventListener('click', create);
+  document.getElementById('fav-new-name')?.addEventListener('keydown', e => { if (e.key === 'Enter') create(); });
+  document.getElementById('fav-list')?.addEventListener('click', e => {
+    const row = e.target.closest('.favc-row'); if (!row) return;
+    const name = row.dataset.name; Favorites.add(name, _favPending.map(favItem));
+    Sound.success && Sound.success(); Toast.success(_favPending.length + ' item(ns) salvo(s) em "' + name + '"'); UI.closeModal(bd);
+  });
+}
+
+/* pasta de Logos da marca — GALERIA MASONRY (fundo adaptável, seleção, favoritos) */
 async function initBrandLogos(brand, samples) {
   const grid = document.getElementById('brand-logos'); if (!grid) return;
-  const root = grid.closest('.folder-page');
   const searchInp = document.getElementById('blogos-search');
   const countEl = document.getElementById('blogos-count');
   const sizeInp = document.getElementById('blogos-size');
@@ -691,18 +814,24 @@ async function initBrandLogos(brand, samples) {
     release();
     const up = uploaded.map(r => {
       const url = URL.createObjectURL(r.blob); urls.push(url);
-      return { kind: 'img', id: r.id, t: r.title, size: fmtBytes(r.size), date: r.date || '—', folder: 'Logos', ext: r.ext || 'PNG', ar: r.ar || 1.4, url };
+      return { kind: 'img', key: 'img:' + brand + ':' + r.id, id: r.id, brand, folder: 'Logos', t: r.title, title: r.title,
+        size: fmtBytes(r.size), date: r.date || '—', ext: r.ext || 'PNG', ar: r.ar || 1.4, darkBg: !!r.darkBg, url, blob: r.blob };
     });
-    const sm = (samples || []).map(s => ({ kind: 'wm', t: s.t, size: s.size, date: s.date || '01/06/2026', folder: 'Logos', ext: s.ext || 'PNG', ar: s.ar || 1.8, wm: s.th }));
+    const sm = (samples || []).map(s => ({ kind: 'wm', key: 'wm:' + brand + ':' + s.id, id: s.id, brand, folder: 'Logos', t: s.t, title: s.t,
+      size: s.size, date: s.date || '01/06/2026', ext: s.ext || 'PNG', ar: s.ar || 1.8, darkBg: !!s.darkBg, variant: s.variant, color: s.color, word: s.word, wm: s.th }));
     return up.concat(sm);
   }
   function itemHTML(x, i, h) {
     const thumb = x.kind === 'img' ? `<img src="${x.url}" alt="${x.t}" loading="lazy">` : x.wm;
-    return `<div class="lg-item${x.id ? ' own' : ''}" data-i="${i}" title="${x.t}">
-      <div class="lg-thumb"${h ? ` style="height:${Math.round(h)}px"` : ''}>
+    return `<div class="lg-item${Sel.has(x.key) ? ' sel' : ''}" data-i="${i}" title="${x.t}">
+      <div class="lg-thumb ${x.darkBg ? 'dark' : 'light'}"${h ? ` style="height:${Math.round(h)}px"` : ''}>
         ${thumb}
         <span class="lg-ext">${x.ext}</span>
-        ${x.id ? `<button class="lg-del" data-id="${x.id}" title="Remover">${svgIcon('trash','ic ic-xs')}</button>` : ''}
+        <button class="lg-check" title="Selecionar">${svgIcon('check','ic ic-xs')}</button>
+        <div class="lg-tools">
+          <button class="lg-fav" title="Favoritar">${svgIcon('heart','ic ic-xs')}</button>
+          ${x.kind === 'img' ? `<button class="lg-del" data-id="${x.id}" title="Remover">${svgIcon('trash','ic ic-xs')}</button>` : ''}
+        </div>
       </div>
       <div class="lg-cap"><b>${x.t}</b><span>${x.size} · ${x.date}</span></div>
     </div>`;
@@ -726,17 +855,18 @@ async function initBrandLogos(brand, samples) {
       for (let i = 0; i < cols; i++) { const c = document.createElement('div'); c.className = 'masonry-col'; grid.appendChild(c); colEls.push(c); heights.push(0); }
       items.forEach((x, i) => {
         let t = 0; for (let k = 1; k < cols; k++) if (heights[k] < heights[t] - 0.5) t = k;
-        const thumbH = colW / (x.ar || 1);
+        const thumbH = Math.max(118, Math.min(colW / (x.ar || 1), 210));   // não deixa o card gigante p/ logo pequena
         const w = document.createElement('div'); w.innerHTML = itemHTML(x, i, thumbH);
         colEls[t].appendChild(w.firstElementChild); heights[t] += thumbH + CAP + gap;
       });
     }
     renderIcons(grid);
   }
+  Sel.attach({ refresh: render });
 
   // busca
   searchInp && searchInp.addEventListener('input', render);
-  // densidade / visualização
+  // densidade / visualização (SÓ o tamanho do thumb — download é sempre full)
   document.getElementById('blogos-quality')?.addEventListener('click', e => {
     const b = e.target.closest('[data-q]'); if (!b) return;
     document.querySelectorAll('#blogos-quality [data-q]').forEach(x => x.classList.remove('on'));
@@ -754,16 +884,19 @@ async function initBrandLogos(brand, samples) {
   });
   let rt; window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { if (view === 'masonry') render(); }, 120); });
 
-  // clique: abrir lightbox · remover (admin)
+  // clique: selecionar · favoritar · remover · abrir lightbox
   grid.addEventListener('click', async e => {
+    const card = e.target.closest('.lg-item'); if (!card) return;
+    const it = items[+card.dataset.i]; if (!it) return;
+    if (e.target.closest('.lg-check')) { e.stopPropagation(); card.classList.toggle('sel', Sel.toggle(it.key, it)); return; }
+    if (e.target.closest('.lg-fav'))   { e.stopPropagation(); openFavModal([it]); return; }
     const del = e.target.closest('.lg-del');
     if (del) { e.stopPropagation();
       uploaded = uploaded.filter(r => r.id !== del.dataset.id);
       try { await LogosDB.set(brand, uploaded); } catch (_) {}
-      Toast.info('Logo removido.'); render(); return;
+      Sel.drop(it.key); Toast.info('Logo removido.'); render(); return;
     }
-    const it = e.target.closest('.lg-item'); if (!it) return;
-    window.__openImg && window.__openImg(items, +it.dataset.i);
+    window.__openImg && window.__openImg(items, +card.dataset.i);
   });
 
   // admin: adicionar logo(s)
@@ -773,9 +906,9 @@ async function initBrandLogos(brand, samples) {
     inp.onchange = async () => {
       const files = Array.from(inp.files || []); if (!files.length) return;
       for (let i = 0; i < files.length; i++) {
-        const f = files[i], ar = await imgAR(f);
+        const f = files[i], { ar, darkBg } = await analyzeImg(f);
         uploaded.unshift({ id: 'lg' + Date.now() + '-' + i, title: f.name.replace(/\.[^.]+$/, ''),
-          size: f.size, ar, ext: (f.name.split('.').pop() || 'PNG').toUpperCase().slice(0, 4), date: dateBR(), blob: f });
+          size: f.size, ar, darkBg, ext: (f.name.split('.').pop() || 'PNG').toUpperCase().slice(0, 4), date: dateBR(), blob: f });
       }
       try { await LogosDB.set(brand, uploaded); Sound.success && Sound.success(); Toast.success(files.length + ' logo(s) adicionado(s)!'); }
       catch (_) { Toast.error('Não consegui salvar. Tente arquivos menores.'); }
@@ -785,6 +918,74 @@ async function initBrandLogos(brand, samples) {
   });
 
   render();
+}
+
+/* ---- FAVORITOS (página: coleções do usuário) ---- */
+async function initFavoritos() {
+  const root = document.getElementById('fav-page'); if (!root) return;
+  let urls = [];
+  const cols = Favorites.read(), names = Object.keys(cols);
+  // resolve blobs das imagens (do IndexedDB) p/ poder exibir/baixar
+  const blobCache = {};
+  async function blobFor(it) {
+    if (it.kind !== 'img') return null;
+    const k = it.brand; if (!(k in blobCache)) { try { blobCache[k] = await LogosDB.get(it.brand) || []; } catch (_) { blobCache[k] = []; } }
+    const r = blobCache[k].find(x => x.id === it.id); return r ? r.blob : null;
+  }
+  if (!names.length) {
+    root.innerHTML = `<div class="fav-blank"><span class="fav-blank-ic">${svgIcon('heart')}</span><b>Nenhuma coleção ainda</b><p>Selecione imagens em qualquer pasta e toque em <b>Favoritar</b> para criar suas coleções (tipo playlists).</p><a class="btn" href="#/marca/Lumenis/logos">${svgIcon('image','ic ic-sm')} Ver logos da Lumenis</a></div>`;
+    renderIcons(root); return;
+  }
+  root.innerHTML = '';
+  for (const name of names) {
+    const list = cols[name];
+    const sec = document.createElement('section'); sec.className = 'fav-col'; sec.dataset.name = name;
+    sec.innerHTML = `<div class="fav-col-head"><div><h2>${name}</h2><span>${list.length} item(ns)</span></div>
+      <div class="fav-col-actions">
+        <button class="btn ghost fav-dlall">${svgIcon('download','ic ic-sm')} Baixar tudo</button>
+        <button class="btn ghost fav-delcol">${svgIcon('trash','ic ic-sm')} Excluir</button>
+      </div></div>
+      <div class="masonry lg-grid fav-grid"></div>`;
+    root.appendChild(sec);
+    const grid = sec.querySelector('.fav-grid');
+    // resolve thumbs
+    const resolved = [];
+    for (let i = 0; i < list.length; i++) {
+      const it = { ...list[i] }; it.t = it.title;
+      if (it.kind === 'img') { const b = await blobFor(it); if (b) { const u = URL.createObjectURL(b); urls.push(u); it.url = u; it.blob = b; } }
+      resolved.push(it);
+    }
+    // masonry simples
+    const gap = 16, CAP = 52, size = 240;
+    const ncols = Math.max(1, Math.floor((grid.clientWidth + gap) / (size + gap)));
+    const colW = (grid.clientWidth - (ncols - 1) * gap) / ncols;
+    const colEls = [], heights = [];
+    for (let i = 0; i < ncols; i++) { const c = document.createElement('div'); c.className = 'masonry-col'; grid.appendChild(c); colEls.push(c); heights.push(0); }
+    resolved.forEach((x, i) => {
+      let t = 0; for (let k = 1; k < ncols; k++) if (heights[k] < heights[t] - 0.5) t = k;
+      const h = Math.max(118, Math.min(colW / (x.ar || 1.6), 210));
+      const thumb = x.kind === 'img' ? (x.url ? `<img src="${x.url}" alt="">` : `<span class="lg-miss">${svgIcon('image','ic')}</span>`) : x.wm;
+      const w = document.createElement('div');
+      w.innerHTML = `<div class="lg-item" data-i="${i}">
+        <div class="lg-thumb ${x.darkBg ? 'dark' : 'light'}" style="height:${Math.round(h)}px">${thumb}
+          <span class="lg-ext">${x.ext || 'PNG'}</span>
+          <div class="lg-tools"><button class="lg-dl" title="Baixar">${svgIcon('download','ic ic-xs')}</button><button class="lg-unfav" title="Remover da coleção">${svgIcon('trash','ic ic-xs')}</button></div>
+        </div>
+        <div class="lg-cap"><b>${x.title}</b><span>${x.size || ''} · ${x.brand}</span></div>
+      </div>`;
+      colEls[t].appendChild(w.firstElementChild); heights[t] += h + CAP + gap;
+    });
+    renderIcons(sec);
+    // ações
+    sec.querySelector('.fav-dlall').addEventListener('click', () => downloadItems(resolved));
+    sec.querySelector('.fav-delcol').addEventListener('click', () => { if (confirm('Excluir a coleção "' + name + '"?')) { Favorites.removeCollection(name); Toast.info('Coleção excluída.'); initFavoritos(); } });
+    grid.addEventListener('click', e => {
+      const card = e.target.closest('.lg-item'); if (!card) return; const x = resolved[+card.dataset.i]; if (!x) return;
+      if (e.target.closest('.lg-dl')) { e.stopPropagation(); downloadItems([x]); return; }
+      if (e.target.closest('.lg-unfav')) { e.stopPropagation(); Favorites.removeItem(name, favKey(x)); Toast.info('Removido da coleção.'); initFavoritos(); return; }
+      window.__openImg && window.__openImg(resolved, +card.dataset.i);
+    });
+  }
 }
 
 /* LIGHTBOX de imagem (galeria) — visual grande + metadados + baixar + navegação */
@@ -803,14 +1004,14 @@ function initImgModal() {
     G('lbx-size').textContent = x.size || '—';
     G('lbx-date').textContent = x.date || '—';
     G('lbx-folder').textContent = x.folder || 'Logos';
-    canvas.innerHTML = x.kind === 'img' ? `<img src="${x.url}" alt="${x.t}">` : `<div class="lbx-wm">${x.wm}</div>`;
-    const dl = G('lbx-dl');
-    if (x.url) { dl.href = x.url; dl.download = fname; dl.style.display = ''; } else dl.style.display = 'none';
+    canvas.innerHTML = x.kind === 'img' ? `<img src="${x.url}" alt="${x.t}">` : `<div class="lbx-wm ${x.darkBg ? 'dark' : 'light'}">${x.wm}</div>`;
     bd.classList.toggle('solo', list.length < 2);
   }
   const move = d => { if (!list.length) return; idx = (idx + d + list.length) % list.length; show(); };
   G('lbx-prev')?.addEventListener('click', () => move(-1));
   G('lbx-next')?.addEventListener('click', () => move(1));
+  G('lbx-dl')?.addEventListener('click', () => { const x = list[idx]; if (x) downloadItems([x]); });
+  G('lbx-fav')?.addEventListener('click', () => { const x = list[idx]; if (x) openFavModal([x]); });
   document.addEventListener('keydown', e => {
     if (!bd.classList.contains('open')) return;
     if (e.key === 'ArrowLeft') move(-1); else if (e.key === 'ArrowRight') move(1);

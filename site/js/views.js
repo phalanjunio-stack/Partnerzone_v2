@@ -219,8 +219,9 @@
       const brand = brandArg || 'Contourline';
       const info = BRANDS[brand] || { logo: brand.split(/\s+/).map(w => w[0]).join('').slice(0, 2).toUpperCase(), tag: 'identidade da marca', cor: '#2f7ff2' };
       const blogo = (cls = '') => `<div class="blogo ${cls}" style="--bcor:${info.cor}"><span class="bl-c">${info.logo}</span><span class="bl-word">${brand.toLowerCase()}<small>${info.tag}</small></span></div>`;
+      const logosHref = '#/marca/' + encodeURIComponent(brand) + '/logos';
       const CATS = [
-        ['image','Logos oficiais','Baixe todas as versões da marca em diferentes formatos.','Ver logos'],
+        ['image','Logos oficiais','Baixe todas as versões da marca em diferentes formatos.','Ver logos', logosHref],
         ['sliders','Cores da marca','Consulte nossa paleta oficial com códigos HEX e RGB.','Ver cores'],
         ['file','Tipografia','Fontes oficiais e diretrizes de uso em títulos e textos.','Ver tipografia'],
         ['grid','Aplicações prontas','Templates para redes sociais, apresentações e impressos.','Ver templates'],
@@ -261,7 +262,7 @@
           </div>
 
           <div class="brand-cats" data-enter>
-            ${CATS.map(c => `<a class="bcat"><div class="bcat-ic">${svgIcon(c[0])}</div><h3>${c[1]}</h3><p>${c[2]}</p><span class="bcat-go">${c[3]} ${svgIcon('arrowR','ic ic-sm')}</span></a>`).join('')}
+            ${CATS.map(c => `<a class="bcat"${c[4] ? ` href="${c[4]}"` : ''}><div class="bcat-ic">${svgIcon(c[0])}</div><h3>${c[1]}</h3><p>${c[2]}</p><span class="bcat-go">${c[3]} ${svgIcon('arrowR','ic ic-sm')}</span></a>`).join('')}
           </div>
 
           <section class="bcol portfolio-sec" data-enter>
@@ -271,7 +272,7 @@
 
           <div class="brand-cols">
             <section class="bcol" data-enter>
-              <div class="bcol-head"><h2>Logos oficiais</h2><a class="link-more">Ver todos ${svgIcon('arrowR','ic ic-sm')}</a></div>
+              <div class="bcol-head"><h2>Logos oficiais</h2><a class="link-more" href="${logosHref}">Ver todos ${svgIcon('arrowR','ic ic-sm')}</a></div>
               <div class="logo-grid">
                 ${LOGOS.map(l => `<div class="logo-card ${l[1]}"><div class="logo-box">${blogo(l[1] === 'sym' ? 'sym' : l[1] === 'white' ? 'white' : l[1] === 'blue' ? 'blue' : '')}</div><div class="logo-meta"><div><b>${l[0]}</b><span>PNG · SVG · PDF</span></div><button class="logo-dl">${svgIcon('download','ic ic-sm')}</button></div></div>`).join('')}
               </div>
@@ -308,6 +309,49 @@
           </div>
         </div>`,
         init: () => { window.initBrandPortfolio && window.initBrandPortfolio(brand); },
+      };
+    },
+
+    /* ---------- LOGOS DA MARCA (pasta · cards igual sistema real) ---------- */
+    marcaLogos(brandArg) {
+      const brand = brandArg || 'Contourline';
+      const COR = { 'Contourline':'#2f7ff2','Daeju':'#0ea5e9','Body Health':'#0d9488','Lumenis':'#e11d48' }[brand] || '#2f7ff2';
+      // miniaturas de amostra (o admin sobe os reais por cima) — wordmark estilizada em fundo quadriculado
+      const wm = v => v === 'sym'
+        ? `<div class="lm-wm sym" style="--lc:${COR}">${brand[0]}</div>`
+        : `<div class="lm-wm ${v}" style="--lc:${COR}"><span class="lm-word">${brand.toLowerCase()}</span><span class="lm-by">by contourline</span></div>`;
+      const SAMPLES = [
+        { t:`Favicon ${brand}`,                  size:'12.7 KB',  dl:2, th: wm('sym')   },
+        { t:`${brand} by Contourline`,           size:'776.1 KB', dl:2, th: wm('dark')  },
+        { t:`${brand} by Contourline`,           size:'39.5 KB',  dl:2, th: wm('color') },
+        { t:`${brand} by Contourline Branca`,    size:'33.2 KB',  dl:2, th: wm('white') },
+        { t:`${brand} by Contourline`,           size:'120 KB',   dl:1, th: wm('dark')  },
+      ];
+      return {
+        title: 'Logos ' + brand,
+        crumbs: `<i data-icon="building" data-cls="ic ic-sm"></i><a href="#/">PartnerZone</a><span>›</span><a href="#/marca/Contourline">Institucional</a><span>›</span><a href="#/marca/${encodeURIComponent(brand)}">${brand}</a><span>›</span><span class="here">Logos</span>`,
+        html: `
+        <div class="folder-page" data-enter>
+          <div class="fp-top">
+            <a class="fp-back" href="#/marca/${encodeURIComponent(brand)}"><svg class="ic ic-sm" viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></svg> Voltar para ${brand}</a>
+          </div>
+          <h1 class="fp-title">Logos</h1>
+          <div class="fp-rule"></div>
+          <div class="fp-search">
+            <div class="search-field"><i data-icon="search"></i><input id="blogos-search" placeholder="Buscar em Logos..."></div>
+            <button class="btn" id="blogos-go">Buscar</button>
+          </div>
+          <div class="fp-toolbar">
+            <div class="fp-count">MATERIAIS NESTA PASTA <b id="blogos-count">${SAMPLES.length}</b></div>
+            <div class="fp-views">
+              <button class="fp-vb on" data-view="grid" title="Grade">${svgIcon('grid','ic ic-sm')}</button>
+              <button class="fp-vb" data-view="list" title="Lista">${svgIcon('list','ic ic-sm')}</button>
+              <button class="btn ghost fp-add" id="blogos-add"><i data-icon="upload" data-cls="ic ic-sm"></i> Adicionar logo</button>
+            </div>
+          </div>
+          <div class="lm-grid" id="brand-logos" data-brand="${brand}"><div class="pf-loading">Carregando logos…</div></div>
+        </div>`,
+        init: () => { window.initBrandLogos && window.initBrandLogos(brand, SAMPLES); },
       };
     },
 
@@ -540,7 +584,7 @@
     if (!p.length || p[0] === 'home')   return Views.home();
     if (p[0] === 'buscar')              return Views.buscar();
     if (p[0] === 'sql')                 return Views.sql();
-    if (p[0] === 'marca')               return Views.marca(p[1]);
+    if (p[0] === 'marca')               return p[2] === 'logos' ? Views.marcaLogos(p[1]) : Views.marca(p[1]);
     if (p[0] === 'cadastro')            return Views.cadastro();
     if (p[0] === 'equipamentos')        return Views.equipamentos();
     if (p[0] === 'categoria')           return Views.categoria(p[1]);

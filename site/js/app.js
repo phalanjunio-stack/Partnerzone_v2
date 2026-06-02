@@ -631,7 +631,7 @@ const PortfolioDB = (() => {
   }
   const tx = (mode, fn) => open().then(db => new Promise((res, rej) => {
     const t = db.transaction('pdf', mode), st = t.objectStore('pdf'); let out;
-    out = fn(st); t.oncomplete = () => res(out && out.result !== undefined ? out.result : out); t.onerror = () => rej(t.error);
+    out = fn(st); t.oncomplete = () => res(out && typeof out === 'object' && 'result' in out ? out.result : out); t.onerror = () => rej(t.error);
   }));
   return {
     get: brand => tx('readonly', st => st.get(brand)),
@@ -639,6 +639,96 @@ const PortfolioDB = (() => {
     del: brand => tx('readwrite', st => st.delete(brand)),
   };
 })();
+
+/* logos por marca — array {id,title,size,dl,blob} guardado em IndexedDB */
+const LogosDB = (() => {
+  let dbp = null;
+  function open() {
+    if (dbp) return dbp;
+    dbp = new Promise((res, rej) => {
+      const r = indexedDB.open('cl-logos', 1);
+      r.onupgradeneeded = () => { if (!r.result.objectStoreNames.contains('logos')) r.result.createObjectStore('logos'); };
+      r.onsuccess = () => res(r.result);
+      r.onerror = () => rej(r.error);
+    });
+    return dbp;
+  }
+  const tx = (mode, fn) => open().then(db => new Promise((res, rej) => {
+    const t = db.transaction('logos', mode), st = t.objectStore('logos'); const out = fn(st);
+    t.oncomplete = () => res(out && typeof out === 'object' && 'result' in out ? out.result : out); t.onerror = () => rej(t.error);
+  }));
+  return {
+    get: brand => tx('readonly', st => st.get(brand)),
+    set: (brand, arr) => tx('readwrite', st => st.put(arr, brand)),
+  };
+})();
+
+/* monta a pasta de Logos da marca (assíncrono) — amostras + uploads do admin */
+async function initBrandLogos(brand, samples) {
+  const grid = document.getElementById('brand-logos'); if (!grid) return;
+  const root = grid.closest('.folder-page');
+  const searchInp = document.getElementById('blogos-search');
+  const countEl = document.getElementById('blogos-count');
+  let uploaded = [];
+  try { uploaded = (await LogosDB.get(brand)) || []; } catch (_) {}
+  let urls = [];
+  const release = () => { urls.forEach(u => URL.revokeObjectURL(u)); urls = []; };
+
+  function listAll() {
+    const up = uploaded.map(r => {
+      const url = URL.createObjectURL(r.blob); urls.push(url);
+      return { t: r.title, size: fmtBytes(r.size), dl: r.dl || 0, id: r.id, th: `<img class="lm-img" src="${url}" alt="${r.title}">` };
+    });
+    return up.concat(samples || []);
+  }
+  function render(filter) {
+    release();
+    const q = (filter || '').trim().toLowerCase();
+    const list = listAll().filter(x => !q || x.t.toLowerCase().includes(q));
+    if (countEl) countEl.textContent = list.length;
+    grid.innerHTML = list.length ? list.map(x => `
+      <div class="lm-card">
+        <div class="lm-thumb">${x.th}</div>
+        <div class="lm-body">
+          <span class="lm-flag">Atualizado recentemente</span>
+          <b class="lm-title">${x.t}</b>
+          <span class="lm-tag">LOGOS</span>
+          <div class="lm-foot">
+            <span class="lm-size">${x.size}</span>
+            <span class="lm-dl">${svgIcon('download','ic ic-xs')} ${x.dl}</span>
+            ${x.id ? `<button class="lm-del" data-id="${x.id}" title="Remover">${svgIcon('trash','ic ic-xs')}</button>` : ''}
+          </div>
+        </div>
+      </div>`).join('') : `<div class="pf-loading">Nenhum logo encontrado.</div>`;
+  }
+
+  searchInp && searchInp.addEventListener('input', () => render(searchInp.value));
+  document.getElementById('blogos-go')?.addEventListener('click', () => render(searchInp ? searchInp.value : ''));
+  root && root.querySelectorAll('.fp-vb').forEach(b => b.addEventListener('click', () => {
+    root.querySelectorAll('.fp-vb').forEach(x => x.classList.remove('on'));
+    b.classList.add('on'); grid.classList.toggle('list', b.dataset.view === 'list'); Sound.click && Sound.click();
+  }));
+  grid.addEventListener('click', async e => {
+    const d = e.target.closest('.lm-del'); if (!d) return;
+    uploaded = uploaded.filter(r => r.id !== d.dataset.id);
+    try { await LogosDB.set(brand, uploaded); } catch (_) {}
+    Toast.info('Logo removido.'); render(searchInp ? searchInp.value : '');
+  });
+  document.getElementById('blogos-add')?.addEventListener('click', () => {
+    const inp = document.createElement('input');
+    inp.type = 'file'; inp.accept = 'image/png,image/svg+xml,image/*'; inp.multiple = true;
+    inp.onchange = async () => {
+      const files = Array.from(inp.files || []); if (!files.length) return;
+      files.forEach((f, i) => uploaded.unshift({ id: 'lg' + Date.now() + '-' + i, title: f.name.replace(/\.[^.]+$/, ''), size: f.size, dl: 0, blob: f }));
+      try { await LogosDB.set(brand, uploaded); Sound.success && Sound.success(); Toast.success(files.length + ' logo(s) adicionado(s)!'); }
+      catch (_) { Toast.error('Não consegui salvar. Tente arquivos menores.'); }
+      render(searchInp ? searchInp.value : '');
+    };
+    inp.click();
+  });
+
+  render('');
+}
 
 /* visualizador de PDF (modal) — usa o leitor nativo do navegador via <iframe> */
 function initPdfModal() {

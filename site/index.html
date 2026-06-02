@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PartnerZone — Contourline</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/theme.css?v=spa27">
+  <link rel="stylesheet" href="css/app.css?v=spa27">
+  <link rel="stylesheet" href="css/effects.css?v=spa27">
+  <link rel="stylesheet" href="css/categoria.css?v=spa27">
+  <link rel="stylesheet" href="css/pasta.css?v=spa27">
+  <link rel="stylesheet" href="css/material.css?v=spa27">
+  <link rel="stylesheet" href="css/buscar.css?v=spa27">
+  <link rel="stylesheet" href="css/upload.css?v=spa27">
+  <link rel="stylesheet" href="css/sql.css?v=spa27">
+  <link rel="stylesheet" href="css/marca.css?v=spa27">
+  <link rel="stylesheet" href="css/splash.css?v=spa27">
+  <script>document.documentElement.setAttribute('data-theme', localStorage.getItem('cl-theme') || 'dark');</script>
+  <script src="js/core/splash.js"></script>
+</head>
+<body>
+
+  <script>window.Splash && Splash.mount();</script>
+  <div class="scrim" id="scrim"></div>
+
+  <div class="app">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <a class="brand-logo" href="#/">C</a>
+        <div class="brand-name"><b>PartnerZone</b><span>CONTOURLINE</span></div>
+        <button class="collapse"><i data-icon="chevsL"></i></button>
+      </div>
+      <nav class="nav" id="nav"></nav>
+      <div class="side-user">
+        <div class="avatar">AM</div>
+        <div class="meta"><b>Ana Martins</b><span>Parceiro · Contourline</span></div>
+        <button class="logout"><i data-icon="logout"></i></button>
+      </div>
+    </aside>
+
+    <div class="main">
+      <header class="topbar">
+        <button class="iconbtn menu-toggle"><i data-icon="menu"></i></button>
+        <div class="crumbs" id="crumbs"></div>
+        <label class="topsearch">
+          <i data-icon="search" data-cls="ic ic-sm"></i>
+          <input type="text" placeholder="Buscar acessos, documentos, sistemas ou setores...">
+          <span class="kbd">⌘ K</span>
+        </label>
+        <div class="spacer"></div>
+        <div class="theme-wrap" id="theme-switcher"></div>
+        <button class="iconbtn" id="sound-btn"><i data-icon="volume"></i></button>
+        <button class="iconbtn"><i data-icon="bell"></i><span class="badge">3</span></button>
+        <button class="user"><div class="avatar">AM</div><b>Ana Martins</b><i data-icon="chevD" data-cls="ic ic-sm"></i></button>
+      </header>
+
+      <!-- CONTEÚDO trocado pelo roteador (SPA) -->
+      <div class="content" id="view"></div>
+
+      <!-- RODAPÉ (igual Galeria Contourline, adaptado) -->
+      <footer class="site-footer">
+        <div class="foot-main">
+          <!-- Col 1: marca -->
+          <div class="foot-brand">
+            <div class="foot-logo"><span class="foot-burst">C</span><span class="foot-word">contourline</span></div>
+            <div class="foot-rule"></div>
+            <div>
+              <p class="foot-title">PartnerZone Contourline</p>
+              <p class="foot-sub">Materiais, equipamentos e arquivos de marketing organizados para os parceiros Contourline.</p>
+            </div>
+            <div class="foot-badge"><i data-icon="shield" data-cls="ic ic-sm"></i><p>Acesso exclusivo para parceiros autorizados.</p></div>
+          </div>
+
+          <!-- Col 2: links rápidos -->
+          <div class="foot-links">
+            <p class="foot-label">Links rápidos</p>
+            <ul>
+              <li><a href="#/equipamentos"><span><i data-icon="package" data-cls="ic ic-sm"></i>Equipamentos</span><i data-icon="chevR" data-cls="ic ic-sm"></i></a></li>
+              <li><a href="#/pasta/HIPRO/Imagens"><span><i data-icon="folder" data-cls="ic ic-sm"></i>Materiais</span><i data-icon="chevR" data-cls="ic ic-sm"></i></a></li>
+              <li><a data-open-modal="modal-solicitar"><span><i data-icon="send" data-cls="ic ic-sm"></i>Solicitar material</span><i data-icon="chevR" data-cls="ic ic-sm"></i></a></li>
+              <li><a href="#/categoria/HIPRO"><span><i data-icon="buoy" data-cls="ic ic-sm"></i>Central de apoio</span><i data-icon="chevR" data-cls="ic ic-sm"></i></a></li>
+              <li><a data-foot-info="Seus dados estão protegidos. O acesso é restrito a parceiros autorizados Contourline."><span><i data-icon="shield" data-cls="ic ic-sm"></i>Privacidade</span><i data-icon="chevR" data-cls="ic ic-sm"></i></a></li>
+            </ul>
+          </div>
+
+          <!-- Col 3: card destaque -->
+          <div class="foot-feature">
+            <div class="foot-dots"><span class="on"></span><span></span><span></span><span></span><span></span></div>
+            <div class="foot-feature-banner">
+              <div class="foot-lock"><i data-icon="lock" data-cls="ic ic-sm"></i></div>
+              <p>Seus materiais de marketing,<br>organizados com segurança.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="foot-bar">
+          <span><i data-icon="lock" data-cls="ic ic-sm"></i> Sistema interno para acesso aos materiais Contourline.</span>
+          <span>© 2026 Contourline. Todos os direitos reservados.</span>
+        </div>
+      </footer>
+    </div>
+  </div>
+
+  <!-- ===================== MODAL: Solicitação ===================== -->
+  <div class="modal-bd" id="modal-solicitar">
+    <div class="modal"><div class="modal-inner">
+      <div class="modal-head">
+        <div><h2>Solicitação</h2><p>Reporte problemas ou solicite novos materiais</p></div>
+        <button class="x" data-close-modal><svg class="ic" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+      </div>
+      <div class="modal-body">
+        <div class="tabs">
+          <button class="tab on">Solicitar Novo Material</button>
+          <button class="tab">Reportar Problema</button>
+        </div>
+        <div class="form-divider">Seus dados de contato</div>
+        <div class="field">
+          <label>Nome <span class="req">*</span></label>
+          <div class="input"><i data-icon="user" data-cls="ic ic-sm"></i><input placeholder="Seu nome completo"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Email <span class="req">*</span></label>
+            <div class="input"><i data-icon="mail" data-cls="ic ic-sm"></i><input placeholder="seu@email.com"></div></div>
+          <div class="field"><label>Telefone <span class="req">*</span></label>
+            <div class="input"><i data-icon="phone" data-cls="ic ic-sm"></i><input placeholder="(31) 99999-9999"></div></div>
+        </div>
+        <div class="form-divider">Sobre o material</div>
+        <div class="field"><label>Equipamento</label>
+          <div class="input"><i data-icon="cpu" data-cls="ic ic-sm"></i><input placeholder="Ex: HIPRO, Enygma..."></div></div>
+        <div class="field"><label>Assunto <span class="req">*</span></label>
+          <div class="input"><i data-icon="file" data-cls="ic ic-sm"></i><input placeholder="Ex: Preciso de fotos do novo HIPRO"></div></div>
+        <div class="field"><label>Descrição <span class="req">*</span></label>
+          <div class="input area"><i data-icon="alignLeft" data-cls="ic ic-sm"></i><textarea placeholder="Descreva o material que precisa, formato, quantidade, prazo..."></textarea></div></div>
+        <button class="btn" id="enviar-sol"><i data-icon="send" data-cls="ic ic-sm"></i>Enviar Solicitação</button>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- ===================== MODAL: Capa do equipamento (admin) ===================== -->
+  <div class="modal-bd" id="modal-capa">
+    <div class="modal"><div class="modal-inner">
+      <div class="modal-head">
+        <div><h2>Editor de imagem</h2><p>Arraste pra posicionar · zoom pra cortar/ampliar · rotação pra inclinar.</p></div>
+        <button class="x" data-close-modal><svg class="ic" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+      </div>
+      <div class="modal-body">
+        <div class="cover-tabs">
+          <button class="ctab on" data-img="1">Capa</button>
+          <button class="ctab" data-img="2">Hover</button>
+          <button class="ctab" data-img="3">Banner do topo</button>
+        </div>
+        <div class="cover-pick" id="cover-pick">
+          <img id="cover-img" alt="capa" draggable="false">
+          <div class="cover-thirds" aria-hidden="true"></div>
+          <div class="cover-empty" id="cover-empty" hidden><span><i data-icon="image" data-cls="ic"></i><b>Adicionar imagem</b><span id="cover-empty-sub">Clique para escolher a foto.</span><br><u>Clique aqui para escolher</u></span></div>
+        </div>
+
+        <div class="xf-controls" id="xf-controls">
+          <div class="xf-row">
+            <span class="xf-lab"><i data-icon="expand" data-cls="ic ic-sm"></i> Zoom</span>
+            <input type="range" id="xf-zoom" min="0.4" max="4" step="0.01" value="1">
+            <output class="xf-val" id="xf-zoom-v">100%</output>
+          </div>
+          <div class="xf-row">
+            <span class="xf-lab"><i data-icon="rotate" data-cls="ic ic-sm"></i> Rotação</span>
+            <input type="range" id="xf-rot" min="-180" max="180" step="1" value="0">
+            <output class="xf-val" id="xf-rot-v">0°</output>
+          </div>
+          <div class="xf-tools">
+            <div class="xf-pad" id="xf-pad">
+              <button data-nudge="0,-3" title="Mover p/ cima" style="grid-area:u">↑</button>
+              <button data-nudge="-3,0" title="Mover p/ esquerda" style="grid-area:l">←</button>
+              <button data-nudge="c" id="xf-center" title="Centralizar" style="grid-area:c"><i data-icon="move" data-cls="ic ic-sm"></i></button>
+              <button data-nudge="3,0" title="Mover p/ direita" style="grid-area:r">→</button>
+              <button data-nudge="0,3" title="Mover p/ baixo" style="grid-area:d">↓</button>
+            </div>
+            <div class="xf-quick">
+              <button class="xf-chip" data-rot="-90" title="Girar 90° à esquerda"><i data-icon="rotate" data-cls="ic ic-sm" style="transform:scaleX(-1)"></i> 90°</button>
+              <button class="xf-chip" data-rot="90" title="Girar 90° à direita"><i data-icon="rotate" data-cls="ic ic-sm"></i> 90°</button>
+              <button class="xf-chip" id="xf-reset"><i data-icon="trash" data-cls="ic ic-sm"></i> Resetar</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="cover-hint"><span class="cover-formats">Aceita PNG, JPG ou WebP — qualquer tamanho (é otimizada automaticamente).</span></div>
+        <div class="cover-actions">
+          <label class="btn ghost" id="cover-add"><i data-icon="image" data-cls="ic ic-sm"></i> <span id="cover-add-label">Trocar imagem</span>
+            <input type="file" accept="image/png,image/jpeg,image/webp,image/*" id="cover-file" hidden></label>
+          <button class="btn ghost" id="cover-clear" hidden><i data-icon="trash" data-cls="ic ic-sm"></i> Remover</button>
+          <button class="btn" id="cover-save"><i data-icon="check" data-cls="ic ic-sm"></i> Salvar</button>
+        </div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- ===================== MODAL: Upload & Classificação (admin) ===================== -->
+  <div class="modal-bd" id="modal-upload">
+    <div class="modal modal-wide"><div class="modal-inner">
+      <div class="modal-head">
+        <div><h2>Upload & Classificação</h2><p>Suba os materiais e classifique — cai tudo no lugar certo</p></div>
+        <button class="x" data-close-modal><svg class="ic" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+      </div>
+      <div class="modal-body">
+        <div class="up up-modal">
+          <div class="up-body">
+            <div class="up-left">
+              <label class="dropzone" id="up-drop">
+                <span class="dz-ic"><i data-icon="upload"></i></span>
+                <b>Arraste arquivos aqui</b>
+                <span class="dz-sub">ou clique para escolher · imagens, vídeos, PDFs, artes, ZIP…</span>
+                <input type="file" id="up-input" multiple hidden>
+              </label>
+              <div class="up-queue-head"><b>Fila</b> <span id="up-qcount">0 arquivos</span></div>
+              <div class="up-queue" id="up-queue"></div>
+            </div>
+            <div class="up-right">
+              <div class="up-empty" id="up-empty"><i data-icon="image"></i><p>Selecione um arquivo da fila para classificar.<br>Ou arraste algo pra começar.</p></div>
+              <div class="up-form" id="up-form" hidden></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- ===================== MODAL: Cadastro de equipamento (admin) ===================== -->
+  <div class="modal-bd" id="modal-equip">
+    <div class="modal"><div class="modal-inner">
+      <div class="modal-head">
+        <div><h2 id="equip-title">Novo equipamento</h2><p>Cadastre marca, modelo e linha — grava no banco (SQL)</p></div>
+        <button class="x" data-close-modal><svg class="ic" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="equip-id">
+        <div class="field-row">
+          <div class="field"><label>Código <span class="req">*</span> <small class="lbl-hint">chave que o sistema usa</small></label>
+            <div class="input"><i data-icon="cpu" data-cls="ic ic-sm"></i><input id="equip-codigo" placeholder="Ex: HIPRO" autocomplete="off" style="text-transform:uppercase;letter-spacing:.04em;font-family:ui-monospace,Menlo,monospace"></div></div>
+          <div class="field"><label>Marca <span class="req">*</span></label>
+            <div class="input"><i data-icon="package" data-cls="ic ic-sm"></i>
+              <input id="equip-marca" list="marca-list" placeholder="Ex: Body Health, Daeju…" autocomplete="off">
+              <datalist id="marca-list"></datalist></div></div>
+        </div>
+        <div class="field"><label>Modelo (nome) <span class="req">*</span></label>
+          <div class="input"><i data-icon="package" data-cls="ic ic-sm"></i><input id="equip-modelo" placeholder="Ex: HIPRO"></div></div>
+        <div class="field-row">
+          <div class="field"><label>Linha <span class="req">*</span></label>
+            <div class="input"><i data-icon="grad" data-cls="ic ic-sm"></i><select id="equip-linha"><option>Estética</option><option>MED</option></select></div></div>
+          <div class="field"><label>Descrição curta</label>
+            <div class="input"><i data-icon="file" data-cls="ic ic-sm"></i><input id="equip-tag" placeholder="Ex: Radiofrequência Avançada"></div></div>
+        </div>
+        <button class="btn" id="equip-save"><i data-icon="check" data-cls="ic ic-sm"></i> Salvar</button>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- ===================== COMMAND PALETTE (⌘K) ===================== -->
+  <div class="cmdk-bd" id="cmdk">
+    <div class="cmdk">
+      <div class="cmdk-input">
+        <i data-icon="search"></i>
+        <input id="cmdk-q" type="text" placeholder="Buscar equipamentos, materiais, ações..." autocomplete="off">
+        <span class="kbd">ESC</span>
+      </div>
+      <div class="cmdk-results" id="cmdk-results"></div>
+      <div class="cmdk-foot"><span><b>↑↓</b> navegar</span><span><b>↵</b> abrir</span><span><b>esc</b> fechar</span></div>
+    </div>
+  </div>
+
+  <script src="js/core/sound.js?v=spa27"></script>
+  <script src="js/core/theme.js?v=spa27"></script>
+  <script src="js/components/ui.js?v=spa27"></script>
+  <script src="js/app.js?v=spa27"></script>
+  <script src="js/core/db.js?v=spa27"></script>
+  <script src="js/views.js?v=spa27"></script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+# dependências / build
+node_modules/
+dist/
+build/
+
+# logs
+*.log
+npm-debug.log*
+
+# SO / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+
+# temporários
+*.tmp
+.cache/

@@ -1,0 +1,1358 @@
+{
+  "generatedAt": "2026-06-01T15:18:01.574Z",
+  "source": "G:\\Meu Drive\\1. MARKETING\\01. Equipamentos",
+  "total": 26,
+  "equipamentos": [
+    {
+      "name": "BHS 156 FULL",
+      "slug": "bhs-156-full",
+      "folder": "14. BHS 156 FULL",
+      "materialCount": 25,
+      "pastas": [
+        {
+          "name": "_ 13. Simulacao de Lucros",
+          "count": 4
+        },
+        {
+          "name": "Videos",
+          "count": 1
+        },
+        {
+          "name": "_ 01. Ads",
+          "count": 3
+        },
+        {
+          "name": "Antes e Depois",
+          "count": 0
+        },
+        {
+          "name": "Apresentacoes",
+          "count": 4
+        },
+        {
+          "name": "_ 05. Certificados",
+          "count": 3
+        },
+        {
+          "name": "Materiais Cientificos",
+          "count": 0
+        },
+        {
+          "name": "Ficha Tecnica",
+          "count": 1
+        },
+        {
+          "name": "Fotos",
+          "count": 1
+        },
+        {
+          "name": "_ 10. Guias Rapido",
+          "count": 3
+        },
+        {
+          "name": "_ 16. Render",
+          "count": 0
+        },
+        {
+          "name": "_ 11. Manual do Usuario",
+          "count": 5
+        },
+        {
+          "name": "Redes Sociais",
+          "count": 0
+        },
+        {
+          "name": "_ 04. Projeto Equipamento",
+          "count": 0
+        },
+        {
+          "name": "Material Impresso",
+          "count": 0
+        }
+      ]
+    },
+    {
+      "name": "CONTOURLINE MED",
+      "slug": "contourline-med",
+      "folder": "CONTOURLINE MED",
+      "materialCount": 0,
+      "pastas": []
+    },
+    {
+      "name": "CRYSTAL 3D",
+      "slug": "crystal-3d",
+      "folder": "02. CRYSTAL 3D",
+      "materialCount": 531,
+      "pastas": [
+        {
+          "name": "Crystal 3D",
+          "count": 93
+        },
+        {
+          "name": "Liso laser",
+          "count": 1
+        },
+        {
+          "name": "Crystal 3D Plus",
+          "count": 437
+        }
+      ]
+    },
+    {
+      "name": "CYNOSURE LUTRONIC",
+      "slug": "cynosure-lutronic",
+      "folder": "26. CYNOSURE LUTRONIC",
+      "materialCount": 1439,
+      "pastas": [
+        {
+          "name": "DermaV",
+          "count": 27
+        },
+        {
+          "name": "Laser Physics &amp; The Basics of Skin Anatomy",
+          "count": 3
+        },
+        {
+          "name": "TotalSkin Solution",
+          "count": 9
+        },
+        {
+          "name": "XERF (FDA)",
+          "count": 844
+        },
+        {
+          "name": "eCO2 Plus",
+          "count": 19
+        },
+        {
+          "name": "Clarity II",
+          "count": 37
+        },
+        {
+          "name": "PicoPlus",
+          "count": 6
+        },
+        {
+          "name": "Hollywood Spectra",
+          "count": 39
+        },
+        {
+          "name": "Genius",
+          "count": 93
+        },
+        {
+          "name": "eCO2 3D (FDA)",
+          "count": 351
+        },
+        {
+          "name": "LaseMD Ultra",
+          "count": 98
+        },
+        {
+          "name": "PicoSure Pro",
+          "count": 63
+        }
+      ]
+    },
+    {
+      "name": "DUET",
+      "slug": "duet",
+      "folder": "29. DUET",
+      "materialCount": 34,
+      "pastas": [
+        {
+          "name": "Redes Sociais",
+          "count": 0
+        },
+        {
+          "name": "_ 13. Simulacao de Lucros",
+          "count": 0
+        },
+        {
+          "name": "_ 10. Guias Rapidos",
+          "count": 0
+        },
+        {
+          "name": "Antes e Depois",
+          "count": 1
+        },
+        {
+          "name": "_ 17. Consultoria",
+          "count": 0
+        },
+        {
+          "name": "Material Grafico",
+          "count": 4
+        },
+        {
+          "name": "Apresentacao",
+          "count": 3
+        },
+        {
+          "name": "_ 01. Ads",
+          "count": 0
+        },
+        {
+          "name": "Videos",
+          "count": 2
+        },
+        {
+          "name": "Materiais Cientificos",
+          "count": 0
+        },
+        {
+          "name": "_ 11. Manual do Usuario",
+          "count": 0
+        },
+        {
+          "name": "Fotos",
+          "count": 24
+        },
+        {
+          "name": "_ 05. Certificado",
+          "count": 0
+        },
+        {
+          "name": "Ficha Tecnica",
+          "count": 0
+        },
+        {
+          "name": "_ 04. Projeto Equipamento",
+          "count": 0
+        },
+        {
+          "name": "_ 16. Render",
+          "count": 0
+        }
+      ]
+    },
+    {
+      "name": "ENYGMA",
+      "slug": "enygma",
+      "folder": "06. ENYGMA",
+      "materialCount": 138,
+      "pastas": [
+        {
+          "name": "_ 01. Ads",
+          "count": 0
+        },
+        {
+          "name": "Antes e Depois",
+          "count": 0
+        },
+        {
+          "name": "Apresentacoes",
+          "count": 12
+        },
+        {
+          "name": "Material Grafico",
+          "count": 16
+        },
+        {
+          "name": "Videos",
+          "count": 15
+        },
+        {
+          "name": "_ 04. Projeto Equipamento",
+          "count": 4
+        },
+        {
+          "name": "_ 16. Render",
+          "count": 25
+        },
+        {
+          "name": "_ 05. Certificado",
+          "count": 2
+        },
+        {
+          "name": "_ 06. Consultoria",
+          "count": 18
+        },
+        {
+          "name": "Materiais Cientificos",
+          "count": 4
+        },
+        {
+          "name": "Ficha Tecnica",
+          "count": 4
+        },
+        {
+          "name": "Fotos",
+          "count": 10
+        },
+        {
+          "name": "_ 10. Guias Rapidos",
+          "count": 8
+        },
+        {
+          "name": "_ 11. Manual do Usuario",
+          "count": 6
+        },
+        {
+          "name": "Redes Sociais",
+          "count": 10
+        },
+        {
+          "name": "_ 13. Simulacao de Lucros",
+          "count": 4
+        },
+        {
+          "name": "_ 17. Mandala",
+          "count": 0
+        }
+      ]
+    },
+    {
+      "name": "EUROFEEDBACK",
+      "slug": "eurofeedback",
+      "folder": "08. EUROFEEDBACK",
+      "materialCount": 842,
+      "pastas": [
+        {
+          "name": "ADENA",
+          "count": 721
+        },
+        {
+          "name": "ADÉLLA",
+          "count": 139
+        }
+      ]
+    },
+    {
+      "name": "EUROPLASMA",
+      "slug": "europlasma",
+      "folder": "30. EUROPLASMA",
+      "materialCount": 88,
+      "pastas": [
+        {
+          "name": "Clínico",
+          "count": 8
+        },
+        {
+          "name": "Redes Sociais",
+          "count": 0
+        },
+        {
+          "name": "Videos",
+          "count": 0
+        },
+        {
+          "name": "Fotos",
+          "count": 56
+        },
+        {
+          "name": "Apresentacao",
+          "count": 3
+        },
+        {
+          "name": "_ 05. Certificado",
+          "count": 0
+        },
+        {
+          "name": "_ 11. Manual do Usuario",
+          "count": 0
+        },
+        {
+          "name": "_ 13. Simulacao de Lucros",
+          "count": 0
+        },
+        {
+          "name": "Material Grafico",
+          "count": 3
+        },
+        {
+          "name": "_ 01. Ads",
+          "count": 0
+        },
+        {
+          "name": "Antes e Depois",
+          "count": 15
+        },
+        {
+          "name": "_ 10. Guias Rapidos",
+          "count": 0
+        },
+        {
+          "name": "_ 17. Consultoria",
+          "count": 0
+        },
+        {
+          "name": "_ 16. Render",
+          "count": 0
+        },
+        {
+          "name": "Materiais Cientificos",
+          "count": 0
+        },
+        {
+          "name": "Ficha Tecnica",
+          "count": 0
+        },
+        {
+          "name": "_ 04. Projeto Equipamento",
+          "count": 0
+        },
+        {
+          "name": "LOGO",
+          "count": 3
+        }
+      ]
+    },
+    {
+      "name": "FOCUSKIN",
+      "slug": "focuskin",
+      "folder": "19. FOCUSKIN",
+      "materialCount": 147,
+      "pastas": [
+        {
+          "name": "Antes e Depois",
+          "count": 0
+        },
+        {
+          "name": "_ 04. Projeto Equipamento",
+          "count": 4
+        },
+        {
+          "name": "_ 05. Certificado",
+          "count": 0
+        },
+        {
+          "name": "_ 10. Guias Rapidos",
+          "count": 0
+        },
+        {
+          "name": "Materiais Cientificos",
+          "count": 0
+        },
+        {
+          "name": "_ 13. Simulacao de Lucros",
+          "count": 0
+        },
+        {
+          "name": "Videos",
+          "count": 2
+        },
+        {
+          "name": "Redes Sociais",
+          "count": 0
+        },
+        {
+          "name": "_ 01. Ads",
+          "count": 0
+        },
+        {
+          "name": "Apresentacao",
+          "count": 9
+        },
+        {
+          "name": "Ficha Tecnica",
+          "count": 0
+        },
+        {
+          "name": "Material Grafico",
+          "count": 11
+        },
+        {
+          "name": "_ 16. Render",
+          "count": 0
+        },
+        {
+          "name": "Fotos",
+          "count": 121
+        },
+        {
+          "name": "_ 11. Manual do Usuario",
+          "count": 0
+        },
+        {
+          "name": "_ 17. Consultoria",
+          "count": 0
+        }
+      ]
+    },
+    {
+      "name": "HIPROs",
+      "slug": "hipros",
+      "folder": "04. HIPRO's",
+      "materialCount": 1552,
+      "pastas": [
+        {
+          "name": "HIPRO HIFACE",
+          "count": 6
+        },
+        {
+          "name": "HIPRO FRANQUIAS",
+          "count": 4
+        },
+        {
+          "name": "RENNOVER",
+          "count": 9
+        },
+        {
+          "name": "HIPRO",
+          "count": 595
+        },
+        {
+          "name": "HIPRO PRIME",
+          "count": 47
+        },
+        {
+          "name": "HIPRO HOF",
+          "count": 508
+        },
+        {
+          "name": "HIPRO MED",
+          "count": 383
+        }
+      ]
+    },
+    {
+      "name": "HIVE PRO",
+      "slug": "hive-pro",
+      "folder": "20. HIVE PRO",
+      "materialCount": 84,
+      "pastas": [
+        {
+          "name": "Antes e Depois",
+          "count": 0
+        },
+        {
+          "name": "_ 04. Projeto Equipamento",
+          "count": 0
+        },
+        {
+          "name": "_ 05. Certificado",
+          "count": 0
+        },
+        {
+          "name": "_ 10. Guias Rapidos",
+          "count": 0
+        },
+        {
+          "name": "Materiais Cientificos",
+          "count": 0
+        },
+        {
+          "name": "_ 13. Simulacao de Lucros",
+          "count": 0
+        },
+        {
+          "name": "Videos",
+          "count": 2
+        },
+        {
+          "name": "Redes Sociais",
+          "count": 0
+        },
+        {
+          "name": "_ 01. Ads",
+          "count": 0
+        },
+        {
+          "name": "Ficha Tecnica",
+          "count": 0
+        },
+        {
+          "name": "Material Grafico",
+          "count": 7
+        },
+        {
+          "name": "Fotos",
+          "count": 68
+        },
+        {
+          "name": "Apresentacao",
+          "count": 7
+        },
+        {
+          "name": "_ 11. Manual do Usuario",
+          "count": 0
+        },
+        {
+          "name": "_ 16. Render",
+          "count": 0
+        },
+        {
+          "name": "_ 17. Consultoria",
+          "count": 0
+        }
+      ]
+    },
+    {
+      "name": "ICONYC",
+      "slug": "iconyc",
+      "folder": "05. ICONYC",
+      "materialCount": 390,
+      "pastas": [
+        {
+          "name": "_ 01. Ads",
+          "count": 7
+        },
+        {
+          "name": "Fotos",
+          "count": 34
+        },
+        {
+          "name": "Apresentacao",
+          "count": 6
+        },
+        {
+          "name": "Ficha Tecnica",
+          "count": 7
+        },
+        {
+          "name": "Material Grafico",
+          "count": 31
+        },
+        {
+          "name": "Antes e Depois",
+          "count": 0
+        },
+        {
+          "name": "_ 04. Projeto Equipamento",
+          "count": 42
+        },
+        {
+          "name": "_ 05. Certificado",
+          "count": 2
+        },
+        {
+          "name": "_ 10. Guias Rapidos",
+          "count": 29
+        },
+        {
+          "name": "_ 11. Manual do Usuário",
+          "count": 11
+        },
+        {
+          "name": "Materiais Cientificos",
+          "count": 0
+        },
+        {
+          "name": "_ 13. Simulacao de Lucros",
+          "count": 2
+        },
+        {
+          "name": "Videos",
+          "count": 7
+        },
+        {
+          "name": "Redes Sociais",
+          "count": 14
+        },
+        {
+          "name": "_ 17. Consultoria",
+          "count": 12
+        },
+        {
+          "name": "_ 16. Render",
+          "count": 185
+        },
+        {
+          "name": "Mandala",
+          "count": 0
+        }
+      ]
+    },
+    {
+      "name": "INDIBA",
+      "slug": "indiba",
+      "folder": "INDIBA",
+      "materialCount": 172,
+      "pastas": [
+        {
+          "name": "REVERSO",
+          "count": 172
+        }
+      ]
+    },
+    {
+      "name": "LINE SKIN",
+      "slug": "line-skin",
+      "folder": "21. LINE SKIN",
+      "materialCount": 8,
+      "pastas": [
+        {
+          "name": "Antes e Depois",
+          "count": 0
+        },
+        {
+          "name": "_ 04. Projeto Equipamento",
+          "count": 0
+        },
+        {
+          "name": "_ 05. Certificado",
+          "count": 0
+        },
+        {
+          "name": "_ 10. Guias Rapidos",
+          "count": 0
+        },
+        {
+          "name": "Materiais Cientificos",
+          "count": 0
+        },
+        {
+          "name": "_ 13. Simulacao de Lucros",
+          "count": 0
+        },
+        {
+          "name": "Videos",
+          "count": 0
+        },
+        {
+          "name": "Redes Sociais",
+          "count": 0
+        },
+        {
+          "name": "_ 01. Ads",
+          "count": 0
+        },
+        {
+          "name": "Ficha Tecnica",
+          "count": 0
+        },
+        {
+          "name": "_ 16. Render",
+          "count": 0
+        },
+        {
+          "name": "_ 17. Consultoria",
+          "count": 0
+        },
+        {
+          "name": "Material Grafico",
+          "count": 3
+        },
+        {
+          "name": "Fotos",
+          "count": 2
+        },
+        {
+          "name": "Apresentacao",
+          "count": 1
+        },
+        {
+          "name": "_ 11. Manual do Usuario",
+          "count": 2
+        }
+      ]
+    },
+    {
+      "name": "LUMENIS",
+      "slug": "lumenis",
+      "folder": "24. LUMENIS",
+      "materialCount": 519,
+      "pastas": [
+        {
+          "name": "ULTRAPULSE ALPHA",
+          "count": 72
+        },
+        {
+          "name": "STELLAR",
+          "count": 74
+        },
+        {
+          "name": "TRILIFT",
+          "count": 223
+        },
+        {
+          "name": "NUERA TIGHT",
+          "count": 95
+        },
+        {
+          "name": "SALES TIME - LUMENIS",
+          "count": 18
+        },
+        {
+          "name": "SPLENDOR X",
+          "count": 31
+        },
+        {
+          "name": "FOLIX",
+          "count": 3
+        },
+        {
+          "name": "FOLIX",
+          "count": 3
+        },
+        {
+          "name": "NOVO PADRÃO",
+          "count": 0
+        }
+      ]
+    },
+    {
+      "name": "MULTISHAPE",
+      "slug": "multishape",
+      "folder": "03. MULTISHAPE",
+      "materialCount": 546,
+      "pastas": [
+        {
+          "name": "_ 01. Ads",
+          "count": 8
+        },
+        {
+          "name": "Antes e depois",
+          "count": 0
+        },
+        {
+          "name": "Apresentacao",
+          "count": 56
+        },
+        {
+          "name": "_ 04. Projeto Equipamento",
+          "count": 6
+        },
+        {
+          "name": "Videos",
+          "count": 20
+        },
+        {
+          "name": "_ 13. Simulacao de lucros",
+          "count": 2
+        },
+        {
+          "name": "_ 16. Render",
+          "count": 0
+        },
+        {
+          "name": "Redes Sociais",
+          "count": 6
+        },
+        {
+          "name": "_ 10. Guias Rapidos",
+          "count": 7
+        },
+        {
+          "name": "_ 05. Certificados",
+          "count": 2
+        },
+        {
+          "name": "_ 06. Consultoria",
+          "count": 51
+        },
+        {
+          "name": "Ficha Tecnica",
+          "count": 2
+        },
+        {
+          "name": "Material Grafico",
+          "count": 31
+        },
+        {
+          "name": "_ 11. Manual do Usuario",
+          "count": 3
+        },
+        {
+          "name": "Materiais Cientificos",
+          "count": 0
+        },
+        {
+          "name": "_ 17. Mandala",
+          "count": 0
+        },
+        {
+          "name": "Fotos",
+          "count": 352
+        }
+      ]
+    },
+    {
+      "name": "RAYTRACE",
+      "slug": "raytrace",
+      "folder": "07. RAYTRACE",
+      "materialCount": 84,
+      "pastas": [
+        {
+          "name": "_ 01. Ads",
+          "count": 3
+        },
+        {
+          "name": "Apresentacoes",
+          "count": 7
+        },
+        {
+          "name": "Antes e Depois",
+          "count": 0
+        },
+        {
+          "name": "_ 05. Certificados",
+          "count": 2
+        },
+        {
+          "name": "_ 06. Consultoria",
+          "count": 50
+        },
+        {
+          "name": "Materiais Cientificos",
+          "count": 0
+        },
+        {
+          "name": "Material Impresso",
+          "count": 9
+        },
+        {
+          "name": "Ficha Tecnica",
+          "count": 1
+        },
+        {
+          "name": "Fotos",
+          "count": 2
+        },
+        {
+          "name": "_ 10. Guias Rapidos",
+          "count": 2
+        },
+        {
+          "name": "_ 11. Manual do Usuario",
+          "count": 4
+        },
+        {
+          "name": "_ 13. Simulacao de Lucros",
+          "count": 0
+        },
+        {
+          "name": "Videos",
+          "count": 2
+        },
+        {
+          "name": "_ 16. Render",
+          "count": 2
+        },
+        {
+          "name": "_ 04. Projeto Equipamento",
+          "count": 0
+        },
+        {
+          "name": "Redes Sociais",
+          "count": 0
+        },
+        {
+          "name": "_ 17. Mandala",
+          "count": 0
+        }
+      ]
+    },
+    {
+      "name": "SKINLED",
+      "slug": "skinled",
+      "folder": "15. SKINLED",
+      "materialCount": 21,
+      "pastas": [
+        {
+          "name": "Antes e Depois",
+          "count": 0
+        },
+        {
+          "name": "_ 04. Projeto Equipamento",
+          "count": 0
+        },
+        {
+          "name": "_ 05. Certificado",
+          "count": 0
+        },
+        {
+          "name": "_ 10. Guias Rapidos",
+          "count": 0
+        },
+        {
+          "name": "Materiais Cientificos",
+          "count": 0
+        },
+        {
+          "name": "_ 13. Simulacao de Lucros",
+          "count": 0
+        },
+        {
+          "name": "Videos",
+          "count": 0
+        },
+        {
+          "name": "Redes Sociais",
+          "count": 0
+        },
+        {
+          "name": "_ 01. Ads",
+          "count": 0
+        },
+        {
+          "name": "Apresentacao",
+          "count": 0
+        },
+        {
+          "name": "Ficha Tecnica",
+          "count": 0
+        },
+        {
+          "name": "Material Grafico",
+          "count": 0
+        },
+        {
+          "name": "_ 16. Render",
+          "count": 9
+        },
+        {
+          "name": "Fotos",
+          "count": 0
+        },
+        {
+          "name": "_ 11. Manual do Usuario",
+          "count": 3
+        },
+        {
+          "name": "_ 17. Consultoria",
+          "count": 9
+        }
+      ]
+    },
+    {
+      "name": "SKINPULSE",
+      "slug": "skinpulse",
+      "folder": "28. SKINPULSE",
+      "materialCount": 54,
+      "pastas": [
+        {
+          "name": "Antes e Depois",
+          "count": 0
+        },
+        {
+          "name": "_ 16. Render",
+          "count": 0
+        },
+        {
+          "name": "_ 05. Certificado",
+          "count": 0
+        },
+        {
+          "name": "Materiais Cientificos",
+          "count": 0
+        },
+        {
+          "name": "_ 17. Consultoria",
+          "count": 0
+        },
+        {
+          "name": "_ 01. Ads",
+          "count": 0
+        },
+        {
+          "name": "_ 13. Simulacao de Lucros",
+          "count": 0
+        },
+        {
+          "name": "Ficha Tecnica",
+          "count": 0
+        },
+        {
+          "name": "_ 10. Guias Rapidos",
+          "count": 0
+        },
+        {
+          "name": "Redes Sociais",
+          "count": 0
+        },
+        {
+          "name": "_ 11. Manual do Usuario",
+          "count": 0
+        },
+        {
+          "name": "Videos",
+          "count": 0
+        },
+        {
+          "name": "Apresentacao",
+          "count": 1
+        },
+        {
+          "name": "Material Grafico",
+          "count": 6
+        },
+        {
+          "name": "Fotos",
+          "count": 47
+        },
+        {
+          "name": "_ 04. Projeto Equipamento",
+          "count": 0
+        }
+      ]
+    },
+    {
+      "name": "SUPREMEPRO",
+      "slug": "supremepro",
+      "folder": "22. SUPREMEPRO",
+      "materialCount": 368,
+      "pastas": [
+        {
+          "name": "_ 04. Projeto Equipamento",
+          "count": 5
+        },
+        {
+          "name": "_ 05. Certificado",
+          "count": 0
+        },
+        {
+          "name": "_ 10. Guias Rapidos",
+          "count": 0
+        },
+        {
+          "name": "Materiais Cientificos",
+          "count": 0
+        },
+        {
+          "name": "_ 13. Simulacao de Lucros",
+          "count": 0
+        },
+        {
+          "name": "Videos",
+          "count": 17
+        },
+        {
+          "name": "Redes Sociais",
+          "count": 0
+        },
+        {
+          "name": "_ 01. Ads",
+          "count": 0
+        },
+        {
+          "name": "Ficha Tecnica",
+          "count": 6
+        },
+        {
+          "name": "_ 16. Render",
+          "count": 0
+        },
+        {
+          "name": "_ 17. Consultoria",
+          "count": 0
+        },
+        {
+          "name": "_ 11. Manual do Usuario",
+          "count": 2
+        },
+        {
+          "name": "Antes e Depois",
+          "count": 14
+        },
+        {
+          "name": "Apresentacao",
+          "count": 5
+        },
+        {
+          "name": "Material Grafico",
+          "count": 15
+        },
+        {
+          "name": "Site",
+          "count": 12
+        },
+        {
+          "name": "Fotos",
+          "count": 292
+        }
+      ]
+    },
+    {
+      "name": "ULTRALIFT",
+      "slug": "ultralift",
+      "folder": "16. ULTRALIFT",
+      "materialCount": 628,
+      "pastas": [
+        {
+          "name": "Luminax",
+          "count": 17
+        },
+        {
+          "name": "FOLDER A3 ULTRALIFT",
+          "count": 8
+        },
+        {
+          "name": "Ultralift Duo",
+          "count": 165
+        },
+        {
+          "name": "Ultralift Hof",
+          "count": 433
+        }
+      ]
+    },
+    {
+      "name": "UNYQUE",
+      "slug": "unyque",
+      "folder": "01. UNYQUE",
+      "materialCount": 776,
+      "pastas": [
+        {
+          "name": "UNYQUE PRO - ENYGMA",
+          "count": 312
+        },
+        {
+          "name": "UNYQUE PRO",
+          "count": 464
+        }
+      ]
+    },
+    {
+      "name": "VISBODY",
+      "slug": "visbody",
+      "folder": "17. VISBODY",
+      "materialCount": 513,
+      "pastas": [
+        {
+          "name": "S30",
+          "count": 167
+        },
+        {
+          "name": "M30",
+          "count": 127
+        },
+        {
+          "name": "Creator 600",
+          "count": 107
+        },
+        {
+          "name": "Futuros lançamentos",
+          "count": 111
+        },
+        {
+          "name": "Videos gerais",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "name": "XERF",
+      "slug": "xerf",
+      "folder": "27. XERF",
+      "materialCount": 16,
+      "pastas": [
+        {
+          "name": "FOTOS",
+          "count": 2
+        },
+        {
+          "name": "MATERIAL",
+          "count": 14
+        }
+      ]
+    },
+    {
+      "name": "XTONUS",
+      "slug": "xtonus",
+      "folder": "13. XTONUS",
+      "materialCount": 689,
+      "pastas": [
+        {
+          "name": "Antes e Depois",
+          "count": 0
+        },
+        {
+          "name": "_ 04. Projeto Equipamento",
+          "count": 0
+        },
+        {
+          "name": "_ 05. Certificado",
+          "count": 2
+        },
+        {
+          "name": "_ 10. Guias Rapidos",
+          "count": 4
+        },
+        {
+          "name": "Materiais Cientificos",
+          "count": 51
+        },
+        {
+          "name": "_ 13. Simulacao de Lucros",
+          "count": 0
+        },
+        {
+          "name": "_ 01. Ads",
+          "count": 0
+        },
+        {
+          "name": "Apresentacao",
+          "count": 14
+        },
+        {
+          "name": "Ficha Tecnica",
+          "count": 4
+        },
+        {
+          "name": "Material Grafico",
+          "count": 7
+        },
+        {
+          "name": "_ 16. Render",
+          "count": 0
+        },
+        {
+          "name": "_ 11. Manual do Usuario",
+          "count": 8
+        },
+        {
+          "name": "_ 17. Materiais Ricos",
+          "count": 8
+        },
+        {
+          "name": "Consultoria",
+          "count": 21
+        },
+        {
+          "name": "Fotos",
+          "count": 553
+        },
+        {
+          "name": "Redes Sociais",
+          "count": 2
+        },
+        {
+          "name": "Videos",
+          "count": 15
+        }
+      ]
+    },
+    {
+      "name": "ZELOTECH",
+      "slug": "zelotech",
+      "folder": "09. ZELOTECH",
+      "materialCount": 2143,
+      "pastas": [
+        {
+          "name": "LASER FUSION",
+          "count": 787
+        },
+        {
+          "name": "HS 900 - SAPHIRE",
+          "count": 7
+        },
+        {
+          "name": "LASER SAFIRAs",
+          "count": 336
+        },
+        {
+          "name": "ATTRACTON",
+          "count": 60
+        },
+        {
+          "name": "VITALIEN",
+          "count": 186
+        },
+        {
+          "name": "INKIE LASER",
+          "count": 617
+        },
+        {
+          "name": "INKIE LIGHT",
+          "count": 38
+        },
+        {
+          "name": "INKIE HOF",
+          "count": 118
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,255 @@
+/* ============================================================
+   EFFECTS — splash, modal (borda girando azul/roxo), ripple,
+   masonry, transições de entrada, skeleton
+   ============================================================ */
+
+/* ---------------- SPLASH (orbital) ---------------- */
+#splash {
+  position: fixed; inset: 0; z-index: 9999; display: grid; place-items: center;
+  background: linear-gradient(135deg, #020b18 0%, #0d2b4e 55%, #1a4a80 100%);
+  color: #fff; transition: opacity .6s ease, visibility .6s; will-change: opacity;
+}
+#splash.hide { opacity: 0; visibility: hidden; }
+#splash .glow-bg { position: absolute; top: 42%; left: 50%; width: 620px; height: 620px;
+  transform: translate(-50%,-50%); pointer-events: none;
+  background: radial-gradient(circle, rgba(46,125,209,.14) 0%, transparent 70%); }
+.sp-stage { position: relative; width: 210px; height: 210px; display: grid; place-items: center; }
+.sp-ring { position: absolute; border-radius: 50%; }
+.sp-ring.r1 { inset: -22px; border: 1px solid rgba(91,164,229,.08); }
+.sp-ring.r2 { inset: 0; border: 1px dashed rgba(255,255,255,.10); animation: sp-spin 28s linear infinite; }
+.sp-ring.r3 { inset: 18px; border: 1px solid rgba(46,125,209,.25); }
+.sp-arc { position: absolute; inset: -22px; border-radius: 50%; border: 2px solid transparent;
+  border-top-color: rgba(91,164,229,.9); border-right-color: rgba(122,87,255,.45);
+  animation: sp-spin 1.6s cubic-bezier(.4,0,.2,1) infinite; }
+.sp-orbit { position: absolute; inset: 0; animation: sp-spin 2.8s linear infinite; }
+.sp-orbit.slow { animation-duration: 16s; }
+.sp-orbit.slow:nth-child(6){ animation-delay: -4s } .sp-orbit.slow:nth-child(7){ animation-delay: -8s } .sp-orbit.slow:nth-child(8){ animation-delay: -12s }
+.sp-dot { position: absolute; top: -7px; left: 50%; transform: translateX(-50%); width: 13px; height: 13px;
+  border-radius: 50%; background: #5ba4e5; box-shadow: 0 0 14px 5px rgba(91,164,229,.65); }
+.sp-orbit.slow .sp-dot { width: 7px; height: 7px; background: rgba(255,255,255,.85); box-shadow: 0 0 6px 2px rgba(255,255,255,.3); }
+.sp-orbit.purple .sp-dot { background: #7a57ff; box-shadow: 0 0 14px 5px rgba(122,87,255,.6); }
+.sp-core { position: relative; z-index: 5; width: 84px; height: 84px; border-radius: 22px; display: grid; place-items: center;
+  color: #fff; font-weight: 800; font-size: 30px; background: linear-gradient(135deg, #3b86f7, #7a57ff);
+  box-shadow: 0 0 30px rgba(91,164,229,.5); animation: sp-breathe 3s ease-in-out infinite; }
+@keyframes sp-spin { to { transform: rotate(360deg); } }
+@keyframes sp-breathe { 0%,100%{ transform: scale(1); box-shadow:0 0 28px rgba(91,164,229,.5);} 50%{ transform: scale(1.05); box-shadow:0 0 40px rgba(122,87,255,.8);} }
+.sp-title { margin-top: 40px; font-size: 23px; font-weight: 800; letter-spacing: .3px; text-align: center; }
+.sp-title em { font-style: normal; background: linear-gradient(90deg,#5ba4e5,#a78bfa); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.sp-ver { color: rgba(255,255,255,.4); font-size: 12px; margin-top: 6px; text-align: center; }
+.sp-dots { display: flex; gap: 6px; justify-content: center; margin-top: 22px; }
+.sp-dots span { width: 6px; height: 6px; border-radius: 50%; background: #5ba4e5; animation: sp-bounce 1.4s ease-in-out infinite; }
+.sp-dots span:nth-child(2){ animation-delay:.15s } .sp-dots span:nth-child(3){ animation-delay:.3s }
+@keyframes sp-bounce { 0%,80%,100%{ transform: translateY(0); opacity:.4 } 40%{ transform: translateY(-6px); opacity:1 } }
+.sp-foot { position: absolute; bottom: 26px; left: 0; right: 0; text-align: center; color: rgba(255,255,255,.3); font-size: 11px;
+  display: flex; gap: 6px; align-items: center; justify-content: center; }
+
+/* ---------------- PAGE / ENTER transitions ---------------- */
+[data-enter] { opacity: 0; transform: translateY(16px); }
+.entered [data-enter] { animation: enter .55s cubic-bezier(.34,1.4,.64,1) forwards; }
+.entered [data-enter]:nth-child(2){ animation-delay:.05s } .entered [data-enter]:nth-child(3){ animation-delay:.1s }
+.entered [data-enter]:nth-child(4){ animation-delay:.15s } .entered [data-enter]:nth-child(5){ animation-delay:.2s }
+@keyframes enter { to { opacity: 1; transform: none; } }
+
+/* ---------------- RIPPLE ---------------- */
+.ripple { position: absolute; border-radius: 50%; transform: scale(0); pointer-events: none;
+  background: rgba(255,255,255,.35); animation: ripple .6s ease-out forwards; }
+@keyframes ripple { to { transform: scale(2.6); opacity: 0; } }
+
+/* ---------------- MODAL + borda girando (azul/roxo) ---------------- */
+@property --ang { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+@keyframes orbit { to { --ang: 360deg; } }
+
+.modal-bd {
+  position: fixed; inset: 0; z-index: 200; display: grid; place-items: center; padding: 24px;
+  background: rgba(4,8,18,.62); backdrop-filter: blur(8px) saturate(120%);
+  opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .25s, visibility .25s;
+}
+.modal-bd.open { opacity: 1; visibility: visible; pointer-events: auto; }
+/* borda/halo girando só rodam com o modal aberto (economia de GPU) */
+.modal::before, .modal::after { animation-play-state: paused; }
+.modal-bd.open .modal::before, .modal-bd.open .modal::after { animation-play-state: running; }
+.modal {
+  position: relative; width: min(560px, 100%); max-height: 90vh;
+  display: flex; flex-direction: column; overflow: visible;   /* scroll vai pro .modal-inner; borda de luz fica parada */
+  border-radius: 24px; background: var(--surface); border: 1px solid var(--border);
+  box-shadow: var(--shadow-lg); transform: translateY(18px) scale(.96); opacity: 0;
+  transition: transform .28s cubic-bezier(.34,1.4,.64,1), opacity .28s;
+}
+.modal-bd.open .modal { transform: none; opacity: 1; }
+/* borda em conic-gradient girando — traçado fino (~1.5px) */
+.modal::before {
+  content: ""; position: absolute; inset: -1.5px; border-radius: 25px; z-index: -1;
+  background: conic-gradient(from var(--ang),
+    transparent 0deg, var(--glow-blue) 70deg, var(--glow-purple) 150deg,
+    transparent 210deg, var(--glow-blue) 300deg, transparent 360deg);
+  animation: orbit 4.4s linear infinite;
+}
+/* halo desfocado girando atrás */
+.modal::after {
+  content: ""; position: absolute; inset: -16px; border-radius: 40px; z-index: -2;
+  background: conic-gradient(from var(--ang), transparent, rgba(0,174,255,.28), rgba(122,87,255,.22), transparent 46%);
+  filter: blur(22px); opacity: .8; animation: orbit 4.4s linear infinite;
+}
+.modal-inner {
+  background: var(--surface); border-radius: 23px;
+  flex: 1 1 auto; min-height: 0;                 /* deixa rolar dentro do flex */
+  overflow-y: auto; overscroll-behavior: contain;
+  cursor: grab;                                   /* mouse: segura e arrasta pra rolar */
+  scrollbar-width: none; -ms-overflow-style: none;          /* SEM barra de rolagem */
+  -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 12px, #000 calc(100% - 12px), transparent 100%);
+          mask-image: linear-gradient(180deg, transparent 0, #000 12px, #000 calc(100% - 12px), transparent 100%);
+}
+.modal-inner::-webkit-scrollbar { width: 0; height: 0; display: none; }
+.modal-inner.dragging { cursor: grabbing; user-select: none; }
+.modal-head { display: flex; align-items: center; gap: 12px; padding: 20px 22px 0; }
+.modal-head h2 { font-size: 18px; font-weight: 700; }
+.modal-head p { font-size: 12.5px; color: var(--text-muted); margin-top: 2px; }
+.modal-head .x { margin-left: auto; color: var(--text-muted); padding: 8px; border-radius: 10px; }
+.modal-head .x:hover { color: var(--error); background: var(--error-bg); }
+.modal-body { padding: 18px 22px 22px; }
+
+/* tabs */
+.tabs { display: flex; gap: 4px; padding: 4px; background: var(--bg); border: 1px solid var(--border); border-radius: 13px; margin-bottom: 20px; }
+.tab { flex: 1; padding: 10px; border-radius: 10px; font-size: 13px; font-weight: 600; color: var(--text-muted); }
+.tab.on { background: var(--accent-grad); color: #fff; box-shadow: 0 8px 18px -10px var(--accent); }
+
+/* form */
+.field { margin-bottom: 16px; }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.field label { display: block; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 7px; }
+.field label .req { color: var(--error); }
+.input { display: flex; align-items: center; gap: 10px; padding: 0 13px; height: 46px;
+  background: var(--bg); border: 1px solid var(--border); border-radius: 12px; transition: border-color .18s, box-shadow .18s; }
+.input:focus-within { border-color: var(--accent-border); box-shadow: 0 0 0 4px var(--accent-soft); }
+.input .ic { color: var(--text-faint); }
+.input input, .input textarea { flex: 1; background: none; border: none; outline: none; color: var(--text); font-size: 13.5px; font-family: inherit; }
+.input input::placeholder, .input textarea::placeholder { color: var(--text-faint); }
+.input.area { height: auto; align-items: flex-start; padding: 12px 13px; }
+.input.area textarea { resize: vertical; min-height: 96px; }
+.form-divider { display: flex; align-items: center; gap: 12px; margin: 22px 0 16px; color: var(--text-soft); font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+.form-divider::before, .form-divider::after { content: ""; flex: 1; height: 1px; background: var(--border); }
+.modal .btn { width: 100%; justify-content: center; height: 50px; margin-top: 8px; }
+
+/* ---------------- MASONRY (esquerda → direita, via JS) ---------------- */
+.masonry { display: flex; align-items: flex-start; gap: 16px; }
+.masonry-col { flex: 1; display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+
+/* ---------------- SKELETON ---------------- */
+.skeleton { background: linear-gradient(100deg, var(--surface-hover) 30%, var(--border) 50%, var(--surface-hover) 70%);
+  background-size: 200% 100%; animation: shimmer 1.3s infinite; border-radius: 10px; }
+@keyframes shimmer { to { background-position: -200% 0; } }
+
+/* ---------------- SMOKE-GLOW (botões que "acendem" — portado do sitelocal) ---------------- */
+.smoke-glow { position: relative; overflow: visible;
+  transition: color .24s ease, background .24s ease, border-color .24s ease, box-shadow .28s ease, transform .28s cubic-bezier(.34,1.56,.64,1); }
+.smoke-glow .sg-aura { position: absolute; inset: -14px; border-radius: inherit; pointer-events: none; z-index: -1; opacity: 0;
+  background: radial-gradient(circle at 50% 50%,
+    rgba(var(--glow-r,43),var(--glow-g,131),var(--glow-b,255),.55) 0%,
+    rgba(var(--glow-r,43),var(--glow-g,131),var(--glow-b,255),.22) 25%,
+    rgba(var(--glow-r,43),var(--glow-g,131),var(--glow-b,255),.08) 50%, transparent 75%);
+  filter: blur(6px); transition: opacity .32s ease; }
+.smoke-glow .sg-halo { position: absolute; inset: -3px; border-radius: inherit; pointer-events: none; opacity: 0;
+  background: radial-gradient(circle, transparent 58%, rgba(var(--glow-r,43),var(--glow-g,131),var(--glow-b,255),.55) 65%, transparent 80%);
+  transition: opacity .32s ease; }
+.smoke-glow .sg-spark { position: absolute; width: 4px; height: 4px; border-radius: 50%; left: 50%; top: 50%;
+  transform: translate(-50%,-50%); opacity: 0; pointer-events: none; transition: opacity .25s ease;
+  background: radial-gradient(circle, var(--glow-spark,#BCE0FF) 0%, rgba(var(--glow-r,43),var(--glow-g,131),var(--glow-b,255),.85) 45%, transparent 100%);
+  box-shadow: 0 0 8px var(--glow-spark,#7CC4FF), 0 0 14px rgba(var(--glow-r,43),var(--glow-g,131),var(--glow-b,255),.6); }
+.smoke-glow:hover .sg-aura { opacity: 1; animation: sg-aura-pulse 2.6s ease-in-out infinite; }
+.smoke-glow:hover .sg-halo { opacity: 1; animation: sg-halo-spin 4.5s linear infinite; }
+.smoke-glow:hover .sg-spark { opacity: 1; animation: sg-spark-orbit var(--d,2s) ease-in-out var(--del,0s) infinite; }
+@keyframes sg-aura-pulse { 0%,100%{transform:scale(1);opacity:.95} 50%{transform:scale(1.12);opacity:.65} }
+@keyframes sg-halo-spin { to { transform: rotate(360deg); } }
+@keyframes sg-spark-orbit {
+  0%   { opacity:0; transform:translate(-50%,-50%) rotate(var(--ang)) translateY(-12px) rotate(calc(var(--ang)*-1)) scale(.4); }
+  20%  { opacity:1; }
+  60%  { opacity:1; transform:translate(-50%,-50%) rotate(calc(var(--ang)+100deg)) translateY(-26px) rotate(calc((var(--ang)+100deg)*-1)) scale(1); }
+  100% { opacity:0; transform:translate(-50%,-50%) rotate(calc(var(--ang)+200deg)) translateY(-34px) rotate(calc((var(--ang)+200deg)*-1)) scale(.2); }
+}
+/* ícones acendem AZUL; o de tema acende ÂMBAR (sol) */
+.iconbtn.smoke-glow { --glow-r:43; --glow-g:131; --glow-b:255; --glow-spark:#BCE0FF; }
+.iconbtn.smoke-glow:hover { color:#fff;
+  background: radial-gradient(circle at 35% 30%, #2B83FF 0%, #1565D8 55%, #0A3D8F 100%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.25), inset 0 0 14px rgba(124,196,255,.35), 0 0 0 3px rgba(43,131,255,.18), 0 0 22px rgba(43,131,255,.65);
+  transform: scale(1.05); }
+#theme-btn.smoke-glow { --glow-r:245; --glow-g:158; --glow-b:11; --glow-spark:#FFE6B0; }
+#theme-btn.smoke-glow:hover { color:#FFEAB0;
+  background: radial-gradient(circle at 35% 30%, #B45309 0%, #92400E 55%, #5C2C0A 100%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.28), inset 0 0 14px rgba(255,213,128,.4), 0 0 0 3px rgba(245,158,11,.2), 0 0 24px rgba(245,158,11,.75);
+  transform: scale(1.06); }
+#theme-btn.smoke-glow:hover svg { filter: drop-shadow(0 0 4px rgba(255,213,128,.9)); }
+.smoke-glow svg { transition: transform .22s ease, filter .22s ease; }
+
+/* ---------------- FAB voltar ao topo (portado do sitelocal) ---------------- */
+.fab-top { position: fixed; right: 26px; bottom: 26px; left: auto; z-index: 9700; width: 50px; height: 50px; border-radius: 50%;
+  display: grid; place-items: center; color: #fff; border: 1px solid rgba(124,196,255,.40);
+  background: linear-gradient(135deg, rgba(124,58,237,.95) 0%, rgba(47,127,242,.95) 100%);
+  transform: translateY(12px); opacity: 0; pointer-events: none;
+  box-shadow: 0 4px 14px rgba(47,127,242,.35), 0 0 24px rgba(124,58,237,.25), 0 2px 10px rgba(0,0,0,.4);
+  backdrop-filter: blur(10px);
+  transition: opacity .3s ease, transform .3s cubic-bezier(.34,1.56,.64,1), box-shadow .2s ease, border-color .2s ease; }
+.fab-top svg { width: 22px; height: 22px; stroke: #fff; stroke-width: 2.5; fill: none; }
+.fab-top.show { opacity: .92; transform: translateY(0) scale(1); pointer-events: auto; }
+.fab-top.show:hover { opacity: 1; transform: translateY(-3px) scale(1.07); border-color: rgba(124,196,255,.7);
+  box-shadow: 0 6px 18px rgba(47,127,242,.55), 0 0 34px rgba(124,58,237,.5), 0 2px 10px rgba(0,0,0,.4); }
+.fab-top:active { transform: translateY(1px) scale(1); }
+
+/* ---------------- TOASTS / AVISOS (pílula flutuante) ---------------- */
+.toast-wrap {
+  position: fixed; top: 18px; left: 50%; transform: translateX(-50%); z-index: 9800;
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  pointer-events: none; width: max-content; max-width: min(92vw, 460px);
+}
+.toast {
+  pointer-events: auto; display: flex; align-items: center; gap: 12px;
+  padding: 11px 14px 11px 13px; border-radius: 999px;
+  background: var(--surface); border: 1px solid var(--border);
+  box-shadow: 0 14px 34px -12px rgba(4,12,28,.45), 0 2px 8px rgba(4,12,28,.18);
+  color: var(--text); font-size: 13.5px; font-weight: 600; line-height: 1.2;
+  backdrop-filter: blur(10px) saturate(120%);
+  opacity: 0; transform: translateY(-14px) scale(.96);
+  transition: opacity .32s ease, transform .42s cubic-bezier(.34,1.56,.64,1);
+}
+.toast.in { opacity: 1; transform: none; }
+.toast.out { opacity: 0; transform: translateY(-10px) scale(.97); }
+.toast .t-ic { flex: 0 0 auto; width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; }
+.toast .t-msg { padding-right: 2px; white-space: nowrap; max-width: 60ch;
+  overflow: hidden; text-overflow: ellipsis; }
+.toast .t-x { flex: 0 0 auto; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center;
+  color: var(--text-faint); cursor: pointer; transition: color .18s, background .18s; }
+.toast .t-x:hover { color: var(--text); background: var(--surface-hover); }
+.toast .t-x svg { width: 13px; height: 13px; stroke: currentColor; stroke-width: 2.4; fill: none; }
+
+/* — progresso/loading: aro azul girando — */
+.toast.t-loading .t-ic { color: var(--accent); }
+.toast .t-spin { width: 20px; height: 20px; border-radius: 50%;
+  border: 2.5px solid color-mix(in srgb, var(--accent) 22%, transparent);
+  border-top-color: var(--accent); animation: t-spin .7s linear infinite; }
+@keyframes t-spin { to { transform: rotate(360deg); } }
+
+/* — sucesso: bolha verde com check — */
+.toast.t-success { border-color: color-mix(in srgb, #16a34a 35%, var(--border)); }
+.toast.t-success .t-ic { color: #fff;
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  box-shadow: 0 0 0 4px rgba(34,197,94,.16), 0 4px 12px -4px rgba(22,163,74,.6); }
+.toast.t-success .t-ic svg { width: 15px; height: 15px; stroke: #fff; stroke-width: 3; fill: none;
+  stroke-dasharray: 20; stroke-dashoffset: 20; animation: t-check .4s .08s ease forwards; }
+@keyframes t-check { to { stroke-dashoffset: 0; } }
+
+/* — erro / aviso — */
+.toast.t-error   .t-ic { color: #fff; background: linear-gradient(135deg, #f87171, #dc2626);
+  box-shadow: 0 0 0 4px rgba(220,38,38,.16); }
+.toast.t-warn    .t-ic { color: #fff; background: linear-gradient(135deg, #fbbf24, #d97706);
+  box-shadow: 0 0 0 4px rgba(217,119,6,.16); }
+.toast.t-error .t-ic svg, .toast.t-warn .t-ic svg, .toast.t-info .t-ic svg { width: 15px; height: 15px; stroke: currentColor; stroke-width: 2.6; fill: none; }
+.toast.t-info    .t-ic { color: var(--accent); background: var(--accent-soft); }
+
+/* barra de tempo (auto-dismiss) */
+.toast .t-bar { position: absolute; left: 16px; right: 16px; bottom: 4px; height: 2px; border-radius: 2px;
+  background: color-mix(in srgb, var(--accent) 55%, transparent); transform-origin: left; }
+.toast.t-success .t-bar { background: color-mix(in srgb, #16a34a 55%, transparent); }
+
+/* NOTA: este produto é focado em design/movimento — o usuário pede explicitamente
+   os efeitos girando (brilho do modal, splash, smoke-glow, etc.). Por isso NÃO
+   cortamos as animações em prefers-reduced-motion (isso estava deixando o brilho
+   do modal "parado"). As transições continuam suaves; nada de movimento agressivo. */

@@ -1,0 +1,65 @@
+/* ════════════════════════════════════════════════════════════
+   SPLASH — ORBITAL, copiado IGUAL da GALERIA CONTOUR
+   (anéis girando + arco + pontos em órbita + logo "respirando")
+   ════════════════════════════════════════════════════════════ */
+
+.splash-overlay {
+  position: fixed; inset: 0; z-index: 99999;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  color: #fff; overflow: hidden; padding-top: 40px;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: linear-gradient(135deg, #020b18 0%, #0D2B4E 55%, #1A4A80 100%);
+  opacity: 1; transition: opacity 600ms ease;
+}
+.splash-overlay.fading { opacity: 0; pointer-events: none; }
+.splash-overlay::before {
+  content: ""; position: absolute; top: 42%; left: 50%;
+  width: 600px; height: 600px; transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgba(46,125,209,0.12) 0%, transparent 70%); pointer-events: none;
+}
+
+.splash-overlay .stage { position: relative; width: 200px; height: 200px; display: flex; align-items: center; justify-content: center; }
+
+.splash-overlay .ring-outermost { position: absolute; inset: -20px; border-radius: 50%; border: 1px solid rgba(91,164,229,0.08); }
+.splash-overlay .ring-outer { position: absolute; inset: 0; border-radius: 50%; border: 1px dashed rgba(255,255,255,0.10); animation: spl-spinSlow 28s linear infinite; }
+.splash-overlay .ring-inner { position: absolute; inset: 16px; border-radius: 50%; border: 1px solid rgba(46,125,209,0.25); }
+.splash-overlay .arc {
+  position: absolute; inset: -20px; border-radius: 50%; border: 2px solid transparent;
+  border-top-color: rgba(91,164,229,0.85); border-right-color: rgba(91,164,229,0.35);
+  animation: spl-spinFast 1.6s cubic-bezier(0.4,0,0.2,1) infinite;
+}
+@keyframes spl-spinSlow { to { transform: rotate(360deg); } }
+@keyframes spl-spinFast { to { transform: rotate(360deg); } }
+
+.splash-overlay .orbit-fast { position: absolute; inset: 0; animation: spl-spinSlow 2.8s linear infinite; }
+.splash-overlay .orbit-fast .dot { position: absolute; top: -7px; left: 50%; transform: translateX(-50%); width: 14px; height: 14px; border-radius: 50%; background: #5BA4E5; box-shadow: 0 0 14px 5px rgba(91,164,229,0.65); }
+
+.splash-overlay .orbit-slow { position: absolute; inset: 0; animation: spl-spinSlow 16s linear infinite; }
+.splash-overlay .orbit-slow .dot { position: absolute; top: -6px; left: 50%; transform: translateX(-50%); width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.85); box-shadow: 0 0 6px 2px rgba(255,255,255,0.35); }
+/* as 4 órbitas lentas espalhadas (1 sem delay + 3 com delay) */
+.splash-overlay .orbit-slow:nth-child(7) { animation-delay: -4s; }
+.splash-overlay .orbit-slow:nth-child(8) { animation-delay: -8s; }
+.splash-overlay .orbit-slow:nth-child(9) { animation-delay: -12s; }
+.splash-overlay .orbit-slow:nth-child(8) .dot,
+.splash-overlay .orbit-slow:nth-child(9) .dot { width: 6px; height: 6px; background: rgba(91,164,229,0.6); box-shadow: none; }
+
+.splash-overlay .core { position: relative; z-index: 5; width: 90px; height: 90px; display: flex; align-items: center; justify-content: center; }
+.splash-overlay .core img { width: 70px; height: 70px; object-fit: contain; filter: brightness(2) drop-shadow(0 0 18px rgba(91,164,229,0.55)); animation: spl-breathe 3s ease-in-out infinite; }
+.splash-overlay .core .fallback { font: 800 36px 'Inter', sans-serif; color: #fff; text-shadow: 0 0 18px rgba(91,164,229,0.8); animation: spl-breathe 3s ease-in-out infinite; }
+@keyframes spl-breathe {
+  0%, 100% { transform: scale(1);    filter: brightness(2)   drop-shadow(0 0 18px rgba(91,164,229,0.55)); }
+  50%      { transform: scale(1.04); filter: brightness(2.3) drop-shadow(0 0 26px rgba(91,164,229,0.85)); }
+}
+
+.splash-overlay .splash-title { margin-top: 44px; font-size: 24px; font-weight: 800; letter-spacing: 0.5px; text-align: center; }
+.splash-overlay .splash-title em { font-style: normal; color: #5BA4E5; }
+.splash-overlay .splash-ver { color: rgba(255,255,255,0.4); font-size: 12px; font-weight: 500; margin-top: 6px; }
+
+.splash-overlay .splash-dots { display: flex; gap: 6px; margin-top: 22px; }
+.splash-overlay .splash-dots span { width: 6px; height: 6px; border-radius: 50%; background: #2E7DD1; animation: spl-bounce 1.4s ease-in-out infinite; }
+.splash-overlay .splash-dots span:nth-child(2) { animation-delay: 0.15s; }
+.splash-overlay .splash-dots span:nth-child(3) { animation-delay: 0.30s; }
+@keyframes spl-bounce { 0%, 80%, 100% { transform: translateY(0); opacity: 0.4; } 40% { transform: translateY(-6px); opacity: 1; } }
+
+.splash-overlay .splash-footer { position: absolute; bottom: 22px; left: 0; right: 0; text-align: center; color: rgba(255,255,255,0.28); font-size: 11px; display: flex; align-items: center; justify-content: center; gap: 6px; }
+.splash-overlay .splash-footer svg { width: 12px; height: 12px; }

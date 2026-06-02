@@ -1,0 +1,143 @@
+/* ============================================================
+   CATEGORIA (Equipamento) — hero, Central de apoio, Biblioteca
+   ============================================================ */
+
+/* ---------------- HERO (banner ESCURO: navy + anéis + arco de luz + onda, máquina à direita) ---------------- */
+.cat-hero {
+  position: relative; overflow: hidden; border-radius: 24px; margin-bottom: 22px;
+  min-height: 300px; padding: 46px 48px; display: flex; align-items: center; color: #fff;
+  background:
+    radial-gradient(60% 90% at 86% 88%, rgba(60,140,255,.55) 0%, transparent 55%),   /* arco de luz inferior-direito */
+    radial-gradient(70% 110% at 80% 40%, rgba(34,96,210,.45) 0%, transparent 56%),    /* brilho atrás da máquina */
+    linear-gradient(118deg, #081a44 0%, #0c2a66 50%, #0f3d8c 100%);
+  box-shadow: 0 24px 60px -30px rgba(8,22,60,.7);
+}
+/* anéis concêntricos atrás da máquina (lado direito) */
+.cat-hero::before {
+  content: ""; position: absolute; right: 7%; top: 50%; transform: translateY(-50%);
+  width: 560px; height: 560px; pointer-events: none; z-index: 0; opacity: .55;
+  background:
+    radial-gradient(circle, transparent 63.4%, rgba(160,200,255,.55) 63.8%, transparent 64.8%),
+    radial-gradient(circle, transparent 75.4%, rgba(160,200,255,.38) 75.8%, transparent 76.8%),
+    radial-gradient(circle, transparent 89.4%, rgba(160,200,255,.22) 89.8%, transparent 90.8%);
+}
+/* onda/raio de luz azul no canto inferior esquerdo */
+.cat-hero::after {
+  content: ""; position: absolute; left: -6%; bottom: -14%; width: 62%; height: 80%; pointer-events: none; z-index: 0;
+  background:
+    radial-gradient(46% 32% at 34% 72%, rgba(40,120,255,.55) 0%, transparent 62%),
+    radial-gradient(60% 22% at 42% 80%, rgba(90,170,255,.4) 0%, transparent 60%);
+  filter: blur(2px);
+}
+
+.cat-hero-main { position: relative; z-index: 2; flex: 1; max-width: 56%; }
+.cat-badges { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.cat-badge { display: inline-flex; align-items: center; padding: 6px 13px; border-radius: 999px;
+  font-size: 11px; font-weight: 700; letter-spacing: .1em; color: #bcd6ff;
+  background: rgba(120,170,255,.16); border: 1px solid rgba(160,200,255,.3); }
+.cat-badge.alt { letter-spacing: .02em; color: #fff; background: rgba(255,255,255,.1); border-color: rgba(255,255,255,.2); }
+.cat-hero h1 { font-size: 42px; font-weight: 800; letter-spacing: -.5px; color: #fff; line-height: 1.04;
+  text-shadow: 0 2px 18px rgba(0,0,0,.35); }
+.cat-hero .lead { font-size: 16px; font-weight: 700; color: #cfe0ff; margin-top: 6px; }
+.cat-hero .desc { font-size: 13px; line-height: 1.6; color: rgba(255,255,255,.74); margin-top: 12px; max-width: 430px; }
+
+.cat-stats { display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap; }
+.cat-stat { display: flex; align-items: center; gap: 11px; padding: 11px 16px; border-radius: 14px;
+  background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.18); backdrop-filter: blur(8px); }
+.cat-stat .si { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center;
+  background: rgba(160,200,255,.2); color: #cfe0ff; }
+.cat-stat b { font-size: 18px; font-weight: 800; line-height: 1; color: #fff; font-variant-numeric: tabular-nums; }
+.cat-stat span { font-size: 11px; color: rgba(255,255,255,.66); }
+
+/* máquina sangrando no canto inferior direito */
+.cat-hero-img { position: absolute; right: 44px; bottom: -22px; z-index: 1; width: 350px; height: 320px; }
+.cat-hero-img .ph { width: 86px; height: 86px; color: rgba(255,255,255,.6); }
+.cat-hero-img img { width: 100%; height: 100%; object-fit: contain; object-position: bottom;
+  filter: drop-shadow(0 28px 44px rgba(0,0,0,.55)); }
+
+/* ações (voltar + bookmark) topo direito */
+.cat-hero-actions { position: absolute; top: 22px; right: 24px; z-index: 3; display: flex; gap: 10px; }
+.cat-back { display: inline-flex; align-items: center; gap: 8px; height: 38px; padding: 0 15px;
+  border-radius: 11px; font-size: 12.5px; font-weight: 600; color: #fff;
+  background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.24); transition: background .18s, transform .15s; }
+.cat-back:hover { background: rgba(255,255,255,.26); transform: translateX(-2px); }
+.cat-bookmark { width: 38px; height: 38px; border-radius: 11px; display: grid; place-items: center; color: #fff;
+  background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.24); transition: background .18s; }
+.cat-bookmark:hover { background: rgba(255,255,255,.26); }
+.cat-bookmark .ic { width: 18px; height: 18px; }
+
+/* quando o admin sobe um BANNER próprio do topo, ele vira o fundo (full-bleed) e esconde a máquina/decoração */
+.cat-hero.has-bg { background: #0c2a66; }
+.cat-hero.has-bg .cat-hero-bg { position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%;
+  object-fit: cover; object-position: center;
+  transform: translate(var(--ox,0), var(--oy,0)) scale(var(--os,1)) rotate(var(--or,0)); }
+.cat-hero.has-bg::before, .cat-hero.has-bg::after { display: none; }
+.cat-hero.has-bg .cat-hero-img { display: none; }
+.cat-hero.has-bg .cat-hero-main::before { content: ""; position: absolute; inset: -46px -48px; z-index: -1;
+  background: linear-gradient(90deg, rgba(8,22,60,.82) 0%, rgba(8,22,60,.5) 55%, transparent 85%); }
+
+/* ---------------- search ---------------- */
+.cat-searchbar { display: flex; align-items: center; gap: 10px; margin-bottom: 30px; }
+.cat-searchbar .search-field { flex: 1; }
+
+/* ---------------- seção ---------------- */
+.cat-section { margin-bottom: 30px; }
+.cat-section > h2 { font-size: 19px; font-weight: 700; }
+.cat-section > .sub { font-size: 13px; color: var(--text-muted); margin: 2px 0 16px; }
+
+/* ---------------- CENTRAL DE APOIO ---------------- */
+.support-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; }
+.support-card {
+  display: flex; flex-direction: column; gap: 10px; padding: 18px; border-radius: var(--radius);
+  background: var(--surface-grad); border: 1px solid var(--border); box-shadow: var(--shadow);
+  transition: transform .25s cubic-bezier(.34,1.4,.64,1), box-shadow .25s, border-color .25s;
+}
+.support-card:hover { transform: translateY(-5px); border-color: var(--accent-border);
+  box-shadow: 0 24px 46px -24px color-mix(in srgb, var(--sc, var(--accent)) 70%, transparent); }
+.support-ic { width: 50px; height: 50px; border-radius: 15px; display: grid; place-items: center;
+  color: var(--sc, var(--accent)); background: color-mix(in srgb, var(--sc, var(--accent)) 15%, transparent); }
+.support-ic .ic { width: 24px; height: 24px; }
+.support-card h3 { font-size: 14.5px; font-weight: 700; line-height: 1.25; }
+.support-card p { font-size: 11.5px; color: var(--text-muted); line-height: 1.45; flex: 1; }
+.support-card .go { align-self: flex-start; width: 32px; height: 32px; border-radius: 10px; display: grid; place-items: center;
+  color: var(--sc, var(--accent)); background: color-mix(in srgb, var(--sc, var(--accent)) 12%, transparent);
+  transition: transform .18s; }
+.support-card:hover .go { transform: translateX(3px); }
+
+/* ---------------- BIBLIOTECA (pastas) ---------------- */
+.lib-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; }
+.lib-card {
+  display: flex; flex-direction: column; gap: 14px; padding: 18px; border-radius: var(--radius);
+  background: var(--surface-grad); border: 1px solid var(--border); box-shadow: var(--shadow);
+  transition: transform .25s cubic-bezier(.34,1.4,.64,1), box-shadow .25s, border-color .25s;
+}
+.lib-card:hover { transform: translateY(-5px); border-color: var(--accent-border);
+  box-shadow: 0 24px 46px -24px rgba(47,127,242,.5); }
+.lib-top { display: flex; align-items: flex-start; justify-content: space-between; }
+.lib-folder { width: 50px; height: 50px; border-radius: 14px; display: grid; place-items: center;
+  color: var(--accent); background: var(--accent-soft); }
+.lib-folder .ic { width: 26px; height: 26px; }
+.lib-card .chev { color: var(--text-faint); }
+.lib-card:hover .chev { color: var(--accent); }
+.lib-card h3 { font-size: 14.5px; font-weight: 700; }
+.lib-card span { font-size: 11.5px; color: var(--text-soft); }
+
+/* ---------------- CTA inferior ---------------- */
+.cat-cta {
+  display: flex; align-items: center; gap: 14px; padding: 16px 20px; border-radius: var(--radius);
+  background: var(--accent-soft); border: 1px solid var(--accent-border);
+}
+.cat-cta .ic { color: var(--accent); }
+.cat-cta p { flex: 1; font-size: 13px; color: var(--text-muted); }
+.cat-cta a.link { color: var(--accent); font-weight: 600; }
+
+@media (max-width: 1200px) { .support-grid, .lib-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 820px) {
+  .cat-hero { flex-direction: column; padding: 62px 22px 24px; min-height: 0; }
+  .cat-hero::before { right: 50%; transform: translate(50%,-50%); width: 380px; height: 380px; top: 60%; }
+  .cat-hero-main { max-width: 100%; }
+  .cat-hero-img { position: static; width: 200px; height: 200px; margin: 20px auto 0; }
+  .cat-stats { justify-content: flex-start; }
+  .support-grid, .lib-grid { grid-template-columns: repeat(2, 1fr); }
+  .cat-cta { flex-direction: column; text-align: center; }
+}

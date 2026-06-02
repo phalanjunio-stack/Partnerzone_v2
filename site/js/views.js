@@ -264,6 +264,11 @@
             ${CATS.map(c => `<a class="bcat"><div class="bcat-ic">${svgIcon(c[0])}</div><h3>${c[1]}</h3><p>${c[2]}</p><span class="bcat-go">${c[3]} ${svgIcon('arrowR','ic ic-sm')}</span></a>`).join('')}
           </div>
 
+          <section class="bcol portfolio-sec" data-enter>
+            <div class="bcol-head"><h2>Portfólio</h2><span class="pf-hint">PDF institucional da marca — abre no visualizador e pode ser baixado</span></div>
+            <div id="brand-portfolio" data-brand="${brand}"><div class="pf-loading">Carregando portfólio…</div></div>
+          </section>
+
           <div class="brand-cols">
             <section class="bcol" data-enter>
               <div class="bcol-head"><h2>Logos oficiais</h2><a class="link-more">Ver todos ${svgIcon('arrowR','ic ic-sm')}</a></div>
@@ -302,7 +307,7 @@
             </section>
           </div>
         </div>`,
-        init: () => {},
+        init: () => { window.initBrandPortfolio && window.initBrandPortfolio(brand); },
       };
     },
 

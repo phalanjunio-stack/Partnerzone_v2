@@ -359,6 +359,7 @@ function initShell() {
   initCoverPicker();
   initCmdK();
   initUpload();
+  initPdfModal();
 }
 
 /* ============================================================
@@ -605,6 +606,124 @@ function initCoverPicker() {
     refresh();
     UI.openModal('modal-capa');
   };
+}
+
+/* ============================================================
+   PORTFÓLIO POR MARCA — PDF guardado em IndexedDB (não estoura o storage)
+   + visualizador de PDF (igual o portfólio da Lumenis)
+   ============================================================ */
+function fmtBytes(n) {
+  if (n >= 1048576) return (n / 1048576).toFixed(1) + ' MB';
+  if (n >= 1024) return Math.round(n / 1024) + ' KB';
+  return n + ' B';
+}
+const PortfolioDB = (() => {
+  let dbp = null;
+  function open() {
+    if (dbp) return dbp;
+    dbp = new Promise((res, rej) => {
+      const r = indexedDB.open('cl-portfolios', 1);
+      r.onupgradeneeded = () => { if (!r.result.objectStoreNames.contains('pdf')) r.result.createObjectStore('pdf'); };
+      r.onsuccess = () => res(r.result);
+      r.onerror = () => rej(r.error);
+    });
+    return dbp;
+  }
+  const tx = (mode, fn) => open().then(db => new Promise((res, rej) => {
+    const t = db.transaction('pdf', mode), st = t.objectStore('pdf'); let out;
+    out = fn(st); t.oncomplete = () => res(out && out.result !== undefined ? out.result : out); t.onerror = () => rej(t.error);
+  }));
+  return {
+    get: brand => tx('readonly', st => st.get(brand)),
+    set: (brand, rec) => tx('readwrite', st => st.put(rec, brand)),
+    del: brand => tx('readwrite', st => st.delete(brand)),
+  };
+})();
+
+/* visualizador de PDF (modal) — usa o leitor nativo do navegador via <iframe> */
+function initPdfModal() {
+  const bd = document.getElementById('modal-pdf'); if (!bd) return;
+  const frame = document.getElementById('pdf-frame');
+  const dl = document.getElementById('pdf-download');
+  const title = document.getElementById('pdf-title');
+  const sub = document.getElementById('pdf-sub');
+  let url = null;
+  function cleanup() { if (url) { URL.revokeObjectURL(url); url = null; } frame.src = 'about:blank'; }
+  // limpa o object URL ao fechar (evita vazamento de memória)
+  bd.addEventListener('click', e => { if (e.target === bd || e.target.closest('[data-close-modal]')) setTimeout(cleanup, 200); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && bd.classList.contains('open')) setTimeout(cleanup, 200); });
+  window.__openPDF = (blob, name, label) => {
+    cleanup();
+    url = URL.createObjectURL(blob);
+    frame.src = url + '#toolbar=1&view=FitH';
+    dl.href = url; dl.download = name || 'portfolio.pdf';
+    title.textContent = label || 'Portfólio';
+    sub.textContent = (name || 'documento.pdf') + ' · ' + fmtBytes(blob.size);
+    UI.openModal('modal-pdf');
+  };
+}
+
+/* monta a seção de Portfólio dentro da página da marca (assíncrono: lê do IndexedDB) */
+async function initBrandPortfolio(brand) {
+  const box = document.getElementById('brand-portfolio'); if (!box) return;
+  let rec = null;
+  try { rec = await PortfolioDB.get(brand); } catch (_) {}
+
+  const openFile = () => {
+    const inp = document.createElement('input');
+    inp.type = 'file'; inp.accept = 'application/pdf';
+    inp.onchange = async () => {
+      const f = inp.files && inp.files[0]; if (!f) return;
+      if (f.type !== 'application/pdf' && !/\.pdf$/i.test(f.name)) { Toast.error('Selecione um arquivo PDF.'); return; }
+      try {
+        await PortfolioDB.set(brand, { name: f.name, size: f.size, blob: f });
+        Sound.success && Sound.success();
+        Toast.success('Portfólio salvo! — ' + brand);
+        render();
+      } catch (err) { Toast.error('Não consegui salvar o PDF. Tente um menor.'); }
+    };
+    inp.click();
+  };
+
+  function render() {
+    if (rec && rec.blob) {
+      box.innerHTML = `
+        <div class="pf-card" id="pf-open" title="Abrir portfólio">
+          <div class="pf-thumb"><i data-icon="file" data-cls="ic"></i><span class="pf-ext">PDF</span></div>
+          <div class="pf-meta">
+            <span class="pf-flag">Atualizado recentemente</span>
+            <span class="pf-tag">PORTFÓLIO</span>
+            <b>PORTFÓLIO ${brand.toUpperCase()}</b>
+            <span class="pf-file">${rec.name} · ${fmtBytes(rec.size)}</span>
+          </div>
+          <div class="pf-actions">
+            <button class="btn ghost pf-replace"><i data-icon="upload" data-cls="ic ic-sm"></i> Trocar</button>
+            <button class="btn ghost pf-del" title="Remover">${svgIcon('trash','ic ic-sm')}</button>
+            <button class="btn pf-view"><i data-icon="eye" data-cls="ic ic-sm"></i> Abrir portfólio</button>
+          </div>
+        </div>`;
+      renderIcons();
+      const openView = () => window.__openPDF(rec.blob, rec.name, 'Portfólio ' + brand);
+      box.querySelector('.pf-view').addEventListener('click', e => { e.stopPropagation(); openView(); });
+      box.querySelector('#pf-open').addEventListener('click', openView);
+      box.querySelector('.pf-replace').addEventListener('click', e => { e.stopPropagation(); openFile(); });
+      box.querySelector('.pf-del').addEventListener('click', async e => {
+        e.stopPropagation();
+        try { await PortfolioDB.del(brand); rec = null; Toast.info('Portfólio removido.'); render(); } catch (_) {}
+      });
+    } else {
+      box.innerHTML = `
+        <button class="pf-empty">
+          <span class="pf-empty-ic"><i data-icon="upload" data-cls="ic"></i></span>
+          <b>Adicionar portfólio (PDF)</b>
+          <span>Igual o portfólio da Lumenis — abre num visualizador e pode ser baixado.</span>
+          <span class="pf-empty-cta">Clique para escolher o PDF</span>
+        </button>`;
+      renderIcons();
+      box.querySelector('.pf-empty').addEventListener('click', openFile);
+    }
+  }
+  render();
 }
 
 /* ============================================================

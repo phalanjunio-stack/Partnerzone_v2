@@ -6,17 +6,17 @@
   <title>PartnerZone — Contourline</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/theme.css?v=spa27">
-  <link rel="stylesheet" href="css/app.css?v=spa27">
-  <link rel="stylesheet" href="css/effects.css?v=spa27">
-  <link rel="stylesheet" href="css/categoria.css?v=spa27">
-  <link rel="stylesheet" href="css/pasta.css?v=spa27">
-  <link rel="stylesheet" href="css/material.css?v=spa27">
-  <link rel="stylesheet" href="css/buscar.css?v=spa27">
-  <link rel="stylesheet" href="css/upload.css?v=spa27">
-  <link rel="stylesheet" href="css/sql.css?v=spa27">
-  <link rel="stylesheet" href="css/marca.css?v=spa27">
-  <link rel="stylesheet" href="css/splash.css?v=spa27">
+  <link rel="stylesheet" href="css/theme.css?v=spa28">
+  <link rel="stylesheet" href="css/app.css?v=spa28">
+  <link rel="stylesheet" href="css/effects.css?v=spa28">
+  <link rel="stylesheet" href="css/categoria.css?v=spa28">
+  <link rel="stylesheet" href="css/pasta.css?v=spa28">
+  <link rel="stylesheet" href="css/material.css?v=spa28">
+  <link rel="stylesheet" href="css/buscar.css?v=spa28">
+  <link rel="stylesheet" href="css/upload.css?v=spa28">
+  <link rel="stylesheet" href="css/sql.css?v=spa28">
+  <link rel="stylesheet" href="css/marca.css?v=spa28">
+  <link rel="stylesheet" href="css/splash.css?v=spa28">
   <script>document.documentElement.setAttribute('data-theme', localStorage.getItem('cl-theme') || 'dark');</script>
   <script src="js/core/splash.js"></script>
 </head>
@@ -255,6 +255,22 @@
     </div></div>
   </div>
 
+  <!-- ===================== MODAL: Visualizador de PDF (portfólio) ===================== -->
+  <div class="modal-bd" id="modal-pdf">
+    <div class="modal modal-pdf"><div class="modal-inner">
+      <div class="modal-head">
+        <div><h2 id="pdf-title">Portfólio</h2><p id="pdf-sub">documento.pdf</p></div>
+        <div class="pdf-head-actions">
+          <a class="btn" id="pdf-download" download><i data-icon="download" data-cls="ic ic-sm"></i> Baixar</a>
+          <button class="x" data-close-modal><svg class="ic" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+        </div>
+      </div>
+      <div class="modal-body pdf-body">
+        <iframe id="pdf-frame" title="Visualizador de PDF" src="about:blank"></iframe>
+      </div>
+    </div></div>
+  </div>
+
   <!-- ===================== COMMAND PALETTE (⌘K) ===================== -->
   <div class="cmdk-bd" id="cmdk">
     <div class="cmdk">
@@ -268,11 +284,11 @@
     </div>
   </div>
 
-  <script src="js/core/sound.js?v=spa27"></script>
-  <script src="js/core/theme.js?v=spa27"></script>
-  <script src="js/components/ui.js?v=spa27"></script>
-  <script src="js/app.js?v=spa27"></script>
-  <script src="js/core/db.js?v=spa27"></script>
-  <script src="js/views.js?v=spa27"></script>
+  <script src="js/core/sound.js?v=spa28"></script>
+  <script src="js/core/theme.js?v=spa28"></script>
+  <script src="js/components/ui.js?v=spa28"></script>
+  <script src="js/app.js?v=spa28"></script>
+  <script src="js/core/db.js?v=spa28"></script>
+  <script src="js/views.js?v=spa28"></script>
 </body>
 </html>

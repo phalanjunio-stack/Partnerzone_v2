@@ -360,6 +360,7 @@ function initShell() {
   initCmdK();
   initUpload();
   initPdfModal();
+  initImgModal();
 }
 
 /* ============================================================
@@ -663,71 +664,158 @@ const LogosDB = (() => {
   };
 })();
 
-/* monta a pasta de Logos da marca (assíncrono) — amostras + uploads do admin */
+/* mede a proporção (w/h) de um arquivo de imagem */
+function imgAR(file) {
+  return new Promise(res => {
+    const u = URL.createObjectURL(file), im = new Image();
+    im.onload = () => { const ar = (im.naturalWidth && im.naturalHeight) ? im.naturalWidth / im.naturalHeight : 1.6; URL.revokeObjectURL(u); res(+ar.toFixed(3)); };
+    im.onerror = () => { URL.revokeObjectURL(u); res(1.6); };
+    im.src = u;
+  });
+}
+function dateBR() { const d = new Date(); const p = n => String(n).padStart(2, '0'); return p(d.getDate()) + '/' + p(d.getMonth() + 1) + '/' + d.getFullYear(); }
+
+/* pasta de Logos da marca — GALERIA MASONRY (igual Biblioteca) + lightbox */
 async function initBrandLogos(brand, samples) {
   const grid = document.getElementById('brand-logos'); if (!grid) return;
   const root = grid.closest('.folder-page');
   const searchInp = document.getElementById('blogos-search');
   const countEl = document.getElementById('blogos-count');
+  const sizeInp = document.getElementById('blogos-size');
   let uploaded = [];
   try { uploaded = (await LogosDB.get(brand)) || []; } catch (_) {}
-  let urls = [];
+  let view = 'masonry', size = +(sizeInp ? sizeInp.value : 240), urls = [], items = [];
   const release = () => { urls.forEach(u => URL.revokeObjectURL(u)); urls = []; };
 
   function listAll() {
+    release();
     const up = uploaded.map(r => {
       const url = URL.createObjectURL(r.blob); urls.push(url);
-      return { t: r.title, size: fmtBytes(r.size), dl: r.dl || 0, id: r.id, th: `<img class="lm-img" src="${url}" alt="${r.title}">` };
+      return { kind: 'img', id: r.id, t: r.title, size: fmtBytes(r.size), date: r.date || '—', folder: 'Logos', ext: r.ext || 'PNG', ar: r.ar || 1.4, url };
     });
-    return up.concat(samples || []);
+    const sm = (samples || []).map(s => ({ kind: 'wm', t: s.t, size: s.size, date: s.date || '01/06/2026', folder: 'Logos', ext: s.ext || 'PNG', ar: s.ar || 1.8, wm: s.th }));
+    return up.concat(sm);
   }
-  function render(filter) {
-    release();
-    const q = (filter || '').trim().toLowerCase();
-    const list = listAll().filter(x => !q || x.t.toLowerCase().includes(q));
-    if (countEl) countEl.textContent = list.length;
-    grid.innerHTML = list.length ? list.map(x => `
-      <div class="lm-card">
-        <div class="lm-thumb">${x.th}</div>
-        <div class="lm-body">
-          <span class="lm-flag">Atualizado recentemente</span>
-          <b class="lm-title">${x.t}</b>
-          <span class="lm-tag">LOGOS</span>
-          <div class="lm-foot">
-            <span class="lm-size">${x.size}</span>
-            <span class="lm-dl">${svgIcon('download','ic ic-xs')} ${x.dl}</span>
-            ${x.id ? `<button class="lm-del" data-id="${x.id}" title="Remover">${svgIcon('trash','ic ic-xs')}</button>` : ''}
-          </div>
-        </div>
-      </div>`).join('') : `<div class="pf-loading">Nenhum logo encontrado.</div>`;
+  function itemHTML(x, i, h) {
+    const thumb = x.kind === 'img' ? `<img src="${x.url}" alt="${x.t}" loading="lazy">` : x.wm;
+    return `<div class="lg-item${x.id ? ' own' : ''}" data-i="${i}" title="${x.t}">
+      <div class="lg-thumb"${h ? ` style="height:${Math.round(h)}px"` : ''}>
+        ${thumb}
+        <span class="lg-ext">${x.ext}</span>
+        ${x.id ? `<button class="lg-del" data-id="${x.id}" title="Remover">${svgIcon('trash','ic ic-xs')}</button>` : ''}
+      </div>
+      <div class="lg-cap"><b>${x.t}</b><span>${x.size} · ${x.date}</span></div>
+    </div>`;
+  }
+  function render() {
+    if (!document.body.contains(grid)) return;
+    const q = (searchInp && searchInp.value || '').trim().toLowerCase();
+    items = listAll().filter(x => !q || x.t.toLowerCase().includes(q));
+    if (countEl) countEl.textContent = items.length;
+    if (!items.length) { grid.className = 'lg-grid'; grid.innerHTML = `<div class="pf-loading">Nenhum logo encontrado.</div>`; return; }
+    if (view === 'list') {
+      grid.className = 'lg-grid list';
+      grid.innerHTML = items.map((x, i) => itemHTML(x, i)).join('');
+    } else {
+      grid.className = 'masonry lg-grid';
+      const gap = 16, CAP = 52;
+      const cols = Math.max(1, Math.floor((grid.clientWidth + gap) / (size + gap)));
+      const colW = (grid.clientWidth - (cols - 1) * gap) / cols;
+      grid.innerHTML = '';
+      const colEls = [], heights = [];
+      for (let i = 0; i < cols; i++) { const c = document.createElement('div'); c.className = 'masonry-col'; grid.appendChild(c); colEls.push(c); heights.push(0); }
+      items.forEach((x, i) => {
+        let t = 0; for (let k = 1; k < cols; k++) if (heights[k] < heights[t] - 0.5) t = k;
+        const thumbH = colW / (x.ar || 1);
+        const w = document.createElement('div'); w.innerHTML = itemHTML(x, i, thumbH);
+        colEls[t].appendChild(w.firstElementChild); heights[t] += thumbH + CAP + gap;
+      });
+    }
+    renderIcons(grid);
   }
 
-  searchInp && searchInp.addEventListener('input', () => render(searchInp.value));
-  document.getElementById('blogos-go')?.addEventListener('click', () => render(searchInp ? searchInp.value : ''));
-  root && root.querySelectorAll('.fp-vb').forEach(b => b.addEventListener('click', () => {
-    root.querySelectorAll('.fp-vb').forEach(x => x.classList.remove('on'));
-    b.classList.add('on'); grid.classList.toggle('list', b.dataset.view === 'list'); Sound.click && Sound.click();
-  }));
-  grid.addEventListener('click', async e => {
-    const d = e.target.closest('.lm-del'); if (!d) return;
-    uploaded = uploaded.filter(r => r.id !== d.dataset.id);
-    try { await LogosDB.set(brand, uploaded); } catch (_) {}
-    Toast.info('Logo removido.'); render(searchInp ? searchInp.value : '');
+  // busca
+  searchInp && searchInp.addEventListener('input', render);
+  // densidade / visualização
+  document.getElementById('blogos-quality')?.addEventListener('click', e => {
+    const b = e.target.closest('[data-q]'); if (!b) return;
+    document.querySelectorAll('#blogos-quality [data-q]').forEach(x => x.classList.remove('on'));
+    b.classList.add('on'); size = +b.dataset.q; if (sizeInp) sizeInp.value = size; Sound.click && Sound.click(); render();
   });
+  sizeInp && sizeInp.addEventListener('input', () => {
+    size = +sizeInp.value;
+    document.querySelectorAll('#blogos-quality [data-q]').forEach(x => x.classList.toggle('on', +x.dataset.q === size));
+    render();
+  });
+  document.getElementById('blogos-view')?.addEventListener('click', e => {
+    const b = e.target.closest('[data-view]'); if (!b) return;
+    document.querySelectorAll('#blogos-view [data-view]').forEach(x => x.classList.remove('on'));
+    b.classList.add('on'); view = b.dataset.view; Sound.click && Sound.click(); render();
+  });
+  let rt; window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { if (view === 'masonry') render(); }, 120); });
+
+  // clique: abrir lightbox · remover (admin)
+  grid.addEventListener('click', async e => {
+    const del = e.target.closest('.lg-del');
+    if (del) { e.stopPropagation();
+      uploaded = uploaded.filter(r => r.id !== del.dataset.id);
+      try { await LogosDB.set(brand, uploaded); } catch (_) {}
+      Toast.info('Logo removido.'); render(); return;
+    }
+    const it = e.target.closest('.lg-item'); if (!it) return;
+    window.__openImg && window.__openImg(items, +it.dataset.i);
+  });
+
+  // admin: adicionar logo(s)
   document.getElementById('blogos-add')?.addEventListener('click', () => {
     const inp = document.createElement('input');
-    inp.type = 'file'; inp.accept = 'image/png,image/svg+xml,image/*'; inp.multiple = true;
+    inp.type = 'file'; inp.accept = 'image/png,image/svg+xml,image/jpeg,image/*'; inp.multiple = true;
     inp.onchange = async () => {
       const files = Array.from(inp.files || []); if (!files.length) return;
-      files.forEach((f, i) => uploaded.unshift({ id: 'lg' + Date.now() + '-' + i, title: f.name.replace(/\.[^.]+$/, ''), size: f.size, dl: 0, blob: f }));
+      for (let i = 0; i < files.length; i++) {
+        const f = files[i], ar = await imgAR(f);
+        uploaded.unshift({ id: 'lg' + Date.now() + '-' + i, title: f.name.replace(/\.[^.]+$/, ''),
+          size: f.size, ar, ext: (f.name.split('.').pop() || 'PNG').toUpperCase().slice(0, 4), date: dateBR(), blob: f });
+      }
       try { await LogosDB.set(brand, uploaded); Sound.success && Sound.success(); Toast.success(files.length + ' logo(s) adicionado(s)!'); }
       catch (_) { Toast.error('Não consegui salvar. Tente arquivos menores.'); }
-      render(searchInp ? searchInp.value : '');
+      render();
     };
     inp.click();
   });
 
-  render('');
+  render();
+}
+
+/* LIGHTBOX de imagem (galeria) — visual grande + metadados + baixar + navegação */
+function initImgModal() {
+  const bd = document.getElementById('modal-img'); if (!bd) return;
+  const canvas = document.getElementById('lbx-canvas');
+  const G = id => document.getElementById(id);
+  let list = [], idx = 0;
+  function show() {
+    const x = list[idx]; if (!x) return;
+    G('lbx-counter').textContent = (idx + 1) + ' de ' + list.length;
+    const fname = x.t + (x.ext ? ('.' + x.ext.toLowerCase()) : '');
+    G('lbx-name').textContent = fname;
+    G('lbx-file').textContent = fname;
+    G('lbx-type').textContent = x.ext || '—';
+    G('lbx-size').textContent = x.size || '—';
+    G('lbx-date').textContent = x.date || '—';
+    G('lbx-folder').textContent = x.folder || 'Logos';
+    canvas.innerHTML = x.kind === 'img' ? `<img src="${x.url}" alt="${x.t}">` : `<div class="lbx-wm">${x.wm}</div>`;
+    const dl = G('lbx-dl');
+    if (x.url) { dl.href = x.url; dl.download = fname; dl.style.display = ''; } else dl.style.display = 'none';
+    bd.classList.toggle('solo', list.length < 2);
+  }
+  const move = d => { if (!list.length) return; idx = (idx + d + list.length) % list.length; show(); };
+  G('lbx-prev')?.addEventListener('click', () => move(-1));
+  G('lbx-next')?.addEventListener('click', () => move(1));
+  document.addEventListener('keydown', e => {
+    if (!bd.classList.contains('open')) return;
+    if (e.key === 'ArrowLeft') move(-1); else if (e.key === 'ArrowRight') move(1);
+  });
+  window.__openImg = (arr, i) => { list = arr || []; idx = i || 0; show(); UI.openModal('modal-img'); };
 }
 
 /* visualizador de PDF (modal) — usa o leitor nativo do navegador via <iframe> */

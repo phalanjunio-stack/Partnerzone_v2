@@ -6,17 +6,17 @@
   <title>PartnerZone — Contourline</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/theme.css?v=spa30">
-  <link rel="stylesheet" href="css/app.css?v=spa30">
-  <link rel="stylesheet" href="css/effects.css?v=spa30">
-  <link rel="stylesheet" href="css/categoria.css?v=spa30">
-  <link rel="stylesheet" href="css/pasta.css?v=spa30">
-  <link rel="stylesheet" href="css/material.css?v=spa30">
-  <link rel="stylesheet" href="css/buscar.css?v=spa30">
-  <link rel="stylesheet" href="css/upload.css?v=spa30">
-  <link rel="stylesheet" href="css/sql.css?v=spa30">
-  <link rel="stylesheet" href="css/marca.css?v=spa30">
-  <link rel="stylesheet" href="css/splash.css?v=spa30">
+  <link rel="stylesheet" href="css/theme.css?v=spa32">
+  <link rel="stylesheet" href="css/app.css?v=spa32">
+  <link rel="stylesheet" href="css/effects.css?v=spa32">
+  <link rel="stylesheet" href="css/categoria.css?v=spa32">
+  <link rel="stylesheet" href="css/pasta.css?v=spa32">
+  <link rel="stylesheet" href="css/material.css?v=spa32">
+  <link rel="stylesheet" href="css/buscar.css?v=spa32">
+  <link rel="stylesheet" href="css/upload.css?v=spa32">
+  <link rel="stylesheet" href="css/sql.css?v=spa32">
+  <link rel="stylesheet" href="css/marca.css?v=spa32">
+  <link rel="stylesheet" href="css/splash.css?v=spa32">
   <script>document.documentElement.setAttribute('data-theme', localStorage.getItem('cl-theme') || 'dark');</script>
   <script src="js/core/splash.js"></script>
 </head>
@@ -271,6 +271,33 @@
     </div></div>
   </div>
 
+  <!-- ===================== LIGHTBOX de imagem (galeria de logos) ===================== -->
+  <div class="modal-bd lbx-bd" id="modal-img">
+    <div class="lbx">
+      <div class="lbx-head">
+        <span class="lbx-counter" id="lbx-counter">1 de 5</span>
+        <span class="lbx-name" id="lbx-name">arquivo.png</span>
+        <button class="x" data-close-modal><svg class="ic" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+      </div>
+      <div class="lbx-body">
+        <div class="lbx-stage">
+          <button class="lbx-nav prev" id="lbx-prev" title="Anterior"><svg class="ic" viewBox="0 0 24 24"><path d="m15 6-6 6 6 6"/></svg></button>
+          <div class="lbx-canvas" id="lbx-canvas"></div>
+          <button class="lbx-nav next" id="lbx-next" title="Próxima"><svg class="ic" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></button>
+        </div>
+        <aside class="lbx-side">
+          <div class="lbx-field"><label>Arquivo</label><b id="lbx-file">—</b></div>
+          <div class="lbx-field"><label>Tipo</label><span id="lbx-type">—</span></div>
+          <div class="lbx-field"><label>Tamanho</label><span id="lbx-size">—</span></div>
+          <div class="lbx-field"><label>Modificado</label><span id="lbx-date">—</span></div>
+          <div class="lbx-field"><label>Pasta</label><span id="lbx-folder">Logos</span></div>
+          <div class="lbx-spacer"></div>
+          <a class="btn" id="lbx-dl" download><i data-icon="download" data-cls="ic ic-sm"></i> Baixar</a>
+        </aside>
+      </div>
+    </div>
+  </div>
+
   <!-- ===================== COMMAND PALETTE (⌘K) ===================== -->
   <div class="cmdk-bd" id="cmdk">
     <div class="cmdk">
@@ -284,11 +311,11 @@
     </div>
   </div>
 
-  <script src="js/core/sound.js?v=spa30"></script>
-  <script src="js/core/theme.js?v=spa30"></script>
-  <script src="js/components/ui.js?v=spa30"></script>
-  <script src="js/app.js?v=spa30"></script>
-  <script src="js/core/db.js?v=spa30"></script>
-  <script src="js/views.js?v=spa30"></script>
+  <script src="js/core/sound.js?v=spa32"></script>
+  <script src="js/core/theme.js?v=spa32"></script>
+  <script src="js/components/ui.js?v=spa32"></script>
+  <script src="js/app.js?v=spa32"></script>
+  <script src="js/core/db.js?v=spa32"></script>
+  <script src="js/views.js?v=spa32"></script>
 </body>
 </html>

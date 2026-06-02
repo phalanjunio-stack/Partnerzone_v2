@@ -321,11 +321,11 @@
         ? `<div class="lm-wm sym" style="--lc:${COR}">${brand[0]}</div>`
         : `<div class="lm-wm ${v}" style="--lc:${COR}"><span class="lm-word">${brand.toLowerCase()}</span><span class="lm-by">by contourline</span></div>`;
       const SAMPLES = [
-        { t:`Favicon ${brand}`,                  size:'12.7 KB',  dl:2, th: wm('sym')   },
-        { t:`${brand} by Contourline`,           size:'776.1 KB', dl:2, th: wm('dark')  },
-        { t:`${brand} by Contourline`,           size:'39.5 KB',  dl:2, th: wm('color') },
-        { t:`${brand} by Contourline Branca`,    size:'33.2 KB',  dl:2, th: wm('white') },
-        { t:`${brand} by Contourline`,           size:'120 KB',   dl:1, th: wm('dark')  },
+        { t:`Favicon ${brand}`,               size:'12.7 KB',  date:'01/06/2026', ext:'PNG', ar:1,   th: wm('sym')   },
+        { t:`${brand} by Contourline`,        size:'776.1 KB', date:'01/06/2026', ext:'PNG', ar:2.7, th: wm('dark')  },
+        { t:`${brand} by Contourline`,        size:'39.5 KB',  date:'01/06/2026', ext:'PNG', ar:2.7, th: wm('color') },
+        { t:`${brand} by Contourline Branca`, size:'33.2 KB',  date:'01/06/2026', ext:'PNG', ar:2.4, th: wm('white') },
+        { t:`${brand} by Contourline`,        size:'120 KB',   date:'01/06/2026', ext:'SVG', ar:2.7, th: wm('dark')  },
       ];
       return {
         title: 'Logos ' + brand,
@@ -339,17 +339,25 @@
           <div class="fp-rule"></div>
           <div class="fp-search">
             <div class="search-field"><i data-icon="search"></i><input id="blogos-search" placeholder="Buscar em Logos..."></div>
-            <button class="btn" id="blogos-go">Buscar</button>
+            <button class="btn fp-add" id="blogos-add"><i data-icon="upload" data-cls="ic ic-sm"></i> Adicionar logo</button>
           </div>
-          <div class="fp-toolbar">
-            <div class="fp-count">MATERIAIS NESTA PASTA <b id="blogos-count">${SAMPLES.length}</b></div>
-            <div class="fp-views">
-              <button class="fp-vb on" data-view="grid" title="Grade">${svgIcon('grid','ic ic-sm')}</button>
-              <button class="fp-vb" data-view="list" title="Lista">${svgIcon('list','ic ic-sm')}</button>
-              <button class="btn ghost fp-add" id="blogos-add"><i data-icon="upload" data-cls="ic ic-sm"></i> Adicionar logo</button>
+          <div class="lib-toolbar">
+            <span class="lib-rc"><b id="blogos-count">${SAMPLES.length}</b> logos</span>
+            <div class="spacer"></div>
+            <div class="lib-density">
+              <div class="seg vseg" id="blogos-view">
+                <button class="on" data-view="masonry" title="Masonry"><i data-icon="grid" data-cls="ic ic-sm"></i></button>
+                <button data-view="list" title="Lista"><i data-icon="list" data-cls="ic ic-sm"></i></button>
+              </div>
+              <div class="seg qseg" id="blogos-quality" title="Qualidade dos thumbs conforme a conexão — Rápido = leve, HD = cheio">
+                <button class="on" data-q="200"><i data-icon="zap" data-cls="ic ic-sm"></i>Rápido</button>
+                <button data-q="270">Normal</button>
+                <button data-q="360">HD</button>
+              </div>
+              <input type="range" class="dslider" id="blogos-size" min="170" max="420" step="2" value="240" title="Tamanho dos cards">
             </div>
           </div>
-          <div class="lm-grid" id="brand-logos" data-brand="${brand}"><div class="pf-loading">Carregando logos…</div></div>
+          <div class="masonry lg-grid" id="brand-logos" data-brand="${brand}"><div class="pf-loading">Carregando logos…</div></div>
         </div>`,
         init: () => { window.initBrandLogos && window.initBrandLogos(brand, SAMPLES); },
       };

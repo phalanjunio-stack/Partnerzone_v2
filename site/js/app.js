@@ -1103,6 +1103,17 @@ const ArtesDB = (() => {
 async function initBrandHub(brand) {
   const root = document.querySelector('.brand-page'); if (!root) return;
   const cor = root.dataset.cor || '#2f7ff2';
+  const logoInit = root.dataset.logo || (brand[0] || 'C');
+  const tag = root.dataset.tag || 'identidade da marca';
+  const SAMPLE_LOOKS = [
+    { id: 'principal', name: 'Logo principal', cls: '', ar: 2.5 },
+    { id: 'branca', name: 'Logo branca', cls: 'white', ar: 2.5, darkBg: true },
+    { id: 'azul', name: 'Logo azul', cls: 'blue', ar: 2.5 },
+    { id: 'simbolo', name: 'Símbolo isolado', cls: 'sym', ar: 1.25 },
+    { id: 'horizontal', name: 'Versão horizontal', cls: '', ar: 3 },
+    { id: 'vertical', name: 'Versão vertical', cls: '', ar: 1.7 },
+  ];
+  const lockupHTML = cls => `<div class="blogo ${cls}" style="--bcor:${cor}"><span class="bl-c">${logoInit}</span><span class="bl-word">${(brand || '').toLowerCase()}<small>${tag}</small></span></div>`;
   const logosEl = document.getElementById('bh-logos');
   const colorsEl = document.getElementById('bh-colors');
   const appsEl = document.getElementById('bh-apps');
@@ -1154,29 +1165,44 @@ async function initBrandHub(brand) {
     renderColors(); renderApps(); Sound.click && Sound.click();
   }
   function hasHidden() { try { return (JSON.parse(localStorage.getItem('cl-logohide:' + brand)) || []).length > 0; } catch (_) { return false; } }
-  function logoCardHTML(r, url) {
-    const bg = r.darkBg ? '#0f1b30' : '#f4f6fb';
-    return `<div class="logo-card up-logo${'up:' + r.id === sel ? ' sel' : ''}" data-look="up:${r.id}">
-      <div class="logo-box img" style="background:${bg}"><img src="${url}" alt="${r.title}"></div>
-      <div class="logo-meta"><div><b>${r.title}</b><span>${r.ext || 'PNG'} · ${fmtBytes(r.size)}</span></div>
-        <button class="logo-del" title="Apagar (admin)">${svgIcon('trash','ic ic-sm')}</button>
-        <button class="logo-dl">${svgIcon('download','ic ic-sm')}</button></div></div>`;
-  }
+  // MASONRY: cada card acompanha a proporção real do logo (mostra inteiro, sem cortar)
   async function renderLogos() {
-    logosEl.querySelectorAll('.up-logo, .bh-logos-empty').forEach(n => n.remove());
     lurls.forEach(u => URL.revokeObjectURL(u)); lurls = [];
     try { uploadedLogos = (await LogosDB.get(brand)) || []; } catch (_) { uploadedLogos = []; }
-    const html = uploadedLogos.map(r => { const u = URL.createObjectURL(r.blob); lurls.push(u); return logoCardHTML(r, u); }).join('');
-    if (html) logosEl.insertAdjacentHTML('afterbegin', html);
-    if (!logosEl.querySelector('.logo-card')) {
-      logosEl.insertAdjacentHTML('beforeend', `<div class="bh-logos-empty">
-        <span class="pf-empty-ic">${svgIcon('upload','ic')}</span><b>Nenhum logo aqui</b>
+    let hidden = []; try { hidden = JSON.parse(localStorage.getItem('cl-logohide:' + brand)) || []; } catch (_) {}
+    const list = [];
+    uploadedLogos.forEach(r => { const u = URL.createObjectURL(r.blob); lurls.push(u);
+      list.push({ look: 'up:' + r.id, name: r.title, meta: (r.ext || 'PNG') + ' · ' + fmtBytes(r.size), ar: r.ar || 1.4, darkBg: !!r.darkBg, thumb: `<img src="${u}" alt="${r.title}">`, own: true }); });
+    SAMPLE_LOOKS.filter(s => !hidden.includes(s.id)).forEach(s =>
+      list.push({ look: s.id, name: s.name, meta: 'PNG · SVG · PDF', ar: s.ar, darkBg: !!s.darkBg, thumb: lockupHTML(s.cls), own: false }));
+    if (!list.length) {
+      logosEl.className = 'logo-grid';
+      logosEl.innerHTML = `<div class="bh-logos-empty"><span class="pf-empty-ic">${svgIcon('upload','ic')}</span><b>Nenhum logo aqui</b>
         <span>Solte os logos da marca — a paleta de cores é gerada automaticamente de cada um.</span>
-        <div class="bh-empty-btns"><button class="btn" id="bh-empty-add">${svgIcon('upload','ic ic-sm')} Adicionar logo</button>${hasHidden() ? `<button class="btn ghost" id="bh-restore">Restaurar padrões</button>` : ''}</div></div>`);
+        <div class="bh-empty-btns"><button class="btn" id="bh-empty-add">${svgIcon('upload','ic ic-sm')} Adicionar logo</button>${hasHidden() ? `<button class="btn ghost" id="bh-restore">Restaurar padrões</button>` : ''}</div></div>`;
+      renderIcons(logosEl); return;
     }
+    logosEl.className = 'logo-grid masonry';
+    const gap = 12, CAP = 48, W = logosEl.clientWidth || 340;
+    const cols = Math.max(1, Math.min(2, Math.floor((W + gap) / (168 + gap))));
+    const colW = (W - (cols - 1) * gap) / cols;
+    logosEl.innerHTML = '';
+    const colEls = [], heights = [];
+    for (let i = 0; i < cols; i++) { const c = document.createElement('div'); c.className = 'masonry-col'; logosEl.appendChild(c); colEls.push(c); heights.push(0); }
+    list.forEach(x => {
+      let t = 0; for (let k = 1; k < cols; k++) if (heights[k] < heights[t] - 0.5) t = k;
+      const h = Math.max(84, Math.min(colW / (x.ar || 1.6), 230));
+      const wrap = document.createElement('div');
+      wrap.innerHTML = `<div class="logo-card${x.own ? ' up-logo' : ''}${x.look === sel ? ' sel' : ''}" data-look="${x.look}">
+        <div class="logo-box${x.own ? ' img' : ''}" style="height:${Math.round(h)}px${x.darkBg ? ';background:#0f1b30' : ''}">${x.thumb}</div>
+        <div class="logo-meta"><div><b>${x.name}</b><span>${x.meta}</span></div>
+          <button class="logo-del" title="Apagar (admin)">${svgIcon('trash','ic ic-sm')}</button>
+          <button class="logo-dl">${svgIcon('download','ic ic-sm')}</button></div></div>`;
+      colEls[t].appendChild(wrap.firstElementChild); heights[t] += h + CAP + gap;
+    });
     renderIcons(logosEl);
-    logosEl.querySelectorAll('.logo-card').forEach(c => c.classList.toggle('sel', c.dataset.look === sel));
   }
+  let bhrt; window.addEventListener('resize', () => { clearTimeout(bhrt); bhrt = setTimeout(() => { if (document.body.contains(logosEl)) renderLogos(); }, 150); });
 
   // LOGOS: clicar = selecionar · apagar (admin) · adicionar/restaurar (vazio) · download = aviso
   logosEl.addEventListener('click', async e => {

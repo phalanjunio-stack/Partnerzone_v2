@@ -238,7 +238,7 @@
         title: 'Marca ' + brand,
         crumbs: `<i data-icon="building" data-cls="ic ic-sm"></i><a href="#/">PartnerZone</a><span>›</span><a href="#/marca/Contourline">Institucional</a><span>›</span><span class="here">${brand}</span>`,
         html: `
-        <div class="brand-page" data-brand="${brand}" data-cor="${info.cor}">
+        <div class="brand-page" data-brand="${brand}" data-cor="${info.cor}" data-logo="${info.logo}" data-tag="${info.tag}">
           <div class="brand-hero" data-enter>
             <div class="bh-main">
               <span class="bh-badge">CENTRAL DA MARCA</span>
@@ -273,9 +273,7 @@
           <div class="brand-cols">
             <section class="bcol" data-enter>
               <div class="bcol-head"><h2>Logos oficiais</h2><div class="bh-head-actions"><button class="bh-genbtn" id="bh-addlogo">${svgIcon('upload','ic ic-sm')} Adicionar logo</button><a class="link-more" href="${logosHref}">Ver todos ${svgIcon('arrowR','ic ic-sm')}</a></div></div>
-              <div class="logo-grid" id="bh-logos">
-                ${LOGOS.map((l, i) => `<div class="logo-card ${l[1]}${i === 0 ? ' sel' : ''}" data-look="${l[2]}"><div class="logo-box">${blogo(l[1] === 'sym' ? 'sym' : l[1] === 'white' ? 'white' : l[1] === 'blue' ? 'blue' : '')}</div><div class="logo-meta"><div><b>${l[0]}</b><span>PNG · SVG · PDF</span></div><button class="logo-del" title="Apagar (admin)">${svgIcon('trash','ic ic-sm')}</button><button class="logo-dl">${svgIcon('download','ic ic-sm')}</button></div></div>`).join('')}
-              </div>
+              <div class="logo-grid" id="bh-logos"><div class="pf-loading">Carregando logos…</div></div>
               <div class="bh-note">${svgIcon('zap','ic ic-xs')} Clique num logo pra ver as <b>cores</b> e as <b>artes</b> daquela versão. (Admin pode apagar e gerar a paleta do logo.)</div>
             </section>
 

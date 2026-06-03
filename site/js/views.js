@@ -273,23 +273,20 @@
           <div class="brand-cols">
             <section class="bcol" data-enter>
               <div class="bcol-head"><h2>Logos oficiais</h2><a class="link-more" href="${logosHref}">Ver todos ${svgIcon('arrowR','ic ic-sm')}</a></div>
-              <div class="logo-grid">
+              <div class="logo-grid" id="bh-logos">
                 ${LOGOS.map(l => `<div class="logo-card ${l[1]}"><div class="logo-box">${blogo(l[1] === 'sym' ? 'sym' : l[1] === 'white' ? 'white' : l[1] === 'blue' ? 'blue' : '')}</div><div class="logo-meta"><div><b>${l[0]}</b><span>PNG · SVG · PDF</span></div><button class="logo-dl">${svgIcon('download','ic ic-sm')}</button></div></div>`).join('')}
               </div>
+              <div class="bh-note">${svgIcon('zap','ic ic-xs')} Clique num logo (ou em "Gerar do logo") pra criar a paleta de cores automaticamente.</div>
             </section>
 
             <section class="bcol" data-enter>
-              <div class="bcol-head"><h2>Cores oficiais</h2><a class="link-more">Ver todas ${svgIcon('arrowR','ic ic-sm')}</a></div>
-              <div class="color-grid">
-                ${COLORS.map(c => `<div class="color-card"><span class="color-sw" style="background:${c[1]}"></span><div class="color-meta"><b>${c[0]}</b><span>${c[1]}</span></div><button class="color-cp" title="Copiar">${svgIcon('file','ic ic-sm')}</button></div>`).join('')}
-              </div>
+              <div class="bcol-head"><h2>Cores oficiais</h2><button class="bh-genbtn" id="bh-genpal">${svgIcon('image','ic ic-sm')} Gerar do logo</button></div>
+              <div class="color-grid" id="bh-colors"></div>
             </section>
 
             <section class="bcol" data-enter>
-              <div class="bcol-head"><h2>Aplicações em destaque</h2><a class="link-more">Ver todas ${svgIcon('arrowR','ic ic-sm')}</a></div>
-              <div class="app-grid">
-                ${APPS.map(a => `<div class="app-card"><div class="app-thumb">${svgIcon('image','ic ph')}</div><b>${a[0]}</b><span>${a[1]}</span></div>`).join('')}
-              </div>
+              <div class="bcol-head"><h2>Aplicações em destaque</h2><button class="bh-genbtn" id="bh-addart">${svgIcon('plus','ic ic-sm')} Adicionar arte</button></div>
+              <div class="app-grid" id="bh-apps"></div>
             </section>
           </div>
 
@@ -308,7 +305,7 @@
             </section>
           </div>
         </div>`,
-        init: () => { window.initBrandPortfolio && window.initBrandPortfolio(brand); },
+        init: () => { window.initBrandPortfolio && window.initBrandPortfolio(brand); window.initBrandHub && window.initBrandHub(brand); },
       };
     },
 

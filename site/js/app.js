@@ -1041,6 +1041,141 @@ async function initFavoritos() {
   }
 }
 
+/* ---- PALETA AUTOMÁTICA: extrai as cores dominantes de um logo ---- */
+function rgbHex(r, g, b) { return '#' + [r, g, b].map(v => v.toString(16).padStart(2, '0')).join('').toUpperCase(); }
+function colorName(r, g, b) {
+  const R = r / 255, G = g / 255, B = b / 255, mx = Math.max(R, G, B), mn = Math.min(R, G, B), l = (mx + mn) / 2, dd = mx - mn;
+  if (dd < 0.07) { if (l > 0.93) return 'Branco'; if (l < 0.1) return 'Preto'; if (l > 0.6) return 'Cinza claro'; if (l < 0.3) return 'Cinza escuro'; return 'Cinza'; }
+  let h; if (mx === R) h = ((G - B) / dd) % 6; else if (mx === G) h = (B - R) / dd + 2; else h = (R - G) / dd + 4;
+  h *= 60; if (h < 0) h += 360;
+  const hue = (h < 15 || h >= 345) ? 'Vermelho' : h < 45 ? 'Laranja' : h < 70 ? 'Amarelo' : h < 170 ? 'Verde' : h < 200 ? 'Ciano' : h < 255 ? 'Azul' : h < 290 ? 'Roxo' : 'Rosa';
+  return hue + (l > 0.66 ? ' claro' : l < 0.34 ? ' escuro' : '');
+}
+function extractPalette(src, n = 8) {
+  return new Promise(res => {
+    const im = new Image();
+    im.onload = () => {
+      const S = 72, c = document.createElement('canvas'); c.width = S; c.height = S;
+      const x = c.getContext('2d'); x.drawImage(im, 0, 0, S, S);
+      let d; try { d = x.getImageData(0, 0, S, S).data; } catch (e) { return res([]); }
+      const buckets = new Map();
+      for (let i = 0; i < d.length; i += 4) {
+        if (d[i + 3] < 60) continue;                         // ignora transparente
+        const r = d[i], g = d[i + 1], b = d[i + 2];
+        const key = (r >> 4) + ',' + (g >> 4) + ',' + (b >> 4);
+        let e = buckets.get(key); if (!e) { e = { n: 0, r: 0, g: 0, b: 0 }; buckets.set(key, e); }
+        e.n++; e.r += r; e.g += g; e.b += b;
+      }
+      let arr = [...buckets.values()].map(e => ({ n: e.n, r: Math.round(e.r / e.n), g: Math.round(e.g / e.n), b: Math.round(e.b / e.n) })).sort((a, b) => b.n - a.n);
+      const out = [], dist = (a, b) => Math.abs(a.r - b.r) + Math.abs(a.g - b.g) + Math.abs(a.b - b.b);
+      for (const cand of arr) { if (out.length >= n) break; if (out.every(o => dist(o, cand) > 44)) out.push(cand); }
+      res(out.map(o => ({ hex: rgbHex(o.r, o.g, o.b), name: colorName(o.r, o.g, o.b), rgb: `rgb(${o.r}, ${o.g}, ${o.b})` })));
+    };
+    im.onerror = () => res([]); im.src = src;
+  });
+}
+function imgDim(file) {
+  return new Promise(res => { const u = URL.createObjectURL(file), im = new Image();
+    im.onload = () => { const s = im.naturalWidth + '×' + im.naturalHeight; URL.revokeObjectURL(u); res(s); };
+    im.onerror = () => { URL.revokeObjectURL(u); res(''); }; im.src = u; });
+}
+
+/* artes (aplicações) por marca — IndexedDB */
+const ArtesDB = (() => {
+  let dbp = null;
+  function open() { if (dbp) return dbp;
+    dbp = new Promise((res, rej) => { const r = indexedDB.open('cl-artes', 1);
+      r.onupgradeneeded = () => { if (!r.result.objectStoreNames.contains('artes')) r.result.createObjectStore('artes'); };
+      r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
+    return dbp;
+  }
+  const tx = (mode, fn) => open().then(db => new Promise((res, rej) => {
+    const t = db.transaction('artes', mode), st = t.objectStore('artes'); const out = fn(st);
+    t.oncomplete = () => res(out && typeof out === 'object' && 'result' in out ? out.result : out); t.onerror = () => rej(t.error);
+  }));
+  return { get: brand => tx('readonly', st => st.get(brand)), set: (brand, arr) => tx('readwrite', st => st.put(arr, brand)) };
+})();
+
+/* CENTRAL DA MARCA — paleta automática (do logo) + cores + artes do admin */
+async function initBrandHub(brand) {
+  const root = document.querySelector('.brand-page'); if (!root) return;
+  const colorsEl = document.getElementById('bh-colors');
+  const appsEl = document.getElementById('bh-apps');
+
+  /* ----- CORES: paleta gerada automaticamente do logo ----- */
+  const DEFAULT_PAL = [
+    { hex: '#24336E', name: 'Azul Contourline' }, { hex: '#1B2655', name: 'Azul escuro' },
+    { hex: '#3B82F6', name: 'Azul' }, { hex: '#E6ECFF', name: 'Azul claro' },
+    { hex: '#6B7280', name: 'Cinza' }, { hex: '#1F2937', name: 'Cinza escuro' },
+    { hex: '#F4F5F7', name: 'Cinza claro' }, { hex: '#FFFFFF', name: 'Branco' },
+  ];
+  const palKey = 'cl-pal:' + brand;
+  function loadPal() { try { const p = JSON.parse(localStorage.getItem(palKey)); if (p && p.length) return p; } catch (_) {} return DEFAULT_PAL; }
+  function renderColors() {
+    if (!colorsEl) return;
+    const pal = loadPal(), auto = !!localStorage.getItem(palKey);
+    colorsEl.innerHTML = pal.map(c =>
+      `<div class="color-card"><span class="color-sw" style="background:${c.hex}"></span><div class="color-meta"><b>${c.name || c.hex}</b><span>${c.hex}</span></div><button class="color-cp" data-hex="${c.hex}" title="Copiar HEX">${svgIcon('file','ic ic-sm')}</button></div>`).join('')
+      + (auto ? `<button class="bh-resetpal" id="bh-resetpal">${svgIcon('trash','ic ic-xs')} Voltar pra paleta padrão</button>` : '');
+    renderIcons(colorsEl);
+  }
+  async function genFromFile(file) {
+    if (!/^image\//.test(file.type)) { Toast.error('Selecione uma imagem (logo).'); return; }
+    const t = Toast.loading('Lendo as cores do logo…');
+    const url = URL.createObjectURL(file); const pal = await extractPalette(url, 8); URL.revokeObjectURL(url);
+    if (!pal.length) { t.update({ type: 'error', msg: 'Não consegui ler as cores.', duration: 3000 }); return; }
+    try { localStorage.setItem(palKey, JSON.stringify(pal)); } catch (_) {}
+    Sound.success && Sound.success(); t.update({ type: 'success', msg: 'Paleta gerada do logo — ' + pal.length + ' cores!', duration: 3000 });
+    renderColors();
+  }
+  const pickLogo = () => { const inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'image/*';
+    inp.onchange = () => { const f = inp.files && inp.files[0]; if (f) genFromFile(f); }; inp.click(); };
+  document.getElementById('bh-genpal')?.addEventListener('click', pickLogo);
+  document.getElementById('bh-logos')?.addEventListener('click', e => { if (e.target.closest('.logo-card')) pickLogo(); });
+  colorsEl?.addEventListener('click', e => {
+    const cp = e.target.closest('.color-cp');
+    if (cp) { const hex = cp.dataset.hex; navigator.clipboard && navigator.clipboard.writeText(hex).then(() => Toast.success('Copiado: ' + hex)).catch(() => {}); return; }
+    if (e.target.closest('#bh-resetpal')) { localStorage.removeItem(palKey); Toast.info('Voltou pra paleta padrão.'); renderColors(); }
+  });
+  renderColors();
+
+  /* ----- APLICAÇÕES: artes que o admin sobe ----- */
+  const DEFAULT_APPS = [['Post institucional','1080×1080'],['Story institucional','1080×1920'],['Capa apresentação','1920×1080'],['Assinatura de e-mail','PNG'],['Papel timbrado','A4'],['Template proposta','A4']];
+  let artes = []; try { artes = (await ArtesDB.get(brand)) || []; } catch (_) {}
+  let aurls = [];
+  function renderApps() {
+    if (!appsEl) return;
+    aurls.forEach(u => URL.revokeObjectURL(u)); aurls = [];
+    if (artes.length) {
+      appsEl.innerHTML = artes.map((a, i) => { const u = URL.createObjectURL(a.blob); aurls.push(u);
+        return `<div class="app-card own" data-i="${i}"><div class="app-thumb img"><img src="${u}" alt="${a.title}"><button class="app-del" data-id="${a.id}" title="Remover">${svgIcon('trash','ic ic-xs')}</button></div><b>${a.title}</b><span>${a.dim || fmtBytes(a.size)}</span></div>`;
+      }).join('');
+    } else {
+      appsEl.innerHTML = DEFAULT_APPS.map(a => `<div class="app-card"><div class="app-thumb">${svgIcon('image','ic ph')}</div><b>${a[0]}</b><span>${a[1]}</span></div>`).join('');
+    }
+    renderIcons(appsEl);
+  }
+  document.getElementById('bh-addart')?.addEventListener('click', () => {
+    const inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'image/*'; inp.multiple = true;
+    inp.onchange = async () => { const files = [...(inp.files || [])]; if (!files.length) return;
+      for (let i = 0; i < files.length; i++) { const f = files[i], dim = await imgDim(f);
+        artes.unshift({ id: 'art' + Date.now() + '-' + i, title: f.name.replace(/\.[^.]+$/, ''), ext: (f.name.split('.').pop() || 'PNG').toUpperCase().slice(0, 4), size: f.size, dim, blob: f }); }
+      try { await ArtesDB.set(brand, artes); Sound.success && Sound.success(); Toast.success(files.length + ' arte(s) adicionada(s)!'); }
+      catch (_) { Toast.error('Não consegui salvar. Tente arquivos menores.'); }
+      renderApps();
+    }; inp.click();
+  });
+  appsEl?.addEventListener('click', async e => {
+    const del = e.target.closest('.app-del');
+    if (del) { e.stopPropagation(); artes = artes.filter(a => a.id !== del.dataset.id); try { await ArtesDB.set(brand, artes); } catch (_) {} Toast.info('Arte removida.'); renderApps(); return; }
+    const card = e.target.closest('.app-card.own'); if (card) { const a = artes[+card.dataset.i]; if (a) {
+      const u = URL.createObjectURL(a.blob); aurls.push(u);
+      window.__openImg && window.__openImg([{ kind: 'img', t: a.title, title: a.title, ext: a.ext || 'PNG', size: fmtBytes(a.size), date: a.dim || '', folder: 'Aplicações', url: u, blob: a.blob, brand, darkBg: false }], 0);
+    } }
+  });
+  renderApps();
+}
+
 /* LIGHTBOX de imagem (galeria) — visual grande + metadados + baixar + navegação */
 function initImgModal() {
   const bd = document.getElementById('modal-img'); if (!bd) return;

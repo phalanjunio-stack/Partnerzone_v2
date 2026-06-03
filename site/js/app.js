@@ -1,7 +1,7 @@
 /* ============================================================
    APP — ícones (traçado), dados de exemplo e render da Início
    ============================================================ */
-const BUILD = 'spa48';
+const BUILD = 'spa50';
 try { console.log('%cPartnerZone • build ' + BUILD, 'background:#2f7ff2;color:#fff;padding:2px 8px;border-radius:4px;font-weight:700'); } catch (_) {}
 
 /* ---- Ícones (todos outline / currentColor) ---- */
@@ -1082,6 +1082,54 @@ function imgDim(file) {
   return new Promise(res => { const u = URL.createObjectURL(file), im = new Image();
     im.onload = () => { const s = im.naturalWidth + '×' + im.naturalHeight; URL.revokeObjectURL(u); res(s); };
     im.onerror = () => { URL.revokeObjectURL(u); res(''); }; im.src = u; });
+}
+
+/* RECORTE: detecta a cor do FUNDO pelos 4 cantos e remove ela (→ transparente),
+   com borda suave + autocrop. Funciona com fundo navy, branco, cinza... */
+const _cutCache = {};
+function cutoutBg(src) {
+  if (_cutCache[src]) return Promise.resolve(_cutCache[src]);
+  return new Promise(res => {
+    const im = new Image();
+    im.onload = () => {
+      const W = im.naturalWidth, H = im.naturalHeight;
+      const c = document.createElement('canvas'); c.width = W; c.height = H;
+      const x = c.getContext('2d'); x.drawImage(im, 0, 0);
+      let d; try { d = x.getImageData(0, 0, W, H); } catch (e) { return res(src); }
+      const p = d.data;
+      const samp = (sx, sy) => { let r = 0, g = 0, b = 0, n = 0; for (let yy = sy; yy < sy + 8; yy++) for (let xx = sx; xx < sx + 8; xx++) { const i = (yy * W + xx) * 4; r += p[i]; g += p[i + 1]; b += p[i + 2]; n++; } return [r / n, g / n, b / n]; };
+      const cs = [samp(0, 0), samp(W - 8, 0), samp(0, H - 8), samp(W - 8, H - 8)];
+      const bg = [0, 1, 2].map(k => cs.reduce((a, c) => a + c[k], 0) / 4);
+      const T0 = 56, T1 = 100;   // <=T0 some · T0..T1 desbota (borda suave)
+      for (let i = 0; i < p.length; i += 4) {
+        const dist = Math.abs(p[i] - bg[0]) + Math.abs(p[i + 1] - bg[1]) + Math.abs(p[i + 2] - bg[2]);
+        if (dist <= T0) p[i + 3] = 0;
+        else if (dist < T1) { const a = Math.round(255 * (dist - T0) / (T1 - T0)); if (a < p[i + 3]) p[i + 3] = a; }
+      }
+      x.putImageData(d, 0, 0);
+      // autocrop ao conteúdo opaco
+      let x0 = W, y0 = H, x1 = 0, y1 = 0, found = false;
+      for (let yy = 0; yy < H; yy++) for (let xx = 0; xx < W; xx++) {
+        if (p[(yy * W + xx) * 4 + 3] > 30) { found = true; if (xx < x0) x0 = xx; if (xx > x1) x1 = xx; if (yy < y0) y0 = yy; if (yy > y1) y1 = yy; }
+      }
+      if (!found) return res(src);
+      const pad = Math.round(Math.min(W, H) * 0.02);
+      x0 = Math.max(0, x0 - pad); y0 = Math.max(0, y0 - pad); x1 = Math.min(W - 1, x1 + pad); y1 = Math.min(H - 1, y1 + pad);
+      const cw = x1 - x0 + 1, ch = y1 - y0 + 1;
+      const cc = document.createElement('canvas'); cc.width = cw; cc.height = ch;
+      cc.getContext('2d').putImageData(x.getImageData(x0, y0, cw, ch), 0, 0);
+      const out = cc.toDataURL('image/png');
+      _cutCache[src] = out; res(out);
+    };
+    im.onerror = () => res(src);
+    im.src = src;
+  });
+}
+function initCatHero() {
+  const wrap = document.querySelector('.cat-hero-img'); if (!wrap) return;
+  const img = wrap.querySelector('img'); if (!img) return;
+  const src = img.getAttribute('src'); if (!src) return;
+  cutoutBg(src).then(out => { if (out && out !== src) { img.src = out; wrap.classList.add('cut'); } });
 }
 
 /* artes (aplicações) por marca — IndexedDB */

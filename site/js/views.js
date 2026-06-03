@@ -508,6 +508,7 @@
               <div class="lib-top"><div class="lib-folder">${ic('folder')}</div><span class="chev">${ic('chevR','ic ic-sm')}</span></div>
               <div><h3>${f.name}</h3><span>${f.count} materiais</span></div>
             </a>`).join('');
+          window.initCatHero && window.initCatHero();   // recorta o fundo branco da foto do equipamento
         },
       };
     },

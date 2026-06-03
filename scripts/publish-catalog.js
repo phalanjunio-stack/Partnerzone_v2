@@ -21,6 +21,7 @@ const SRC =
   process.env.CATALOG_SRC ||
   "C:\\Users\\Contourline\\Documents\\sitelocal\\data\\catalog.json";
 const NO_PUSH = process.argv.includes("--no-push");
+const FORCE = process.argv.includes("--force");
 
 const die = (m) => { console.error("✗ " + m); process.exit(1); };
 
@@ -36,6 +37,15 @@ if (!cat || typeof cat !== "object") die("conteúdo não é um objeto JSON.");
 if (!(cat.schemaVersion >= 1)) die("schemaVersion ausente ou < 1. O site só ativa schemaVersion>=1. Abortado (nada publicado).");
 if (!Array.isArray(cat.equipamentos) || !cat.equipamentos.length) die("sem equipamentos[] — nada pra publicar.");
 const nMat = Array.isArray(cat.materials) ? cat.materials.length : 0;
+
+// trava ANTI-INTERIM: não publica urls de rede local nem versão muito incompleta (--force ignora)
+const mats = Array.isArray(cat.materials) ? cat.materials : [];
+if (mats.length && !FORCE) {
+  const lan = mats.filter(m => m.url && /localhost|127\.0\.0\.1|\.local|:\/\/(?:10\.|192\.168\.|172\.(?:1[6-9]|2\d|3[01])\.)/i.test(m.url));
+  const vazio = mats.filter(m => !m.url).length;
+  if (lan.length) die(`${lan.length} materiais com url de REDE LOCAL (ex.: ${lan[0].url}).\n  Parece a versão INTERIM — esses links não abrem no site público.\n  Publique só a versão final (liberados + urls reais). (--force ignora)`);
+  if (vazio > mats.length * 0.3) die(`${vazio}/${mats.length} materiais SEM url — versão incompleta? (--force ignora)`);
+}
 
 // copia pro site
 fs.mkdirSync(path.dirname(DEST), { recursive: true });

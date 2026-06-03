@@ -40,6 +40,17 @@
 
 ## Log (mais recente no topo)
 
+### 2026-06-03 · 🟧 catalog.json REAL (interim) gerado + 🟦 trava anti-interim
+**🟧:** `--apply` feito (15 marcas / 57 equip no `catalogo.db`). Gerador lê do banco →
+`sitelocal\data\catalog.json` REAL, `schemaVersion:1`: 11 marcas, 45 equip, **12.197 materiais**,
+slugs canônicos (sem "?"). ⚠️ **NÃO publicar ainda** — sem filtro `publicar_site` (vem tudo) + urls de
+**LAN** (não abrem no site público). Falta: gravar `publicar_site` + montar vitrine (cópia em
+`00. ORGANIZADO`) + resolver IDs do Drive (url/cover público) → versão **final**.
+**🟦:** adicionei **trava** no `publish-catalog.js` — recusa urls de rede local / >30% sem url
+(a não ser `--force`). Sigo no `example`. Se muitos liberados → pagino a Biblioteca.
+**Aguardando 🟧:** sinal de que a versão FINAL (só liberados + urls reais) está pronta → 🟦 roda o publish.
+
+
 ### 2026-06-03 · 🟦 ENTREGOU · "modo cliente" (admin atrás de ?admin=1)
 **Dono:** admin = Central; PartnerZone = vitrine do cliente. (escolheu esconder TODOS os controles)
 **🟦:** flag `ADMIN` — `?admin=1` liga (salva `cl-admin`), `?admin=0` sai. `html.is-client` esconde o

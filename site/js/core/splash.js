@@ -6,7 +6,8 @@ window.Splash = (() => {
 
   /* remove o fundo branco do PNG da logo + recorta (mostra a logo real sobre o navy) */
   function processLogo(cb) {
-    try { const c = localStorage.getItem("cl-pz-splash2"); if (c) { cb(c); return; } } catch (_) {}
+    try { const c = localStorage.getItem("cl-pz-splash3"); if (c) { cb(c); return; } } catch (_) {}
+    try { localStorage.removeItem("cl-pz-splash"); localStorage.removeItem("cl-pz-splash2"); } catch (_) {}
     const im = new Image();
     im.onload = () => {
       try {
@@ -14,12 +15,15 @@ window.Splash = (() => {
         const cv = document.createElement("canvas"); cv.width = W; cv.height = H;
         const x = cv.getContext("2d"); x.drawImage(im, 0, 0);
         const d = x.getImageData(0, 0, W, H), p = d.data;
-        // remove branco/quase-branco com BORDA SUAVE (sem halo), só em pixels acinzentados
+        // tira só o fundo branco/franja NEUTRA com rampa larga e suave (anti-serrilhado limpo).
+        // pixels coloridos (texto azul + anel) NÃO são tocados => ficam 100% nítidos.
         for (let i = 0; i < p.length; i += 4) {
           const r = p[i], g = p[i + 1], b = p[i + 2], mn = Math.min(r, g, b), sat = Math.max(r, g, b) - mn;
-          if (sat < 20) {
-            if (mn >= 243) p[i + 3] = 0;
-            else if (mn >= 216) { const a = Math.round(255 * (243 - mn) / (243 - 216)); if (a < p[i + 3]) p[i + 3] = a; }
+          if (sat < 34) {
+            let a = 255;
+            if (mn >= 247) a = 0;                                            // branco puro => some
+            else if (mn > 210) a = Math.round(255 * (247 - mn) / (247 - 210)); // rampa suave 210..247
+            if (a < p[i + 3]) p[i + 3] = a;
           }
         }
         x.putImageData(d, 0, 0);
@@ -32,7 +36,7 @@ window.Splash = (() => {
         const cc = document.createElement("canvas"); cc.width = cw; cc.height = ch;
         cc.getContext("2d").putImageData(x.getImageData(x0, y0, cw, ch), 0, 0);
         const out = cc.toDataURL("image/png");
-        try { localStorage.setItem("cl-pz-splash2", out); } catch (_) {}
+        try { localStorage.setItem("cl-pz-splash3", out); } catch (_) {}
         cb(out);
       } catch (e) { cb(im.src); }
     };

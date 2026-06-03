@@ -4,7 +4,7 @@
 .splash-overlay {
   position: fixed; inset: 0; z-index: 99999;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  background: radial-gradient(115% 80% at 50% 44%, #173f7d 0%, #0b245c 44%, #06122e 100%);
+  background: radial-gradient(115% 80% at 50% 44%, #123466 0%, #0a2152 44%, #05112c 100%);
   color: #fff; overflow: hidden; text-align: center;
   opacity: 1; transition: opacity .6s ease, visibility .6s;
   font-family: 'Inter', system-ui, sans-serif;
@@ -13,11 +13,11 @@
 
 /* halo atrás da logo */
 .sp-aura {
-  position: absolute; top: 46%; left: 50%; width: 560px; height: 440px; transform: translate(-50%, -50%);
-  background: radial-gradient(closest-side, rgba(86,156,255,.42) 0%, rgba(60,110,230,.14) 45%, transparent 70%);
-  filter: blur(8px); animation: sp-aura 3.4s ease-in-out infinite alternate; pointer-events: none; z-index: 0;
+  position: absolute; top: 47%; left: 50%; width: 600px; height: 420px; transform: translate(-50%, -50%);
+  background: radial-gradient(closest-side, rgba(70,140,255,.24) 0%, rgba(55,105,225,.08) 48%, transparent 72%);
+  filter: blur(10px); animation: sp-aura 3.4s ease-in-out infinite alternate; pointer-events: none; z-index: 0;
 }
-@keyframes sp-aura { from { opacity: .55; transform: translate(-50%, -50%) scale(.92); } to { opacity: 1; transform: translate(-50%, -50%) scale(1.07); } }
+@keyframes sp-aura { from { opacity: .35; transform: translate(-50%, -50%) scale(.92); } to { opacity: .62; transform: translate(-50%, -50%) scale(1.07); } }
 
 .sp-particles {
   position: absolute; inset: -40px; pointer-events: none; opacity: .85; z-index: 0;
@@ -37,9 +37,13 @@
 /* logo real (PNG com fundo removido) — fallback em texto se falhar */
 .sp-logobox { position: relative; z-index: 2; display: grid; place-items: center; min-height: 96px;
   animation: sp-in 1s cubic-bezier(.2,.7,.3,1) both; }
+/* base escura suave atrás da logo: aumenta o contraste do texto azul-claro (mais nítido) */
+.sp-logobox::before { content: ""; position: absolute; z-index: -1; inset: -26px -72px;
+  background: radial-gradient(closest-side, rgba(5,13,32,.6) 0%, rgba(6,15,36,.26) 56%, transparent 78%);
+  filter: blur(6px); pointer-events: none; }
 @keyframes sp-in { from { opacity: 0; transform: translateY(10px) scale(.96); } to { opacity: 1; transform: none; } }
 .sp-logoimg { display: none; width: min(440px, 76vw); max-height: 150px; object-fit: contain;
-  filter: drop-shadow(0 10px 44px rgba(80,150,255,.45)); }
+  filter: drop-shadow(0 4px 13px rgba(4,12,32,.6)); }
 .splash-overlay.has-logo .sp-logoimg { display: block; animation: sp-fade .5s ease both; }
 .splash-overlay.has-logo .sp-fallback { display: none; }
 .sp-fallback { font-size: 42px; font-weight: 700; letter-spacing: -.02em;

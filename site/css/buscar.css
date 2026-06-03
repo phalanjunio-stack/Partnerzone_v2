@@ -87,7 +87,7 @@
 .matcard { border-radius: 16px; overflow: hidden; background: var(--surface-grad); border: 1px solid var(--border);
   box-shadow: var(--shadow); transition: transform .22s cubic-bezier(.34,1.4,.64,1), box-shadow .22s, border-color .22s; }
 .matcard:hover { transform: translateY(-4px); border-color: var(--accent-border);
-  box-shadow: 0 22px 46px -26px color-mix(in srgb, var(--mt, var(--accent)) 70%, transparent); }
+  box-shadow: 0 22px 46px -26px color-mix(in srgb, var(--accent) 45%, transparent); }
 .mat-thumb { position: relative; width: 100%; display: grid; place-items: center; overflow: hidden;
   background: linear-gradient(155deg, color-mix(in srgb, var(--mt) 26%, var(--surface)) 0%, var(--surface) 78%); }
 /* selo de orientação reconhecida (horizontal / vertical / quadrado) */
@@ -101,7 +101,8 @@
 .mat-play .ic { width: 30px; height: 30px; }
 .mat-new { position: absolute; top: 12px; left: 12px; font-size: 10px; font-weight: 800; letter-spacing: .04em; color: #fff;
   background: var(--accent-grad); padding: 4px 10px; border-radius: 999px; box-shadow: 0 4px 10px -4px var(--accent); }
-.mat-ext { position: absolute; top: 12px; right: 12px; font-size: 10.5px; font-weight: 800; color: var(--mt);
+.mat-ext { position: absolute; top: 12px; right: 12px; font-size: 10.5px; font-weight: 800;
+  color: color-mix(in srgb, var(--mt) 66%, var(--text));
   background: var(--surface); padding: 5px 9px; border-radius: 9px; box-shadow: 0 4px 10px -6px rgba(0,0,0,.4);
   display: inline-flex; align-items: center; gap: 5px; }
 .mat-info { padding: 14px; }
@@ -182,16 +183,16 @@
 /* thumbnails mais ricos (gradiente + brilho + marca d'água + chip de vidro + legenda) */
 .mat-thumb { min-height: 120px;
   background:
-    radial-gradient(130% 90% at 20% 12%, color-mix(in srgb, var(--mt) 42%, var(--surface)) 0%, transparent 58%),
-    linear-gradient(155deg, color-mix(in srgb, var(--mt) 30%, var(--surface)) 0%, color-mix(in srgb, var(--mt) 10%, var(--surface)) 70%, var(--surface) 100%); }
+    radial-gradient(130% 90% at 20% 12%, color-mix(in srgb, var(--accent) 9%, var(--surface)) 0%, transparent 60%),
+    linear-gradient(155deg, color-mix(in srgb, var(--accent) 6%, var(--surface)) 0%, var(--surface) 82%); }
 .mat-thumb::before { content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 1;
   background: linear-gradient(180deg, rgba(255,255,255,.10) 0%, transparent 24%); }
 .mat-wm { position: absolute; right: -14px; bottom: -18px; line-height: 0; pointer-events: none; z-index: 0;
-  color: color-mix(in srgb, var(--mt) 17%, transparent); transform: rotate(-8deg); }
+  color: color-mix(in srgb, var(--text) 6%, transparent); transform: rotate(-8deg); }
 .mat-wm .ic { width: 108px; height: 108px; }
-.mat-ph { position: relative; z-index: 2; width: 62px; height: 62px; border-radius: 18px; display: grid; place-items: center; color: #fff;
-  background: color-mix(in srgb, var(--mt) 60%, transparent); border: 1px solid rgba(255,255,255,.22);
-  box-shadow: 0 12px 26px -12px color-mix(in srgb, var(--mt) 85%, transparent), inset 0 1px 0 rgba(255,255,255,.3); backdrop-filter: blur(3px); }
+.mat-ph { position: relative; z-index: 2; width: 60px; height: 60px; border-radius: 17px; display: grid; place-items: center;
+  color: color-mix(in srgb, var(--mt) 62%, var(--text)); background: var(--surface); border: 1px solid var(--border);
+  box-shadow: 0 10px 22px -14px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.16); }
 .mat-ph .ic { width: 28px; height: 28px; }
 .mat-play { position: relative; z-index: 2; }
 .mat-ext .ic { width: 12px; height: 12px; }

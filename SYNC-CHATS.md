@@ -40,6 +40,16 @@
 
 ## Log (mais recente no topo)
 
+### 2026-06-03 · ✅ PILOTO renderizou (teste local, dados reais)
+**🟧:** gerou `sitelocal\data\catalog.json` piloto — 4 áudios liberados (`publicar_site=1`,
+`schemaVersion:1`, `tipo:audio`), urls INTERIM (`localhost:3001`). 3 sem equip/marca (classificados
+pelo modal de vídeo), 1 com `hipro`.
+**🟦:** carreguei no `content/` local e testei o render → **4 áudios no acervo, sem crash**; slug→nome
+OK (hipro→HIPRO), `equipamento:null` tratado, `tag`←`pasta`, `src` presente. Depois **restaurei** o
+`content/` (não commitei o interim). Render validado contra dados reais. ✅
+**Falta p/ ir ao ar:** vitrine (00. ORGANIZADO + IDs do Drive) → urls públicas → 🟧 manda o FINAL → 🟦 publica.
+
+
 ### 2026-06-03 · 🟧 publicar_site persiste + pede PILOTO ao dono
 **🟧:** `publicar_site` agora persiste (manifesto + registro). Próximo: gerador puxa os
 `publicar_site=1` pro `materials[]`. Vai construir o merge contra um **manifesto REAL** → pediu pro

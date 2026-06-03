@@ -1,0 +1,105 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-06-03T18:40:00Z",
+  "source": "G:\\Meu Drive\\1. MARKETING\\01. Equipamentos",
+  "marcas": [
+    { "slug": "contourline", "code": "CTL", "name": "Contourline", "logo": "brands/ctl.png" },
+    { "slug": "daeju", "code": "DJU", "name": "Daeju", "logo": "brands/daeju.png" },
+    { "slug": "lumenis", "code": "LUM", "name": "Lumenis", "logo": "brands/lumenis.png" }
+  ],
+  "equipamentos": [
+    {
+      "slug": "hipro", "name": "HIPRO", "marca": "daeju", "segmento": "med",
+      "folder": "05. HIPRO", "cover": "equip/hipro.jpg", "materialCount": 892,
+      "pastas": [
+        { "name": "Videos", "count": 120 },
+        { "name": "Fotos", "count": 210 },
+        { "name": "Apresentacoes", "count": 18 },
+        { "name": "Redes Sociais", "count": 64 },
+        { "name": "Documentos", "count": 22 }
+      ]
+    },
+    {
+      "slug": "unyque-pro", "name": "Unyque Pro", "marca": "contourline", "segmento": "estetica",
+      "folder": "08. UNYQUE PRO", "cover": "equip/unyque.jpg", "materialCount": 476,
+      "pastas": [
+        { "name": "Videos", "count": 80 },
+        { "name": "Fotos", "count": 150 },
+        { "name": "Redes Sociais", "count": 40 }
+      ]
+    },
+    {
+      "slug": "trilift", "name": "TriLift", "marca": "lumenis", "segmento": "estetica",
+      "folder": "11. TRILIFT", "cover": "equip/trilift.jpg", "materialCount": 402,
+      "pastas": [
+        { "name": "Videos", "count": 60 },
+        { "name": "Apresentacoes", "count": 12 }
+      ]
+    }
+  ],
+  "materials": [
+    {
+      "id": "m_0001", "titulo": "HIPRO | Vídeo institucional",
+      "equipamento": "hipro", "marca": "daeju", "tipo": "vid", "formato": "mp4",
+      "pasta": "Videos", "linha": "med", "tags": ["institucional"], "flags": ["audio"],
+      "url": "https://exemplo/contourline/hipro/video-institucional.mp4",
+      "thumb": "https://exemplo/thumb/hipro-inst.jpg",
+      "tamanho": "128 MB", "novo": true, "atualizadoEm": "2026-06-01T12:00:00Z"
+    },
+    {
+      "id": "m_0002", "titulo": "HIPRO | Banner campanha",
+      "equipamento": "hipro", "marca": "daeju", "tipo": "arte", "formato": "png",
+      "pasta": "Redes Sociais", "linha": "med", "tags": ["campanha", "feed"], "flags": [],
+      "url": "https://exemplo/contourline/hipro/banner-campanha.png",
+      "thumb": "https://exemplo/thumb/hipro-banner.jpg",
+      "tamanho": "2.1 MB", "novo": true, "atualizadoEm": "2026-06-02T09:30:00Z"
+    },
+    {
+      "id": "m_0003", "titulo": "HIPRO | Apresentação comercial",
+      "equipamento": "hipro", "marca": "daeju", "tipo": "doc", "formato": "pptx",
+      "pasta": "Apresentacoes", "linha": "med", "tags": ["apresentacao", "comercial"], "flags": [],
+      "url": "https://exemplo/contourline/hipro/apresentacao-comercial.pptx",
+      "thumb": "", "tamanho": "15.3 MB", "novo": false, "atualizadoEm": "2026-05-20T14:00:00Z"
+    },
+    {
+      "id": "m_0004", "titulo": "HIPRO | Manual do usuário",
+      "equipamento": "hipro", "marca": "daeju", "tipo": "doc", "formato": "pdf",
+      "pasta": "Documentos", "linha": "med", "tags": ["manual"], "flags": [],
+      "url": "https://exemplo/contourline/hipro/manual.pdf",
+      "thumb": "", "tamanho": "8.7 MB", "novo": false, "atualizadoEm": "2026-05-18T10:00:00Z"
+    },
+    {
+      "id": "m_0005", "titulo": "HIPRO | Post redes sociais",
+      "equipamento": "hipro", "marca": "daeju", "tipo": "img", "formato": "png",
+      "pasta": "Redes Sociais", "linha": "med", "tags": ["redes-sociais", "story"], "flags": [],
+      "url": "https://exemplo/contourline/hipro/post.png",
+      "thumb": "https://exemplo/thumb/hipro-post.jpg",
+      "tamanho": "1.2 MB", "novo": false, "atualizadoEm": "2026-05-25T16:00:00Z"
+    },
+    {
+      "id": "m_0006", "titulo": "Unyque Pro | Trilha do equipamento",
+      "equipamento": "unyque-pro", "marca": "contourline", "tipo": "audio", "formato": "mp3",
+      "pasta": "Audio", "linha": "estetica", "tags": ["trilha"], "flags": ["audio"],
+      "url": "https://exemplo/contourline/unyque/trilha.mp3",
+      "thumb": "", "tamanho": "4.0 MB", "novo": true, "atualizadoEm": "2026-06-01T11:00:00Z"
+    },
+    {
+      "id": "m_0007", "titulo": "Unyque Pro | Antes e Depois — abdômen",
+      "equipamento": "unyque-pro", "marca": "contourline", "tipo": "img", "formato": "jpg",
+      "pasta": "Antes e Depois", "linha": "estetica",
+      "tags": ["antes-depois", "barriga", "paciente"], "flags": ["antes-depois", "rosto"],
+      "url": "https://exemplo/contourline/unyque/antes-depois-abdomen.jpg",
+      "thumb": "https://exemplo/thumb/unyque-ad.jpg",
+      "tamanho": "3.4 MB", "novo": false, "atualizadoEm": "2026-05-22T13:00:00Z"
+    },
+    {
+      "id": "m_0008", "titulo": "TriLift | Vídeo sala de espera",
+      "equipamento": "trilift", "marca": "lumenis", "tipo": "vid", "formato": "mp4",
+      "pasta": "Videos", "linha": "estetica", "tags": ["sala-de-espera"], "flags": ["audio"],
+      "url": "https://exemplo/contourline/trilift/sala-espera.mp4",
+      "thumb": "https://exemplo/thumb/trilift-sala.jpg",
+      "tamanho": "56.7 MB", "novo": false, "atualizadoEm": "2026-05-15T08:00:00Z"
+    }
+  ],
+  "categorias": ["Vídeos", "Imagens", "Documentos", "Redes Sociais", "Apresentações", "Áudio"]
+}

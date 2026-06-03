@@ -667,7 +667,8 @@
 
   window.__route = route;   // exposto p/ re-render externo (ex: após salvar banner do topo)
   window.addEventListener('hashchange', route);
-  document.addEventListener('DOMContentLoaded', () => {
+  document.addEventListener('DOMContentLoaded', async () => {
+    try { if (window.Catalog) await Catalog.boot(); } catch (_) {}   // puxa o catalog.json (servidor) antes de renderizar; fallback nos exemplos
     window.initShell && window.initShell();   // shell uma vez
     route();                                   // primeira rota
   });

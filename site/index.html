@@ -8,17 +8,17 @@
   <title>PartnerZone — Contourline</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/theme.css?v=spa50">
-  <link rel="stylesheet" href="css/app.css?v=spa50">
-  <link rel="stylesheet" href="css/effects.css?v=spa50">
-  <link rel="stylesheet" href="css/categoria.css?v=spa50">
-  <link rel="stylesheet" href="css/pasta.css?v=spa50">
-  <link rel="stylesheet" href="css/material.css?v=spa50">
-  <link rel="stylesheet" href="css/buscar.css?v=spa50">
-  <link rel="stylesheet" href="css/upload.css?v=spa50">
-  <link rel="stylesheet" href="css/sql.css?v=spa50">
-  <link rel="stylesheet" href="css/marca.css?v=spa50">
-  <link rel="stylesheet" href="css/splash.css?v=spa50">
+  <link rel="stylesheet" href="css/theme.css?v=spa51">
+  <link rel="stylesheet" href="css/app.css?v=spa51">
+  <link rel="stylesheet" href="css/effects.css?v=spa51">
+  <link rel="stylesheet" href="css/categoria.css?v=spa51">
+  <link rel="stylesheet" href="css/pasta.css?v=spa51">
+  <link rel="stylesheet" href="css/material.css?v=spa51">
+  <link rel="stylesheet" href="css/buscar.css?v=spa51">
+  <link rel="stylesheet" href="css/upload.css?v=spa51">
+  <link rel="stylesheet" href="css/sql.css?v=spa51">
+  <link rel="stylesheet" href="css/marca.css?v=spa51">
+  <link rel="stylesheet" href="css/splash.css?v=spa51">
   <script>document.documentElement.setAttribute('data-theme', localStorage.getItem('cl-theme') || 'dark');</script>
   <script src="js/core/splash.js"></script>
 </head>
@@ -332,6 +332,44 @@
     </div></div>
   </div>
 
+  <!-- ===================== PLAYER DE ÁUDIO (fixo no rodapé) ===================== -->
+  <audio id="player-audio" preload="metadata"></audio>
+  <div class="player-bar" id="player-bar">
+    <div class="pl-now">
+      <div class="pl-ic"><i data-icon="music" data-cls="ic"></i></div>
+      <div class="pl-meta"><b id="pl-title">—</b><span id="pl-sub"></span></div>
+    </div>
+    <div class="pl-center">
+      <div class="pl-ctrls">
+        <button class="pl-btn" id="pl-prev" title="Anterior"><i data-icon="skipB" data-cls="ic ic-sm"></i></button>
+        <button class="pl-btn pl-main" id="pl-toggle" title="Play/Pause"><i data-icon="play2" data-cls="ic"></i></button>
+        <button class="pl-btn" id="pl-next" title="Próxima"><i data-icon="skipF" data-cls="ic ic-sm"></i></button>
+      </div>
+      <div class="pl-seekwrap"><span id="pl-cur">0:00</span><input type="range" id="pl-seek" class="pl-seek" min="0" max="1000" value="0"><span id="pl-dur">0:00</span></div>
+    </div>
+    <div class="pl-extra">
+      <i data-icon="volume" data-cls="ic ic-sm"></i><input type="range" id="pl-vol" class="pl-vol" min="0" max="100" value="100">
+      <button class="pl-btn" id="pl-close" title="Fechar"><svg class="ic ic-sm" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+    </div>
+  </div>
+
+  <!-- ===================== MODAL: Adicionar à playlist ===================== -->
+  <div class="modal-bd" id="modal-playlist">
+    <div class="modal"><div class="modal-inner">
+      <div class="modal-head">
+        <div><h2>Adicionar à playlist</h2><p>Escolha uma playlist ou crie uma nova</p></div>
+        <button class="x" data-close-modal><svg class="ic" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+      </div>
+      <div class="modal-body">
+        <div class="fav-new">
+          <div class="input"><i data-icon="music" data-cls="ic ic-sm"></i><input id="plpick-new" placeholder="Nova playlist (ex: Recepção)" autocomplete="off"></div>
+          <button class="btn" id="plpick-go">Criar</button>
+        </div>
+        <div class="fav-list" id="plpick-list"></div>
+      </div>
+    </div></div>
+  </div>
+
   <!-- ===================== COMMAND PALETTE (⌘K) ===================== -->
   <div class="cmdk-bd" id="cmdk">
     <div class="cmdk">
@@ -345,11 +383,11 @@
     </div>
   </div>
 
-  <script src="js/core/sound.js?v=spa50"></script>
-  <script src="js/core/theme.js?v=spa50"></script>
-  <script src="js/components/ui.js?v=spa50"></script>
-  <script src="js/app.js?v=spa50"></script>
-  <script src="js/core/db.js?v=spa50"></script>
-  <script src="js/views.js?v=spa50"></script>
+  <script src="js/core/sound.js?v=spa51"></script>
+  <script src="js/core/theme.js?v=spa51"></script>
+  <script src="js/components/ui.js?v=spa51"></script>
+  <script src="js/app.js?v=spa51"></script>
+  <script src="js/core/db.js?v=spa51"></script>
+  <script src="js/views.js?v=spa51"></script>
 </body>
 </html>

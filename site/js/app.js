@@ -1,7 +1,7 @@
 /* ============================================================
    APP — ícones (traçado), dados de exemplo e render da Início
    ============================================================ */
-const BUILD = 'spa50';
+const BUILD = 'spa51';
 try { console.log('%cPartnerZone • build ' + BUILD, 'background:#2f7ff2;color:#fff;padding:2px 8px;border-radius:4px;font-weight:700'); } catch (_) {}
 
 /* ---- Ícones (todos outline / currentColor) ---- */
@@ -65,6 +65,11 @@ const ICONS = {
   rotate:'<path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/>',
   move:'<path d="M12 2v20M2 12h20M5 9 2 12l3 3M19 9l3 3-3 3M9 5l3-3 3 3M9 19l3 3 3-3"/>',
   expand:'<path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/>',
+  music:'<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>',
+  play2:'<path d="M7 5v14l11-7z"/>',
+  pause:'<path d="M8 5v14M16 5v14"/>',
+  skipF:'<path d="M5 5v14l9-7z"/><path d="M16 5v14"/>',
+  skipB:'<path d="M19 5v14l-9-7z"/><path d="M8 5v14"/>',
 };
 function svgIcon(name, cls='ic') { return `<svg class="${cls}" viewBox="0 0 24 24">${ICONS[name]||''}</svg>`; }
 function renderIcons(root=document) { root.querySelectorAll('[data-icon]').forEach(el => {
@@ -77,6 +82,7 @@ const NAV = [
     { icon:'file', text:'Solicitações' },
     { icon:'search', text:'Buscar', route:'#/buscar' },
     { icon:'heart', text:'Favoritos', route:'#/favoritos' },
+    { icon:'music', text:'Áudios', route:'#/audio' },
     { icon:'building', text:'Institucional', dynamic:'marcas' },
   ]},
   { label:'Área do Cliente', items:[
@@ -418,6 +424,8 @@ function initShell() {
   initImgModal();
   initFavModal();
   Sel.init();
+  Player.init();
+  initPlaylistModal();
 }
 
 /* ============================================================
@@ -1351,6 +1359,165 @@ async function initBrandHub(brand) {
       appsEl.innerHTML = `<div class="pf-loading">Adicione um logo (e artes) pra esta versão.</div>`;
     }
   })();
+}
+
+/* ============================================================
+   ÁUDIO — acervo + player fixo no rodapé + playlists (cliente)
+   ============================================================ */
+const TRACKS = [
+  { id: 'jingle', title: 'Jingle Contourline', tag: 'Vinheta institucional', eq: 'Contourline', src: 'assets/audio/contourline-jingle.mp3' },
+  { id: 'unyque', title: 'Música Unyque Pro',  tag: 'Trilha do equipamento', eq: 'Unyque Pro',  src: 'assets/audio/unyque-pro.mp3' },
+];
+const AudioDB = (() => {
+  let dbp = null;
+  function open() { if (dbp) return dbp;
+    dbp = new Promise((res, rej) => { const r = indexedDB.open('cl-audio', 1);
+      r.onupgradeneeded = () => { if (!r.result.objectStoreNames.contains('tracks')) r.result.createObjectStore('tracks'); };
+      r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }); return dbp; }
+  const tx = (mode, fn) => open().then(db => new Promise((res, rej) => {
+    const t = db.transaction('tracks', mode), st = t.objectStore('tracks'); const out = fn(st);
+    t.oncomplete = () => res(out && typeof out === 'object' && 'result' in out ? out.result : out); t.onerror = () => rej(t.error); }));
+  return { get: () => tx('readonly', st => st.get('all')), set: arr => tx('readwrite', st => st.put(arr, 'all')) };
+})();
+const Playlists = {
+  read() { try { return JSON.parse(localStorage.getItem('cl-playlists') || '{}'); } catch (_) { return {}; } },
+  write(o) { try { localStorage.setItem('cl-playlists', JSON.stringify(o)); } catch (_) { Toast.error('Sem espaço pra salvar.'); } },
+  create(n) { const o = this.read(); if (!o[n]) o[n] = []; this.write(o); },
+  add(n, ids) { const o = this.read(); const a = o[n] || []; ids.forEach(id => { if (!a.includes(id)) a.push(id); }); o[n] = a; this.write(o); },
+  removeTrack(n, id) { const o = this.read(); if (o[n]) o[n] = o[n].filter(t => t !== id); this.write(o); },
+  remove(n) { const o = this.read(); delete o[n]; this.write(o); },
+};
+function fmtTime(s) { s = Math.max(0, Math.floor(s || 0)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); }
+let _uploadedTracks = [];
+async function loadAudioTracks() { try { _uploadedTracks = (await AudioDB.get()) || []; } catch (_) { _uploadedTracks = []; } return _uploadedTracks; }
+function allTracks() { return _uploadedTracks.concat(TRACKS); }
+function trackById(id) { return allTracks().find(t => t.id === id); }
+
+const Player = {
+  audio: null, bar: null, queue: [], idx: -1, urls: [],
+  init() {
+    this.audio = document.getElementById('player-audio'); this.bar = document.getElementById('player-bar'); if (!this.audio || !this.bar) return;
+    document.getElementById('pl-toggle')?.addEventListener('click', () => this.toggle());
+    document.getElementById('pl-prev')?.addEventListener('click', () => this.prev());
+    document.getElementById('pl-next')?.addEventListener('click', () => this.next());
+    document.getElementById('pl-close')?.addEventListener('click', () => this.stop());
+    const seek = document.getElementById('pl-seek');
+    seek?.addEventListener('input', () => { if (this.audio.duration) this.audio.currentTime = (+seek.value / 1000) * this.audio.duration; });
+    const vol = document.getElementById('pl-vol'); vol?.addEventListener('input', () => { this.audio.volume = +vol.value / 100; });
+    this.audio.addEventListener('timeupdate', () => this.tick());
+    this.audio.addEventListener('ended', () => this.next());
+    this.audio.addEventListener('play', () => this.render());
+    this.audio.addEventListener('pause', () => this.render());
+    this.audio.addEventListener('loadedmetadata', () => this.tick());
+  },
+  srcFor(t) { if (t.src) return t.src; if (t.blob) { const u = URL.createObjectURL(t.blob); this.urls.push(u); return u; } return null; },
+  load(i) { this.idx = i; const t = this.queue[i]; if (!t) return; const src = this.srcFor(t); if (!src) { Toast.error('Áudio indisponível.'); return; }
+    this.audio.src = src; this.audio.play().catch(() => {}); this.bar.classList.add('show'); document.body.classList.add('has-player'); this.render(); },
+  play(track, queue) { this.queue = (queue && queue.length ? queue : [track]); const i = this.queue.findIndex(t => t.id === track.id); this.load(i < 0 ? 0 : i); Sound.click && Sound.click(); },
+  toggle() { if (!this.queue.length) return; if (this.audio.paused) this.audio.play().catch(() => {}); else this.audio.pause(); },
+  next() { if (this.idx + 1 < this.queue.length) this.load(this.idx + 1); else this.audio.pause(); },
+  prev() { if (this.audio.currentTime > 3) this.audio.currentTime = 0; else if (this.idx > 0) this.load(this.idx - 1); else this.audio.currentTime = 0; },
+  stop() { this.audio.pause(); this.audio.removeAttribute('src'); this.audio.load(); this.queue = []; this.idx = -1; this.bar.classList.remove('show'); document.body.classList.remove('has-player'); this.render(); },
+  tick() { const a = this.audio, seek = document.getElementById('pl-seek');
+    if (seek && a.duration && document.activeElement !== seek) seek.value = String((a.currentTime / a.duration) * 1000);
+    const cur = document.getElementById('pl-cur'), dur = document.getElementById('pl-dur'); if (cur) cur.textContent = fmtTime(a.currentTime); if (dur) dur.textContent = fmtTime(a.duration); },
+  render() { const t = this.queue[this.idx], pl = !this.audio || this.audio.paused;
+    const tg = document.getElementById('pl-toggle'); if (tg) tg.innerHTML = svgIcon(pl ? 'play2' : 'pause', 'ic');
+    if (t) { const T = document.getElementById('pl-title'), S = document.getElementById('pl-sub'); if (T) T.textContent = t.title; if (S) S.textContent = (t.tag || '') + (t.eq ? (' · ' + t.eq) : ''); }
+    document.querySelectorAll('.track-row, .plc-track').forEach(r => r.classList.toggle('playing', !!t && r.dataset.id === t.id && !pl));
+  },
+  isPlaying(id) { return this.queue[this.idx] && this.queue[this.idx].id === id && !this.audio.paused; },
+};
+
+/* modal "Adicionar à playlist" */
+let _plPending = [];
+function renderPlPicker() {
+  const el = document.getElementById('plpick-list'); if (!el) return;
+  const pls = Playlists.read(), names = Object.keys(pls);
+  el.innerHTML = names.length ? names.map(n => `<button class="favc-row" data-name="${n}"><span class="favc-ic">${svgIcon('music')}</span><div class="favc-meta"><b>${n}</b><span>${pls[n].length} áudio(s)</span></div><span class="favc-add">${svgIcon('plus','ic ic-sm')}</span></button>`).join('') : `<div class="fav-empty">Crie uma playlist acima ☝</div>`;
+  renderIcons(el);
+}
+function openPlaylistPicker(ids) { _plPending = ids || []; renderPlPicker(); UI.openModal('modal-playlist'); }
+function initPlaylistModal() {
+  const bd = document.getElementById('modal-playlist'); if (!bd) return;
+  const create = () => { const inp = document.getElementById('plpick-new'); const n = (inp.value || '').trim(); if (!n) return; Playlists.create(n); inp.value = ''; renderPlPicker(); Sound.click && Sound.click(); };
+  document.getElementById('plpick-go')?.addEventListener('click', create);
+  document.getElementById('plpick-new')?.addEventListener('keydown', e => { if (e.key === 'Enter') create(); });
+  document.getElementById('plpick-list')?.addEventListener('click', e => {
+    const row = e.target.closest('.favc-row'); if (!row) return;
+    Playlists.add(row.dataset.name, _plPending); Sound.success && Sound.success(); Toast.success(_plPending.length + ' áudio(s) em "' + row.dataset.name + '"'); UI.closeModal(bd);
+    if (location.hash.indexOf('#/audio') === 0 && window.__route) window.__route();
+  });
+}
+
+/* página de Áudios */
+async function initMusica() {
+  const root = document.getElementById('audio-page'); if (!root) return;
+  await loadAudioTracks();
+  const trackRow = t => {
+    const playing = Player.isPlaying(t.id);
+    return `<div class="track-row${playing ? ' playing' : ''}" data-id="${t.id}">
+      <button class="tr-play" title="Tocar">${svgIcon(playing ? 'pause' : 'play2', 'ic ic-sm')}</button>
+      <div class="tr-ic">${svgIcon('music', 'ic ic-sm')}</div>
+      <div class="tr-meta"><b>${t.title}</b><span>${t.tag || ''}${t.eq ? (' · ' + t.eq) : ''}</span></div>
+      <div class="tr-actions">
+        <button class="tr-add" title="Adicionar à playlist">${svgIcon('plus', 'ic ic-sm')}</button>
+        ${t.own ? `<button class="tr-del" title="Remover (admin)">${svgIcon('trash', 'ic ic-xs')}</button>` : ''}
+      </div></div>`;
+  };
+  const playlistCard = (n, ids) => {
+    const tracks = ids.map(trackById).filter(Boolean);
+    return `<div class="playlist-card" data-pl="${n}">
+      <div class="plc-head"><div class="plc-ic">${svgIcon('music', 'ic')}</div>
+        <div class="plc-meta"><b>${n}</b><span>${tracks.length} áudio(s)</span></div>
+        <button class="btn plc-play">${svgIcon('play2', 'ic ic-sm')} Tocar</button>
+        <button class="plc-del" title="Excluir playlist">${svgIcon('trash', 'ic ic-sm')}</button></div>
+      <div class="plc-tracks">${tracks.map(t => `<div class="plc-track" data-id="${t.id}"><button class="plct-play">${svgIcon('play2', 'ic ic-xs')}</button><span>${t.title}</span><button class="plct-rm" title="Tirar da playlist">${svgIcon('trash', 'ic ic-xs')}</button></div>`).join('') || '<div class="plc-empty">Vazia — use o + nos áudios pra adicionar.</div>'}</div>
+    </div>`;
+  };
+  function render() {
+    const list = allTracks(), pls = Playlists.read(), names = Object.keys(pls);
+    root.innerHTML = `
+      <section class="audio-sec">
+        <div class="audio-head"><h2>Acervo de áudios <span class="audio-count">${list.length}</span></h2>
+          <button class="bh-genbtn" id="audio-add"><i data-icon="upload" data-cls="ic ic-sm"></i> Adicionar áudio</button></div>
+        <div class="track-list">${list.map(trackRow).join('') || '<div class="pf-loading">Nenhum áudio ainda.</div>'}</div>
+      </section>
+      <section class="audio-sec">
+        <div class="audio-head"><h2>Minhas playlists</h2></div>
+        <div class="pl-new"><div class="input"><i data-icon="music" data-cls="ic ic-sm"></i><input id="pl-new-name" placeholder="Nova playlist (ex: Recepção, Procedimento)" autocomplete="off"></div><button class="btn" id="pl-new-go">Criar</button></div>
+        <div class="playlist-list">${names.length ? names.map(n => playlistCard(n, pls[n])).join('') : '<div class="pf-loading">Crie uma playlist e adicione áudios com o + 🎵</div>'}</div>
+      </section>`;
+    renderIcons(root); Player.render();
+  }
+  function doCreate() { const inp = document.getElementById('pl-new-name'); const n = (inp.value || '').trim(); if (!n) return; Playlists.create(n); inp.value = ''; render(); }
+  function addAudio() {
+    const inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'audio/*'; inp.multiple = true;
+    inp.onchange = async () => { const files = [...(inp.files || [])]; if (!files.length) return;
+      files.forEach((f, i) => _uploadedTracks.unshift({ id: 'au' + Date.now() + '-' + i, title: f.name.replace(/\.[^.]+$/, ''), tag: 'Enviado', size: f.size, own: true, blob: f }));
+      try { await AudioDB.set(_uploadedTracks); Sound.success && Sound.success(); Toast.success(files.length + ' áudio(s) adicionado(s)!'); } catch (_) { Toast.error('Não consegui salvar. Tente arquivos menores.'); }
+      render();
+    }; inp.click();
+  }
+  root.addEventListener('keydown', e => { if (e.target.id === 'pl-new-name' && e.key === 'Enter') doCreate(); });
+  root.addEventListener('click', async e => {
+    if (e.target.closest('#audio-add')) { addAudio(); return; }
+    if (e.target.closest('#pl-new-go')) { doCreate(); return; }
+    const tr = e.target.closest('.track-row');
+    if (tr) {
+      if (e.target.closest('.tr-play')) { const t = trackById(tr.dataset.id); if (t) Player.play(t, allTracks()); return; }
+      if (e.target.closest('.tr-add')) { openPlaylistPicker([tr.dataset.id]); return; }
+      if (e.target.closest('.tr-del')) { _uploadedTracks = _uploadedTracks.filter(t => t.id !== tr.dataset.id); try { await AudioDB.set(_uploadedTracks); } catch (_) {} Toast.info('Áudio removido.'); render(); return; }
+    }
+    const pc = e.target.closest('.playlist-card'); if (!pc) return;
+    const name = pc.dataset.pl, ids = Playlists.read()[name] || [], tracks = ids.map(trackById).filter(Boolean);
+    if (e.target.closest('.plc-play')) { if (tracks.length) Player.play(tracks[0], tracks); else Toast.info('Playlist vazia.'); return; }
+    if (e.target.closest('.plc-del')) { if (confirm('Excluir a playlist "' + name + '"?')) { Playlists.remove(name); render(); } return; }
+    const pt = e.target.closest('.plc-track'); if (!pt) return;
+    if (e.target.closest('.plct-play')) { const t = trackById(pt.dataset.id); if (t) Player.play(t, tracks); return; }
+    if (e.target.closest('.plct-rm')) { Playlists.removeTrack(name, pt.dataset.id); render(); return; }
+  });
+  render();
 }
 
 /* LIGHTBOX de imagem (galeria) — visual grande + metadados + baixar + navegação */

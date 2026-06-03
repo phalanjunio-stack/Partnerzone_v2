@@ -2,6 +2,81 @@
    APP — layout + componentes (Início / Dashboard)
    ============================================================ */
 
+/* ============ PLAYER DE ÁUDIO (fixo no rodapé) ============ */
+.player-bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 190; height: 72px;
+  display: grid; grid-template-columns: minmax(170px,1fr) 2.2fr minmax(150px,1fr); align-items: center; gap: 18px; padding: 0 20px;
+  background: var(--surface); border-top: 1px solid var(--border); box-shadow: 0 -12px 34px -20px rgba(0,0,0,.45);
+  transform: translateY(110%); transition: transform .3s cubic-bezier(.34,1.2,.64,1); }
+.player-bar.show { transform: translateY(0); }
+.pl-now { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.pl-ic { width: 44px; height: 44px; flex-shrink: 0; border-radius: 11px; display: grid; place-items: center; color: #fff; background: var(--accent-grad); }
+.pl-ic .ic { width: 22px; height: 22px; }
+.pl-meta { min-width: 0; }
+.pl-meta b { display: block; font-size: 13.5px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pl-meta span { display: block; font-size: 11.5px; color: var(--text-faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pl-center { display: flex; flex-direction: column; align-items: center; gap: 5px; min-width: 0; }
+.pl-ctrls { display: flex; align-items: center; gap: 8px; }
+.pl-btn { width: 36px; height: 36px; display: grid; place-items: center; border-radius: 50%; cursor: pointer; color: var(--text-muted); background: none; border: none; }
+.pl-btn:hover { color: var(--text); background: var(--surface-hover); }
+.pl-main { width: 44px; height: 44px; color: #fff; background: var(--accent-grad); }
+.pl-main:hover { color: #fff; filter: brightness(1.07); }
+.pl-main .ic { width: 22px; height: 22px; }
+.pl-seekwrap { display: flex; align-items: center; gap: 10px; width: 100%; max-width: 540px; font-size: 11px; color: var(--text-faint); font-variant-numeric: tabular-nums; }
+.pl-seek, .pl-vol { -webkit-appearance: none; appearance: none; height: 5px; border-radius: 999px; background: var(--surface-hover); cursor: pointer; outline: none; }
+.pl-seek { flex: 1; }
+.pl-seek::-webkit-slider-thumb, .pl-vol::-webkit-slider-thumb { -webkit-appearance: none; width: 13px; height: 13px; border-radius: 50%; background: var(--accent); border: 2px solid var(--surface); }
+.pl-seek::-moz-range-thumb, .pl-vol::-moz-range-thumb { width: 11px; height: 11px; border-radius: 50%; background: var(--accent); border: 2px solid var(--surface); }
+.pl-extra { display: flex; align-items: center; gap: 8px; justify-content: flex-end; color: var(--text-faint); }
+.pl-vol { width: 80px; }
+body.has-player .main { padding-bottom: 80px; }
+body.has-player .selbar { bottom: 88px; }   /* não encostar no player */
+@media (max-width: 760px) {
+  .player-bar { grid-template-columns: 1fr auto; gap: 10px; }
+  .pl-seekwrap { display: none; } .pl-extra { display: none; }
+}
+
+/* ============ ÁUDIOS & PLAYLISTS (página) ============ */
+.audio-sec { margin-bottom: 28px; }
+.audio-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+.audio-head h2 { font-size: 20px; font-weight: 800; display: flex; align-items: center; gap: 10px; }
+.audio-count { font-size: 12px; font-weight: 700; color: var(--accent); background: var(--accent-soft); border: 1px solid var(--accent-border); padding: 2px 10px; border-radius: 999px; }
+.track-list { display: flex; flex-direction: column; gap: 8px; }
+.track-row { display: flex; align-items: center; gap: 14px; padding: 10px 14px; border-radius: 14px; background: var(--surface); border: 1px solid var(--border); transition: border-color .15s, background .15s; }
+.track-row:hover { border-color: var(--accent-border); }
+.track-row.playing { border-color: var(--accent); background: var(--accent-soft); }
+.tr-play { width: 40px; height: 40px; flex-shrink: 0; display: grid; place-items: center; border-radius: 50%; cursor: pointer; color: #fff; background: var(--accent-grad); border: none; }
+.tr-play:hover { filter: brightness(1.08); }
+.tr-ic { width: 38px; height: 38px; flex-shrink: 0; border-radius: 10px; display: grid; place-items: center; color: var(--accent); background: var(--accent-soft); }
+.tr-meta { flex: 1; min-width: 0; }
+.tr-meta b { display: block; font-size: 14px; font-weight: 600; }
+.tr-meta span { font-size: 11.5px; color: var(--text-faint); }
+.tr-actions { display: flex; align-items: center; gap: 6px; }
+.tr-add, .tr-del { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 9px; cursor: pointer; color: var(--text-muted); background: var(--surface-hover); border: 1px solid var(--border); }
+.tr-add:hover { color: var(--accent); border-color: var(--accent-border); }
+.tr-del:hover { color: var(--error); border-color: var(--error); }
+.pl-new { display: flex; gap: 10px; margin-bottom: 16px; max-width: 540px; }
+.pl-new .input { flex: 1; }
+.pl-new .btn { height: 46px; margin: 0; width: auto; padding: 0 22px; }
+.playlist-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
+.playlist-card { border-radius: 16px; background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow); overflow: hidden; }
+.plc-head { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-bottom: 1px solid var(--border); }
+.plc-ic { width: 40px; height: 40px; flex-shrink: 0; border-radius: 11px; display: grid; place-items: center; color: #fff; background: var(--accent2-grad); }
+.plc-meta { flex: 1; min-width: 0; }
+.plc-meta b { display: block; font-size: 15px; font-weight: 700; }
+.plc-meta span { font-size: 11.5px; color: var(--text-faint); }
+.plc-play { height: 36px; margin: 0; width: auto; padding: 0 14px; }
+.plc-del { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 9px; cursor: pointer; color: var(--text-muted); background: none; border: none; }
+.plc-del:hover { color: var(--error); }
+.plc-tracks { display: flex; flex-direction: column; padding: 6px; gap: 2px; }
+.plc-track { display: flex; align-items: center; gap: 10px; padding: 7px 10px; border-radius: 9px; }
+.plc-track:hover { background: var(--surface-hover); }
+.plc-track.playing { color: var(--accent); font-weight: 600; }
+.plc-track span { flex: 1; min-width: 0; font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.plct-play, .plct-rm { width: 26px; height: 26px; display: grid; place-items: center; border-radius: 7px; cursor: pointer; color: var(--text-faint); background: none; border: none; flex-shrink: 0; }
+.plct-play:hover { color: var(--accent); }
+.plct-rm:hover { color: var(--error); }
+.plc-empty { font-size: 12px; color: var(--text-faint); padding: 12px; text-align: center; }
+
 * { margin: 0; padding: 0; box-sizing: border-box; }
 *::selection { background: var(--accent-soft); color: var(--text); }
 [hidden] { display: none !important; }   /* o atributo hidden sempre esconde (vence display:grid/flex dos componentes) */

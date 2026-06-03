@@ -375,6 +375,22 @@
       };
     },
 
+    /* ---------- ÁUDIOS & MÚSICAS (acervo + playlists) ---------- */
+    musica() {
+      return {
+        title: 'Áudios',
+        crumbs: `<i data-icon="music" data-cls="ic ic-sm"></i><a href="#/">PartnerZone</a><span>›</span><span class="here">Áudios</span>`,
+        html: `
+        <div class="folder-page" data-enter>
+          <h1 class="fp-title">Áudios & Músicas</h1>
+          <div class="fp-sub">Ouça os jingles e trilhas dos equipamentos e monte suas <b>playlists</b>. O player fica fixo no rodapé enquanto você navega.</div>
+          <div class="fp-rule"></div>
+          <div id="audio-page"><div class="pf-loading">Carregando áudios…</div></div>
+        </div>`,
+        init: () => { window.initMusica && window.initMusica(); },
+      };
+    },
+
     /* ---------- CADASTRO DE EQUIPAMENTOS (admin · grava no SQL) ---------- */
     cadastro() {
       return {
@@ -606,6 +622,7 @@
     if (p[0] === 'buscar')              return Views.buscar();
     if (p[0] === 'sql')                 return Views.sql();
     if (p[0] === 'favoritos')           return Views.favoritos();
+    if (p[0] === 'audio')               return Views.musica();
     if (p[0] === 'marca')               return p[2] === 'logos' ? Views.marcaLogos(p[1]) : Views.marca(p[1]);
     if (p[0] === 'cadastro')            return Views.cadastro();
     if (p[0] === 'equipamentos')        return Views.equipamentos();

@@ -156,3 +156,51 @@
   .lib-searchrow { flex-direction: column; }
   .lib-count { justify-content: center; padding: 14px 20px; }
 }
+
+/* ============================================================
+   Busca digitável • filtros marcáveis • thumbnails ricos
+   ============================================================ */
+
+/* botão limpar da busca (aparece quando há texto) */
+.lib-qclear { width: 26px; height: 26px; flex-shrink: 0; border-radius: 8px; display: grid; place-items: center;
+  font-size: 12px; line-height: 1; color: var(--text-muted); background: var(--surface-hover);
+  border: 1px solid var(--border); cursor: pointer; transition: all .15s; }
+.lib-qclear:hover { color: var(--accent); border-color: var(--accent-border); }
+
+/* itens de filtro com checkbox (marcar/desmarcar) */
+.lf-item { gap: 9px; }
+.lf-item > span { flex: 1; }
+.lf-cb { width: 16px; height: 16px; flex-shrink: 0; border-radius: 5px; border: 1.5px solid var(--border-strong);
+  position: relative; transition: background .15s, border-color .15s; }
+.lf-item:hover .lf-cb { border-color: var(--accent-border); }
+.lf-item.on { color: var(--text); }
+.lf-item.on .lf-cb { background: var(--accent-grad); border-color: transparent; }
+.lf-item.on .lf-cb::after { content: ""; position: absolute; left: 5px; top: 1.5px; width: 4px; height: 8px;
+  border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg); }
+.lf-item.on b { color: var(--accent); }
+
+/* thumbnails mais ricos (gradiente + brilho + marca d'água + chip de vidro + legenda) */
+.mat-thumb { min-height: 120px;
+  background:
+    radial-gradient(130% 90% at 20% 12%, color-mix(in srgb, var(--mt) 42%, var(--surface)) 0%, transparent 58%),
+    linear-gradient(155deg, color-mix(in srgb, var(--mt) 30%, var(--surface)) 0%, color-mix(in srgb, var(--mt) 10%, var(--surface)) 70%, var(--surface) 100%); }
+.mat-thumb::before { content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 1;
+  background: linear-gradient(180deg, rgba(255,255,255,.10) 0%, transparent 24%); }
+.mat-wm { position: absolute; right: -14px; bottom: -18px; line-height: 0; pointer-events: none; z-index: 0;
+  color: color-mix(in srgb, var(--mt) 17%, transparent); transform: rotate(-8deg); }
+.mat-wm .ic { width: 108px; height: 108px; }
+.mat-ph { position: relative; z-index: 2; width: 62px; height: 62px; border-radius: 18px; display: grid; place-items: center; color: #fff;
+  background: color-mix(in srgb, var(--mt) 60%, transparent); border: 1px solid rgba(255,255,255,.22);
+  box-shadow: 0 12px 26px -12px color-mix(in srgb, var(--mt) 85%, transparent), inset 0 1px 0 rgba(255,255,255,.3); backdrop-filter: blur(3px); }
+.mat-ph .ic { width: 28px; height: 28px; }
+.mat-play { position: relative; z-index: 2; }
+.mat-ext .ic { width: 12px; height: 12px; }
+.mat-orient { left: auto; right: 10px; z-index: 2; }
+.mat-thumbcap { position: absolute; z-index: 2; bottom: 9px; left: 11px; max-width: 60%; font-size: 10.5px; font-weight: 800;
+  color: #fff; letter-spacing: .01em; text-shadow: 0 1px 5px rgba(0,0,0,.55);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; pointer-events: none; }
+
+/* visão lista: sem enriquecimentos (thumb pequeno) */
+.lib-grid.list .mat-wm, .lib-grid.list .mat-thumbcap, .lib-grid.list .mat-thumb::before { display: none; }
+.lib-grid.list .mat-thumb { min-height: 0; }
+.lib-grid.list .mat-ph { width: auto; height: auto; background: none; border: none; box-shadow: none; backdrop-filter: none; border-radius: 0; }

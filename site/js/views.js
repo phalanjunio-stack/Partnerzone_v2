@@ -134,7 +134,17 @@
     buscar() {
       const eqs = (typeof EQUIPMENT !== 'undefined' ? EQUIPMENT : []);
       const eqCounts = [['HIPRO',892],['Folix',548],['Unyque Pro',476],['Trilift',402],['Enygma',388],['Crystal 3D',356]];
-      const fgroup = (label) => `<div class="lf-group"><button class="lf-title">${label}<i data-icon="chevD" data-cls="ic ic-sm"></i></button></div>`;
+      const FILT = {
+        'Marcas': [['Contourline',1240],['Lumenis',498],['Daeju',686],['Body Health',542],['Focuskin',410]],
+        'Tipo de material': [['Vídeo institucional',612],['Sala de espera',388],['Redes sociais',974],['Documentos',706],['Imagens',1120],['Manual técnico',164]],
+        'Formato': [['MP4',842],['PDF',706],['PNG / JPG',1120],['ZIP',288],['PPTX',96]],
+        'Status': [['Novo',214],['Atualizado',332],['Em destaque',58]],
+        'Data': [['Últimos 7 dias',86],['Último mês',274],['Últimos 3 meses',640],['Este ano',1880]],
+        'Tamanho do arquivo': [['Até 10 MB',1460],['10–50 MB',1320],['50–200 MB',980],['Acima de 200 MB',410]],
+        'Downloads': [['100+',1240],['300+',720],['500+',360],['1.000+',120]],
+      };
+      const fitem = ([n, c]) => `<label class="lf-item"><i class="lf-cb"></i><span>${n}</span>${c != null ? `<b>${c}</b>` : ''}</label>`;
+      const fgroup = (label, items, open) => `<div class="lf-group${open ? ' open' : ''}"><button class="lf-title">${label}<i data-icon="chevD" data-cls="ic ic-sm"></i></button><div class="lf-items">${items.map(fitem).join('')}</div></div>`;
       return {
         title: 'Buscar',
         crumbs: `<i data-icon="home" data-cls="ic ic-sm"></i><a href="#/">PartnerZone</a><span>›</span><span class="here">Buscar</span>`,
@@ -146,7 +156,7 @@
           </div>
 
           <div class="lib-searchrow">
-            <label class="lib-search" data-cmdk><i data-icon="search"></i><input placeholder="Buscar por equipamento, categoria ou nome do arquivo..." readonly><span class="kbd">⌘ K</span></label>
+            <label class="lib-search"><i data-icon="search"></i><input id="lib-q" type="search" autocomplete="off" placeholder="Buscar por equipamento, categoria ou nome do arquivo..."><button class="lib-qclear" id="lib-qclear" type="button" title="Limpar busca" hidden>✕</button></label>
             <div class="lib-count"><span class="lc-ic"><i data-icon="sliders" data-cls="ic ic-sm"></i></span><div><b id="lib-total">4.170</b><span>materiais encontrados</span></div></div>
           </div>
 
@@ -166,11 +176,12 @@
               <div class="lf-group open">
                 <button class="lf-title">Equipamentos<i data-icon="chevD" data-cls="ic ic-sm"></i></button>
                 <div class="lf-items">
-                  ${eqCounts.map(([n,c]) => `<label class="lf-item"><span>${n}</span><b>${c}</b></label>`).join('')}
+                  ${eqCounts.map(fitem).join('')}
                   <a class="lf-more">Ver mais <i data-icon="chevD" data-cls="ic ic-sm"></i></a>
                 </div>
               </div>
-              ${['Marcas','Tipo de material','Formato','Status','Data','Tamanho do arquivo','Downloads'].map(fgroup).join('')}
+              ${fgroup('Marcas', FILT['Marcas'], true)}
+              ${['Tipo de material','Formato','Status','Data','Tamanho do arquivo','Downloads'].map(k => fgroup(k, FILT[k], false)).join('')}
               <button class="btn ghost lf-clear"><i data-icon="trash" data-cls="ic ic-sm"></i> Limpar todos os filtros</button>
             </aside>
 

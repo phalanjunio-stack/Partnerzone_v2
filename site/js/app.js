@@ -1,7 +1,7 @@
 /* ============================================================
    APP — ícones (traçado), dados de exemplo e render da Início
    ============================================================ */
-const BUILD = 'spa63';
+const BUILD = 'spa64';
 try { console.log('%cPartnerZone • build ' + BUILD, 'background:#2f7ff2;color:#fff;padding:2px 8px;border-radius:4px;font-weight:700'); } catch (_) {}
 
 /* ---- Ícones (todos outline / currentColor) ---- */
@@ -1809,10 +1809,11 @@ function initBuscar() {
   const grid = document.getElementById('lib-grid'); if (!grid) return;
   const sizeInp = document.getElementById('lib-size');
   const countEl = document.getElementById('lib-count');
-  let filter = 'todos', view = 'masonry', size = +sizeInp.value;
+  let filter = 'todos', view = 'masonry', size = +sizeInp.value, query = '';
 
   function filtered() {
     let list = MATERIALS.slice();
+    if (query) { const q = query.toLowerCase(); list = list.filter(m => ((m.t || '') + ' ' + (m.eq || '') + ' ' + (m.tag || '') + ' ' + (m.type || '')).toLowerCase().includes(q)); }
     if (filter === 'novos') list = list.filter(m => m.novo);
     else if (filter === 'mais') list.sort((a, b) => b.dl - a.dl);
     else {
@@ -1830,10 +1831,12 @@ function initBuscar() {
     const ori = m.ar > 1.15 ? 'Horizontal' : m.ar < 0.85 ? 'Vertical' : 'Quadrado';
     return `<div class="matcard" data-masonry-item style="--mt:${T.c}">
       <div class="mat-thumb" style="aspect-ratio:${m.ar}">
+        <span class="mat-wm">${svgIcon(T.ic)}</span>
         ${m.novo ? '<span class="mat-new">Novo</span>' : ''}
-        <span class="mat-ext">${T.badge}</span>
+        <span class="mat-ext">${svgIcon(T.ic, 'ic')}${T.badge}</span>
         <span class="mat-orient">${ori}</span>
         ${m.type === 'vid' ? `<span class="mat-play">${svgIcon('play')}</span>` : `<span class="mat-ph">${svgIcon(T.ic)}</span>`}
+        <span class="mat-thumbcap">${m.eq}</span>
       </div>
       <div class="mat-info">
         <h3>${m.t}</h3>
@@ -1850,7 +1853,10 @@ function initBuscar() {
   function relayout() {
     if (!document.body.contains(grid)) return;
     const list = filtered();
-    if (countEl) countEl.textContent = (filter === 'todos' ? 4170 : list.length).toLocaleString('pt-BR');
+    const total = (filter === 'todos' && !query) ? 4170 : list.length;
+    const totalStr = total.toLocaleString('pt-BR');
+    if (countEl) countEl.textContent = totalStr;
+    const totEl = document.getElementById('lib-total'); if (totEl) totEl.textContent = totalStr;
     if (view === 'list') {
       grid.className = 'lib-grid list';
       grid.innerHTML = list.map(cardHTML).join('');
@@ -1898,8 +1904,24 @@ function initBuscar() {
   document.getElementById('lib-sort')?.addEventListener('change', relayout);
   document.querySelectorAll('.lib-filters .lf-title').forEach(t =>
     t.addEventListener('click', () => t.parentElement.classList.toggle('open')));
-  document.querySelectorAll('.lib-search[data-cmdk]').forEach(s =>
-    s.addEventListener('click', e => { e.preventDefault(); window.__openCmdK && window.__openCmdK(); }));
+
+  // busca digitável: filtra os materiais em tempo real
+  const qInp = document.getElementById('lib-q'), qClear = document.getElementById('lib-qclear');
+  let qt;
+  qInp?.addEventListener('input', () => {
+    query = qInp.value.trim();
+    if (qClear) qClear.hidden = !qInp.value;
+    clearTimeout(qt); qt = setTimeout(relayout, 70);
+  });
+  qInp?.addEventListener('search', () => { query = qInp.value.trim(); if (qClear) qClear.hidden = !qInp.value; relayout(); });
+  qClear?.addEventListener('click', () => { qInp.value = ''; query = ''; qClear.hidden = true; relayout(); qInp.focus(); });
+
+  // filtros da lateral: marcar/desmarcar (feedback visual) + limpar
+  document.querySelectorAll('.lib-filters .lf-item').forEach(it =>
+    it.addEventListener('click', e => { e.preventDefault(); it.classList.toggle('on'); Sound.click && Sound.click(); }));
+  const clearFilters = () => document.querySelectorAll('.lib-filters .lf-item.on').forEach(x => x.classList.remove('on'));
+  document.getElementById('lf-clear-top')?.addEventListener('click', clearFilters);
+  document.querySelector('.lib-filters .lf-clear')?.addEventListener('click', clearFilters);
 }
 
 /* ============================================================

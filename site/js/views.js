@@ -227,7 +227,7 @@
         ['grid','Aplicações prontas','Templates para redes sociais, apresentações e impressos.','Ver templates'],
         ['shield','Regras de uso','Saiba como aplicar a marca corretamente em qualquer meio.','Ver regras'],
       ];
-      const LOGOS = [['Logo principal','main'],['Logo branca','white'],['Logo azul','blue'],['Símbolo isolado','sym'],['Versão horizontal','main'],['Versão vertical','vert']];
+      const LOGOS = [['Logo principal','main','principal'],['Logo branca','white','branca'],['Logo azul','blue','azul'],['Símbolo isolado','sym','simbolo'],['Versão horizontal','main','horizontal'],['Versão vertical','vert','vertical']];
       const COLORS = [['Azul Contourline','#24336E'],['Branco','#FFFFFF'],['Azul escuro','#1B2655'],['Cinza claro','#F4F5F7'],['Azul claro','#3B82F6'],['Cinza médio','#6B7280'],['Azul suave','#E6ECFF'],['Cinza escuro','#1F2937']];
       const APPS = [['Post institucional','1080×1080'],['Story institucional','1080×1920'],['Capa apresentação','1920×1080'],['Assinatura de e-mail','PNG'],['Papel timbrado','A4'],['Template proposta','A4']];
       const RULES = [['check','ok','O que pode fazer','Veja exemplos de uso correto da marca.'],['x','no','O que não pode fazer','Evite usos incorretos que descaracterizam a marca.'],['crop','dash','Área de respiro','Respeite o espaço mínimo em volta da marca.'],['image','img','Uso sobre fundos','Saiba como aplicar em fundos claros, escuros e imagens.']];
@@ -238,7 +238,7 @@
         title: 'Marca ' + brand,
         crumbs: `<i data-icon="building" data-cls="ic ic-sm"></i><a href="#/">PartnerZone</a><span>›</span><a href="#/marca/Contourline">Institucional</a><span>›</span><span class="here">${brand}</span>`,
         html: `
-        <div class="brand-page">
+        <div class="brand-page" data-brand="${brand}" data-cor="${info.cor}">
           <div class="brand-hero" data-enter>
             <div class="bh-main">
               <span class="bh-badge">CENTRAL DA MARCA</span>
@@ -274,9 +274,9 @@
             <section class="bcol" data-enter>
               <div class="bcol-head"><h2>Logos oficiais</h2><a class="link-more" href="${logosHref}">Ver todos ${svgIcon('arrowR','ic ic-sm')}</a></div>
               <div class="logo-grid" id="bh-logos">
-                ${LOGOS.map(l => `<div class="logo-card ${l[1]}"><div class="logo-box">${blogo(l[1] === 'sym' ? 'sym' : l[1] === 'white' ? 'white' : l[1] === 'blue' ? 'blue' : '')}</div><div class="logo-meta"><div><b>${l[0]}</b><span>PNG · SVG · PDF</span></div><button class="logo-dl">${svgIcon('download','ic ic-sm')}</button></div></div>`).join('')}
+                ${LOGOS.map((l, i) => `<div class="logo-card ${l[1]}${i === 0 ? ' sel' : ''}" data-look="${l[2]}"><div class="logo-box">${blogo(l[1] === 'sym' ? 'sym' : l[1] === 'white' ? 'white' : l[1] === 'blue' ? 'blue' : '')}</div><div class="logo-meta"><div><b>${l[0]}</b><span>PNG · SVG · PDF</span></div><button class="logo-del" title="Apagar (admin)">${svgIcon('trash','ic ic-sm')}</button><button class="logo-dl">${svgIcon('download','ic ic-sm')}</button></div></div>`).join('')}
               </div>
-              <div class="bh-note">${svgIcon('zap','ic ic-xs')} Clique num logo (ou em "Gerar do logo") pra criar a paleta de cores automaticamente.</div>
+              <div class="bh-note">${svgIcon('zap','ic ic-xs')} Clique num logo pra ver as <b>cores</b> e as <b>artes</b> daquela versão. (Admin pode apagar e gerar a paleta do logo.)</div>
             </section>
 
             <section class="bcol" data-enter>

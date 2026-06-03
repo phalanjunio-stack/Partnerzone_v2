@@ -1043,6 +1043,8 @@ async function initFavoritos() {
 
 /* ---- PALETA AUTOMÁTICA: extrai as cores dominantes de um logo ---- */
 function rgbHex(r, g, b) { return '#' + [r, g, b].map(v => v.toString(16).padStart(2, '0')).join('').toUpperCase(); }
+function hexToRgb(h) { h = (h || '').replace('#', ''); if (h.length === 3) h = h.split('').map(c => c + c).join(''); const n = parseInt(h, 16) || 0; return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
+function hexName(hex) { const [r, g, b] = hexToRgb(hex); return colorName(r, g, b); }
 function colorName(r, g, b) {
   const R = r / 255, G = g / 255, B = b / 255, mx = Math.max(R, G, B), mn = Math.min(R, G, B), l = (mx + mn) / 2, dd = mx - mn;
   if (dd < 0.07) { if (l > 0.93) return 'Branco'; if (l < 0.1) return 'Preto'; if (l > 0.6) return 'Cinza claro'; if (l < 0.3) return 'Cinza escuro'; return 'Cinza'; }
@@ -1096,84 +1098,123 @@ const ArtesDB = (() => {
   return { get: brand => tx('readonly', st => st.get(brand)), set: (brand, arr) => tx('readwrite', st => st.put(arr, brand)) };
 })();
 
-/* CENTRAL DA MARCA — paleta automática (do logo) + cores + artes do admin */
+/* CENTRAL DA MARCA — cada LOGO é uma "versão" com sua paleta + suas artes.
+   Clicar num logo SELECIONA (não abre nada) e mostra cores + aplicações daquela versão. */
 async function initBrandHub(brand) {
   const root = document.querySelector('.brand-page'); if (!root) return;
+  const cor = root.dataset.cor || '#2f7ff2';
+  const logosEl = document.getElementById('bh-logos');
   const colorsEl = document.getElementById('bh-colors');
   const appsEl = document.getElementById('bh-apps');
+  if (!logosEl || !colorsEl || !appsEl) return;
 
-  /* ----- CORES: paleta gerada automaticamente do logo ----- */
-  const DEFAULT_PAL = [
-    { hex: '#24336E', name: 'Azul Contourline' }, { hex: '#1B2655', name: 'Azul escuro' },
-    { hex: '#3B82F6', name: 'Azul' }, { hex: '#E6ECFF', name: 'Azul claro' },
-    { hex: '#6B7280', name: 'Cinza' }, { hex: '#1F2937', name: 'Cinza escuro' },
-    { hex: '#F4F5F7', name: 'Cinza claro' }, { hex: '#FFFFFF', name: 'Branco' },
-  ];
-  const palKey = 'cl-pal:' + brand;
-  function loadPal() { try { const p = JSON.parse(localStorage.getItem(palKey)); if (p && p.length) return p; } catch (_) {} return DEFAULT_PAL; }
+  // paleta padrão por versão (distinta) — o admin pode regerar do logo
+  const DEF = {
+    principal: [cor, '#1B2655', '#6B7280', '#F4F5F7', '#1F2937', '#FFFFFF'],
+    azul:      ['#3B82F6', '#2447B0', '#1B2655', '#E6ECFF', '#0EA5E9', '#FFFFFF'],
+    branca:    ['#0F1B30', '#1F2937', '#6B7280', '#C9D3E0', '#FFFFFF', '#000000'],
+    simbolo:   [cor, '#E6ECFF', '#FFFFFF'],
+    horizontal:[cor, '#24336E', '#6B7280', '#F4F5F7', '#1F2937', '#FFFFFF'],
+    vertical:  [cor, '#1B2655', '#3B82F6', '#E6ECFF', '#1F2937', '#FFFFFF'],
+  };
+  const DEFAULT_APPS = [['Post institucional','1080×1080'],['Story institucional','1080×1920'],['Capa apresentação','1920×1080'],['Assinatura de e-mail','PNG'],['Papel timbrado','A4'],['Template proposta','A4']];
+  const palKey = look => 'cl-pal:' + brand + ':' + look;
+  const artKey = look => brand + '::' + look;
+  let sel = 'principal', aurls = [], appsCache = [];
+
+  function loadPal(look) {
+    try { const p = JSON.parse(localStorage.getItem(palKey(look))); if (p && p.length) return { pal: p, custom: true }; } catch (_) {}
+    return { pal: (DEF[look] || DEF.principal).map(h => ({ hex: h, name: hexName(h) })), custom: false };
+  }
   function renderColors() {
-    if (!colorsEl) return;
-    const pal = loadPal(), auto = !!localStorage.getItem(palKey);
-    colorsEl.innerHTML = pal.map(c =>
-      `<div class="color-card"><span class="color-sw" style="background:${c.hex}"></span><div class="color-meta"><b>${c.name || c.hex}</b><span>${c.hex}</span></div><button class="color-cp" data-hex="${c.hex}" title="Copiar HEX">${svgIcon('file','ic ic-sm')}</button></div>`).join('')
-      + (auto ? `<button class="bh-resetpal" id="bh-resetpal">${svgIcon('trash','ic ic-xs')} Voltar pra paleta padrão</button>` : '');
+    const { pal, custom } = loadPal(sel);
+    colorsEl.innerHTML = pal.map((c, i) =>
+      `<div class="color-card"><span class="color-sw" style="background:${c.hex}"></span><div class="color-meta"><b>${c.name || hexName(c.hex)}</b><span>${c.hex}</span></div>
+        <button class="color-cp" data-hex="${c.hex}" title="Copiar HEX">${svgIcon('file','ic ic-sm')}</button>
+        <button class="color-del" data-i="${i}" title="Apagar (admin)">${svgIcon('trash','ic ic-xs')}</button></div>`).join('')
+      + (custom ? `<button class="bh-resetpal" id="bh-resetpal">${svgIcon('trash','ic ic-xs')} Voltar pra paleta padrão</button>` : '');
     renderIcons(colorsEl);
   }
-  async function genFromFile(file) {
-    if (!/^image\//.test(file.type)) { Toast.error('Selecione uma imagem (logo).'); return; }
-    const t = Toast.loading('Lendo as cores do logo…');
-    const url = URL.createObjectURL(file); const pal = await extractPalette(url, 8); URL.revokeObjectURL(url);
-    if (!pal.length) { t.update({ type: 'error', msg: 'Não consegui ler as cores.', duration: 3000 }); return; }
-    try { localStorage.setItem(palKey, JSON.stringify(pal)); } catch (_) {}
-    Sound.success && Sound.success(); t.update({ type: 'success', msg: 'Paleta gerada do logo — ' + pal.length + ' cores!', duration: 3000 });
-    renderColors();
-  }
-  const pickLogo = () => { const inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'image/*';
-    inp.onchange = () => { const f = inp.files && inp.files[0]; if (f) genFromFile(f); }; inp.click(); };
-  document.getElementById('bh-genpal')?.addEventListener('click', pickLogo);
-  document.getElementById('bh-logos')?.addEventListener('click', e => { if (e.target.closest('.logo-card')) pickLogo(); });
-  colorsEl?.addEventListener('click', e => {
-    const cp = e.target.closest('.color-cp');
-    if (cp) { const hex = cp.dataset.hex; navigator.clipboard && navigator.clipboard.writeText(hex).then(() => Toast.success('Copiado: ' + hex)).catch(() => {}); return; }
-    if (e.target.closest('#bh-resetpal')) { localStorage.removeItem(palKey); Toast.info('Voltou pra paleta padrão.'); renderColors(); }
-  });
-  renderColors();
-
-  /* ----- APLICAÇÕES: artes que o admin sobe ----- */
-  const DEFAULT_APPS = [['Post institucional','1080×1080'],['Story institucional','1080×1920'],['Capa apresentação','1920×1080'],['Assinatura de e-mail','PNG'],['Papel timbrado','A4'],['Template proposta','A4']];
-  let artes = []; try { artes = (await ArtesDB.get(brand)) || []; } catch (_) {}
-  let aurls = [];
-  function renderApps() {
-    if (!appsEl) return;
+  async function renderApps() {
     aurls.forEach(u => URL.revokeObjectURL(u)); aurls = [];
-    if (artes.length) {
-      appsEl.innerHTML = artes.map((a, i) => { const u = URL.createObjectURL(a.blob); aurls.push(u);
+    try { appsCache = (await ArtesDB.get(artKey(sel))) || []; } catch (_) { appsCache = []; }
+    if (appsCache.length) {
+      appsEl.innerHTML = appsCache.map((a, i) => { const u = URL.createObjectURL(a.blob); aurls.push(u);
         return `<div class="app-card own" data-i="${i}"><div class="app-thumb img"><img src="${u}" alt="${a.title}"><button class="app-del" data-id="${a.id}" title="Remover">${svgIcon('trash','ic ic-xs')}</button></div><b>${a.title}</b><span>${a.dim || fmtBytes(a.size)}</span></div>`;
       }).join('');
     } else {
-      appsEl.innerHTML = DEFAULT_APPS.map(a => `<div class="app-card"><div class="app-thumb">${svgIcon('image','ic ph')}</div><b>${a[0]}</b><span>${a[1]}</span></div>`).join('');
+      const tint = (loadPal(sel).pal[0] || {}).hex || cor;   // placeholders tingidos na cor da versão
+      appsEl.innerHTML = DEFAULT_APPS.map(a => `<div class="app-card"><div class="app-thumb" style="background:linear-gradient(155deg, ${tint}2e, var(--surface)); color:${tint}; border-color:${tint}33">${svgIcon('image','ic ph')}</div><b>${a[0]}</b><span>${a[1]}</span></div>`).join('');
     }
     renderIcons(appsEl);
   }
+  function selectLook(look) {
+    sel = look;
+    logosEl.querySelectorAll('.logo-card').forEach(c => c.classList.toggle('sel', c.dataset.look === look));
+    renderColors(); renderApps(); Sound.click && Sound.click();
+  }
+
+  // esconde versões apagadas + garante uma selecionada
+  try { (JSON.parse(localStorage.getItem('cl-logohide:' + brand)) || []).forEach(id => logosEl.querySelector(`.logo-card[data-look="${id}"]`)?.remove()); } catch (_) {}
+  sel = logosEl.querySelector('.logo-card.sel')?.dataset.look || logosEl.querySelector('.logo-card')?.dataset.look || 'principal';
+  logosEl.querySelectorAll('.logo-card').forEach(c => c.classList.toggle('sel', c.dataset.look === sel));
+
+  // LOGOS: clicar = selecionar · apagar (admin) · download = aviso
+  logosEl.addEventListener('click', e => {
+    const del = e.target.closest('.logo-del');
+    if (del) { e.stopPropagation(); const card = del.closest('.logo-card'), look = card.dataset.look;
+      card.remove();
+      let hid = []; try { hid = JSON.parse(localStorage.getItem('cl-logohide:' + brand)) || []; } catch (_) {}
+      if (!hid.includes(look)) { hid.push(look); localStorage.setItem('cl-logohide:' + brand, JSON.stringify(hid)); }
+      Toast.info('Logo removido.');
+      if (sel === look) { const first = logosEl.querySelector('.logo-card'); if (first) selectLook(first.dataset.look); else { colorsEl.innerHTML = ''; appsEl.innerHTML = ''; } }
+      return;
+    }
+    if (e.target.closest('.logo-dl')) { e.stopPropagation(); Toast.info('Download do logo (demo).'); return; }
+    const card = e.target.closest('.logo-card'); if (card) selectLook(card.dataset.look);
+  });
+
+  // CORES: copiar HEX · apagar cor (admin) · gerar do logo · reset
+  colorsEl.addEventListener('click', e => {
+    const cp = e.target.closest('.color-cp');
+    if (cp) { navigator.clipboard && navigator.clipboard.writeText(cp.dataset.hex).then(() => Toast.success('Copiado: ' + cp.dataset.hex)).catch(() => {}); return; }
+    const cd = e.target.closest('.color-del');
+    if (cd) { const { pal } = loadPal(sel); pal.splice(+cd.dataset.i, 1); localStorage.setItem(palKey(sel), JSON.stringify(pal)); Toast.info('Cor removida.'); renderColors(); renderApps(); return; }
+    if (e.target.closest('#bh-resetpal')) { localStorage.removeItem(palKey(sel)); Toast.info('Paleta padrão restaurada.'); renderColors(); renderApps(); }
+  });
+  document.getElementById('bh-genpal')?.addEventListener('click', () => {
+    const inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'image/*';
+    inp.onchange = async () => { const f = inp.files && inp.files[0]; if (!f) return;
+      const t = Toast.loading('Lendo as cores do logo…'); const url = URL.createObjectURL(f); const p = await extractPalette(url, 8); URL.revokeObjectURL(url);
+      if (!p.length) { t.update({ type: 'error', msg: 'Não consegui ler as cores.', duration: 3000 }); return; }
+      try { localStorage.setItem(palKey(sel), JSON.stringify(p)); } catch (_) {}
+      Sound.success && Sound.success(); t.update({ type: 'success', msg: 'Paleta gerada — ' + p.length + ' cores!', duration: 3000 });
+      renderColors(); renderApps();
+    }; inp.click();
+  });
+
+  // APLICAÇÕES (artes da versão): adicionar · abrir lightbox · remover
   document.getElementById('bh-addart')?.addEventListener('click', () => {
     const inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'image/*'; inp.multiple = true;
     inp.onchange = async () => { const files = [...(inp.files || [])]; if (!files.length) return;
+      let arr = []; try { arr = (await ArtesDB.get(artKey(sel))) || []; } catch (_) {}
       for (let i = 0; i < files.length; i++) { const f = files[i], dim = await imgDim(f);
-        artes.unshift({ id: 'art' + Date.now() + '-' + i, title: f.name.replace(/\.[^.]+$/, ''), ext: (f.name.split('.').pop() || 'PNG').toUpperCase().slice(0, 4), size: f.size, dim, blob: f }); }
-      try { await ArtesDB.set(brand, artes); Sound.success && Sound.success(); Toast.success(files.length + ' arte(s) adicionada(s)!'); }
+        arr.unshift({ id: 'art' + Date.now() + '-' + i, title: f.name.replace(/\.[^.]+$/, ''), ext: (f.name.split('.').pop() || 'PNG').toUpperCase().slice(0, 4), size: f.size, dim, blob: f }); }
+      try { await ArtesDB.set(artKey(sel), arr); Sound.success && Sound.success(); Toast.success(files.length + ' arte(s) adicionada(s)!'); }
       catch (_) { Toast.error('Não consegui salvar. Tente arquivos menores.'); }
       renderApps();
     }; inp.click();
   });
-  appsEl?.addEventListener('click', async e => {
+  appsEl.addEventListener('click', async e => {
     const del = e.target.closest('.app-del');
-    if (del) { e.stopPropagation(); artes = artes.filter(a => a.id !== del.dataset.id); try { await ArtesDB.set(brand, artes); } catch (_) {} Toast.info('Arte removida.'); renderApps(); return; }
-    const card = e.target.closest('.app-card.own'); if (card) { const a = artes[+card.dataset.i]; if (a) {
+    if (del) { e.stopPropagation(); const arr = appsCache.filter(a => a.id !== del.dataset.id); try { await ArtesDB.set(artKey(sel), arr); } catch (_) {} Toast.info('Arte removida.'); renderApps(); return; }
+    const card = e.target.closest('.app-card.own'); if (card) { const a = appsCache[+card.dataset.i]; if (a) {
       const u = URL.createObjectURL(a.blob); aurls.push(u);
       window.__openImg && window.__openImg([{ kind: 'img', t: a.title, title: a.title, ext: a.ext || 'PNG', size: fmtBytes(a.size), date: a.dim || '', folder: 'Aplicações', url: u, blob: a.blob, brand, darkBg: false }], 0);
     } }
   });
-  renderApps();
+
+  renderColors(); renderApps();
 }
 
 /* LIGHTBOX de imagem (galeria) — visual grande + metadados + baixar + navegação */

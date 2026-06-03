@@ -107,8 +107,22 @@
 .bh-genbtn .ic { width: 14px; height: 14px; }
 .bh-note { display: flex; align-items: center; gap: 7px; margin-top: 12px; font-size: 11.5px; color: var(--text-muted); }
 .bh-note .ic { width: 13px; height: 13px; color: var(--accent); flex-shrink: 0; }
-#bh-logos .logo-card { cursor: pointer; transition: border-color .15s, transform .15s; }
+#bh-logos .logo-card { position: relative; cursor: pointer; transition: border-color .15s, transform .15s, box-shadow .15s; }
 #bh-logos .logo-card:hover { border-color: var(--accent-border); transform: translateY(-2px); }
+#bh-logos .logo-card.sel { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent), 0 14px 30px -18px var(--accent); }
+#bh-logos .logo-card.sel::after { content: "✓ Selecionado"; position: absolute; top: 8px; left: 8px; z-index: 2; font-size: 10px; font-weight: 700;
+  color: #fff; background: var(--accent); padding: 3px 8px; border-radius: 999px; }
+.logo-del { width: 30px; height: 30px; border-radius: 8px; display: grid; place-items: center; flex-shrink: 0; cursor: pointer;
+  color: var(--text-muted); background: var(--surface-hover); border: 1px solid var(--border); opacity: 0; transition: opacity .15s, color .15s, border-color .15s; }
+#bh-logos .logo-card:hover .logo-del { opacity: 1; }
+.logo-del:hover { color: var(--error); border-color: var(--error); }
+.logo-del .ic { width: 14px; height: 14px; }
+/* apagar cor (admin) */
+.color-card { position: relative; }
+.color-del { width: 24px; height: 24px; border-radius: 6px; display: grid; place-items: center; flex-shrink: 0; cursor: pointer;
+  color: var(--text-faint); background: none; border: none; opacity: 0; transition: opacity .15s, color .15s; }
+.color-card:hover .color-del { opacity: 1; }
+.color-del:hover { color: var(--error); }
 .color-cp { cursor: pointer; }
 .bh-resetpal { grid-column: 1 / -1; display: inline-flex; align-items: center; justify-content: center; gap: 6px; margin-top: 4px;
   font-size: 11.5px; font-weight: 600; color: var(--text-muted); background: var(--surface-hover); border: 1px solid var(--border);

@@ -72,9 +72,11 @@
   object-fit: cover; object-position: center;
   transform: translate(var(--ox,0), var(--oy,0)) scale(var(--os,1)) rotate(var(--or,0)); }
 .cat-hero.has-bg::before, .cat-hero.has-bg::after { display: none; }
-.cat-hero.has-bg .cat-hero-img { display: none; }
+/* banner = FUNDO; a foto REAL do equipamento continua por cima, à direita */
+.cat-hero.has-bg .cat-hero-img { display: block; z-index: 1; }
+.cat-hero.has-bg .cat-hero-main { z-index: 2; }
 .cat-hero.has-bg .cat-hero-main::before { content: ""; position: absolute; inset: -46px -48px; z-index: -1;
-  background: linear-gradient(90deg, rgba(8,22,60,.82) 0%, rgba(8,22,60,.5) 55%, transparent 85%); }
+  background: linear-gradient(90deg, rgba(8,22,60,.86) 0%, rgba(8,22,60,.55) 52%, rgba(8,22,60,.12) 78%, transparent 92%); }
 
 /* ---------------- search ---------------- */
 .cat-searchbar { display: flex; align-items: center; gap: 10px; margin-bottom: 30px; }

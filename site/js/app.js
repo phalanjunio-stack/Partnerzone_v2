@@ -304,8 +304,61 @@ window.renderIcons = renderIcons; window.svgIcon = svgIcon;
 /* ============================================================
    SHELL — roda UMA vez (sidebar, topbar, modais, picker de capa)
    ============================================================ */
+/* LOGO PARTNERZONE — remove o fundo branco do PNG e separa anel + wordmark (canvas) */
+function processLogo(src) {
+  return new Promise((res, rej) => {
+    const im = new Image(); im.crossOrigin = 'anonymous';
+    im.onload = () => {
+      const W = im.naturalWidth, H = im.naturalHeight;
+      const c = document.createElement('canvas'); c.width = W; c.height = H;
+      const x = c.getContext('2d'); x.drawImage(im, 0, 0);
+      let d; try { d = x.getImageData(0, 0, W, H); } catch (e) { return rej(e); }
+      const p = d.data;
+      for (let i = 0; i < p.length; i += 4) {   // branco/quase-branco → transparente
+        const r = p[i], g = p[i + 1], b = p[i + 2], mn = Math.min(r, g, b), mx = Math.max(r, g, b);
+        if (mn > 236 && (mx - mn) < 16) p[i + 3] = 0;
+      }
+      x.putImageData(d, 0, 0);
+      const colHas = new Uint8Array(W), rowHas = new Uint8Array(H);
+      for (let y = 0; y < H; y++) for (let xx = 0; xx < W; xx++) if (p[(y * W + xx) * 4 + 3] > 30) { colHas[xx] = 1; rowHas[y] = 1; }
+      let y0 = 0, y1 = H - 1; while (y0 < H && !rowHas[y0]) y0++; while (y1 > 0 && !rowHas[y1]) y1--;
+      const ih = Math.max(1, y1 - y0 + 1);
+      const gap = Math.max(6, Math.round(W * 0.012)); const segs = []; let s = -1, run = 0;
+      for (let xx = 0; xx < W; xx++) {
+        if (colHas[xx]) { if (s < 0) s = xx; run = 0; }
+        else if (s >= 0) { run++; if (run >= gap) { segs.push([s, xx - run]); s = -1; run = 0; } }
+      }
+      if (s >= 0) segs.push([s, W - 1]);
+      const crop = (x0, x1) => { const cw = Math.max(1, x1 - x0 + 1), cc = document.createElement('canvas'); cc.width = cw; cc.height = ih;
+        cc.getContext('2d').drawImage(c, x0, y0, cw, ih, 0, 0, cw, ih); return cc.toDataURL('image/png'); };
+      let mark, word;
+      if (segs.length >= 2) { mark = crop(segs[0][0], segs[0][1]); word = crop(segs[1][0], segs[segs.length - 1][1]); }
+      else if (segs.length === 1) { const a = segs[0][0], bb = segs[0][1], sq = Math.min(ih, bb - a + 1); mark = crop(a, a + sq - 1); word = crop(a, bb); }
+      else { mark = src; word = src; }
+      res({ mark, word });
+    };
+    im.onerror = rej; im.src = src;
+  });
+}
+function initPartnerLogo() {
+  const markEl = document.querySelector('.brand .brand-logo');
+  const wordEl = document.querySelector('.brand .brand-name b');
+  if (!markEl || !wordEl) return;
+  const apply = o => { if (!o || !o.mark) return;
+    markEl.innerHTML = `<img class="pz-mark" src="${o.mark}" alt="">`;
+    wordEl.innerHTML = `<img class="pz-word" src="${o.word}" alt="PartnerZone">`;
+    document.querySelector('.brand')?.classList.add('has-logo');
+  };
+  let cached = null; try { cached = JSON.parse(localStorage.getItem('cl-pz-logo-v1')); } catch (_) {}
+  if (cached && cached.mark) { apply(cached); return; }
+  processLogo('assets/partnerzone-logo.png?v=1')
+    .then(o => { apply(o); try { localStorage.setItem('cl-pz-logo-v1', JSON.stringify(o)); } catch (_) {} })
+    .catch(() => {});
+}
+
 function initShell() {
   renderNav();
+  initPartnerLogo();
   renderIcons();                       // ícones dos placeholders do shell
   Theme.mount(document.getElementById('theme-switcher'));
   UI.smokeGlow && UI.smokeGlow(document.getElementById('theme-btn'));

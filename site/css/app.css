@@ -419,6 +419,16 @@ input[readonly], .lib-search, .topsearch { cursor: pointer; }
 .eq-grid .eq-card { width: 100%; }
 
 /* ============ EDITOR DE IMAGEM (admin: posição / zoom / rotação) ============ */
+/* layout em 2 colunas: foto à ESQUERDA, controles + Salvar à DIREITA (nada some no rodapé) */
+.modal.modal-cover { width: min(800px, 95vw); }
+.cover-editor { display: flex; gap: 22px; align-items: flex-start; }
+.cover-editor .cover-pick { flex: 0 0 300px; margin: 0; max-height: 64vh; }
+.cover-side { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 14px; align-self: stretch; }
+.cover-side .xf-controls { margin-top: 0; }
+@media (max-width: 720px) {
+  .cover-editor { flex-direction: column; }
+  .cover-editor .cover-pick { flex: none; width: 100%; }
+}
 .cover-pick { position: relative; border-radius: 16px; overflow: hidden; aspect-ratio: 4 / 5; max-height: 56vh; margin: 0 auto;
   background: repeating-conic-gradient(#0d1726 0% 25%, #0a1424 0% 50%) 50% / 22px 22px; border: 1px solid var(--border);
   cursor: grab; touch-action: none; }
@@ -462,11 +472,13 @@ input[readonly], .lib-search, .topsearch { cursor: pointer; }
 .xf-chip .ic { width: 14px; height: 14px; }
 #xf-reset:hover { background: color-mix(in srgb, var(--error) 14%, transparent); border-color: var(--error); color: var(--error); }
 
-.cover-actions { display: flex; gap: 12px; margin-top: 18px; }
-.cover-actions .btn { flex: 1; justify-content: center; height: 46px; margin: 0; }
+/* ações na lateral: empilhadas, Salvar coladas no rodapé do painel direito */
+.cover-actions { display: flex; flex-direction: column; gap: 10px; margin-top: auto; padding-top: 6px; }
+.cover-actions .btn { width: 100%; flex: none; justify-content: center; height: 46px; margin: 0; }
 .cover-actions label.btn { cursor: pointer; }
-.cover-hint { font-size: 12.5px; color: var(--text-muted); margin-top: 14px; text-align: center; line-height: 1.7; }
-.cover-formats { font-size: 11.5px; color: var(--text-faint); }
+#cover-save { box-shadow: 0 8px 20px -10px var(--accent); }
+.cover-hint { font-size: 11.5px; color: var(--text-muted); margin-top: 2px; text-align: left; line-height: 1.5; }
+.cover-formats { font-size: 11px; color: var(--text-faint); }
 
 /* abas Capa / Ao passar o mouse */
 .cover-tabs { display: flex; gap: 4px; padding: 4px; margin-bottom: 16px; border-radius: 12px;
@@ -484,8 +496,8 @@ input[readonly], .lib-search, .topsearch { cursor: pointer; }
 .cover-empty b { color: var(--text); font-size: 15px; font-weight: 700; }
 .cover-empty u { color: var(--accent); font-weight: 600; text-decoration: none; margin-top: 4px;
   padding: 6px 14px; border-radius: 999px; background: var(--accent-soft); border: 1px solid var(--accent-border); }
-/* botões do rodapé do modal de capa em linha (vence o `.modal .btn { width:100% }`) */
-.modal .cover-actions .btn { width: auto; }
+/* botões de ação do editor empilhados na lateral (largura cheia) */
+.modal .cover-actions .btn { width: 100%; }
 
 /* ============ MODAL VISUALIZADOR DE PDF (portfólio) ============ */
 .modal.modal-pdf { width: min(1080px, 95vw); max-height: 92vh; }

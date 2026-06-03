@@ -1,7 +1,7 @@
 /* ============================================================
    APP — ícones (traçado), dados de exemplo e render da Início
    ============================================================ */
-const BUILD = 'spa45';
+const BUILD = 'spa46';
 try { console.log('%cPartnerZone • build ' + BUILD, 'background:#2f7ff2;color:#fff;padding:2px 8px;border-radius:4px;font-weight:700'); } catch (_) {}
 
 /* ---- Ícones (todos outline / currentColor) ---- */
@@ -544,7 +544,7 @@ function initCoverPicker() {
   let drag = null;
   imgEl.addEventListener('pointerdown', e => {
     if (!cur().src) return;
-    e.preventDefault();
+    e.preventDefault(); e.stopPropagation();   // impede o drag-scroll do modal de mexer junto
     const r = stage.getBoundingClientRect();
     drag = { px: e.clientX, py: e.clientY, w: r.width, h: r.height, x0: cur().x, y0: cur().y };
     stage.classList.add('dragging');

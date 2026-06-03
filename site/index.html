@@ -8,17 +8,17 @@
   <title>PartnerZone — Contourline</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/theme.css?v=spa45">
-  <link rel="stylesheet" href="css/app.css?v=spa45">
-  <link rel="stylesheet" href="css/effects.css?v=spa45">
-  <link rel="stylesheet" href="css/categoria.css?v=spa45">
-  <link rel="stylesheet" href="css/pasta.css?v=spa45">
-  <link rel="stylesheet" href="css/material.css?v=spa45">
-  <link rel="stylesheet" href="css/buscar.css?v=spa45">
-  <link rel="stylesheet" href="css/upload.css?v=spa45">
-  <link rel="stylesheet" href="css/sql.css?v=spa45">
-  <link rel="stylesheet" href="css/marca.css?v=spa45">
-  <link rel="stylesheet" href="css/splash.css?v=spa45">
+  <link rel="stylesheet" href="css/theme.css?v=spa46">
+  <link rel="stylesheet" href="css/app.css?v=spa46">
+  <link rel="stylesheet" href="css/effects.css?v=spa46">
+  <link rel="stylesheet" href="css/categoria.css?v=spa46">
+  <link rel="stylesheet" href="css/pasta.css?v=spa46">
+  <link rel="stylesheet" href="css/material.css?v=spa46">
+  <link rel="stylesheet" href="css/buscar.css?v=spa46">
+  <link rel="stylesheet" href="css/upload.css?v=spa46">
+  <link rel="stylesheet" href="css/sql.css?v=spa46">
+  <link rel="stylesheet" href="css/marca.css?v=spa46">
+  <link rel="stylesheet" href="css/splash.css?v=spa46">
   <script>document.documentElement.setAttribute('data-theme', localStorage.getItem('cl-theme') || 'dark');</script>
   <script src="js/core/splash.js"></script>
 </head>
@@ -142,7 +142,7 @@
 
   <!-- ===================== MODAL: Capa do equipamento (admin) ===================== -->
   <div class="modal-bd" id="modal-capa">
-    <div class="modal"><div class="modal-inner">
+    <div class="modal modal-cover"><div class="modal-inner">
       <div class="modal-head">
         <div><h2>Editor de imagem</h2><p>Arraste pra posicionar · zoom pra cortar/ampliar · rotação pra inclinar.</p></div>
         <button class="x" data-close-modal><svg class="ic" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
@@ -153,45 +153,49 @@
           <button class="ctab" data-img="2">Hover</button>
           <button class="ctab" data-img="3">Banner do topo</button>
         </div>
-        <div class="cover-pick" id="cover-pick">
-          <img id="cover-img" alt="capa" draggable="false">
-          <div class="cover-thirds" aria-hidden="true"></div>
-          <div class="cover-empty" id="cover-empty" hidden><span><i data-icon="image" data-cls="ic"></i><b>Adicionar imagem</b><span id="cover-empty-sub">Clique para escolher a foto.</span><br><u>Clique aqui para escolher</u></span></div>
-        </div>
+        <div class="cover-editor">
+          <div class="cover-pick" id="cover-pick">
+            <img id="cover-img" alt="capa" draggable="false">
+            <div class="cover-thirds" aria-hidden="true"></div>
+            <div class="cover-empty" id="cover-empty" hidden><span><i data-icon="image" data-cls="ic"></i><b>Adicionar imagem</b><span id="cover-empty-sub">Clique para escolher a foto.</span><br><u>Clique aqui para escolher</u></span></div>
+          </div>
 
-        <div class="xf-controls" id="xf-controls">
-          <div class="xf-row">
-            <span class="xf-lab"><i data-icon="expand" data-cls="ic ic-sm"></i> Zoom</span>
-            <input type="range" id="xf-zoom" min="0.4" max="4" step="0.01" value="1">
-            <output class="xf-val" id="xf-zoom-v">100%</output>
-          </div>
-          <div class="xf-row">
-            <span class="xf-lab"><i data-icon="rotate" data-cls="ic ic-sm"></i> Rotação</span>
-            <input type="range" id="xf-rot" min="-180" max="180" step="1" value="0">
-            <output class="xf-val" id="xf-rot-v">0°</output>
-          </div>
-          <div class="xf-tools">
-            <div class="xf-pad" id="xf-pad">
-              <button data-nudge="0,-3" title="Mover p/ cima" style="grid-area:u">↑</button>
-              <button data-nudge="-3,0" title="Mover p/ esquerda" style="grid-area:l">←</button>
-              <button data-nudge="c" id="xf-center" title="Centralizar" style="grid-area:c"><i data-icon="move" data-cls="ic ic-sm"></i></button>
-              <button data-nudge="3,0" title="Mover p/ direita" style="grid-area:r">→</button>
-              <button data-nudge="0,3" title="Mover p/ baixo" style="grid-area:d">↓</button>
+          <div class="cover-side">
+            <div class="xf-controls" id="xf-controls">
+              <div class="xf-row">
+                <span class="xf-lab"><i data-icon="expand" data-cls="ic ic-sm"></i> Zoom</span>
+                <input type="range" id="xf-zoom" min="0.4" max="4" step="0.01" value="1">
+                <output class="xf-val" id="xf-zoom-v">100%</output>
+              </div>
+              <div class="xf-row">
+                <span class="xf-lab"><i data-icon="rotate" data-cls="ic ic-sm"></i> Rotação</span>
+                <input type="range" id="xf-rot" min="-180" max="180" step="1" value="0">
+                <output class="xf-val" id="xf-rot-v">0°</output>
+              </div>
+              <div class="xf-tools">
+                <div class="xf-pad" id="xf-pad">
+                  <button data-nudge="0,-3" title="Mover p/ cima" style="grid-area:u">↑</button>
+                  <button data-nudge="-3,0" title="Mover p/ esquerda" style="grid-area:l">←</button>
+                  <button data-nudge="c" id="xf-center" title="Centralizar" style="grid-area:c"><i data-icon="move" data-cls="ic ic-sm"></i></button>
+                  <button data-nudge="3,0" title="Mover p/ direita" style="grid-area:r">→</button>
+                  <button data-nudge="0,3" title="Mover p/ baixo" style="grid-area:d">↓</button>
+                </div>
+                <div class="xf-quick">
+                  <button class="xf-chip" data-rot="-90" title="Girar 90° à esquerda"><i data-icon="rotate" data-cls="ic ic-sm" style="transform:scaleX(-1)"></i> 90°</button>
+                  <button class="xf-chip" data-rot="90" title="Girar 90° à direita"><i data-icon="rotate" data-cls="ic ic-sm"></i> 90°</button>
+                  <button class="xf-chip" id="xf-reset"><i data-icon="trash" data-cls="ic ic-sm"></i> Resetar</button>
+                </div>
+              </div>
             </div>
-            <div class="xf-quick">
-              <button class="xf-chip" data-rot="-90" title="Girar 90° à esquerda"><i data-icon="rotate" data-cls="ic ic-sm" style="transform:scaleX(-1)"></i> 90°</button>
-              <button class="xf-chip" data-rot="90" title="Girar 90° à direita"><i data-icon="rotate" data-cls="ic ic-sm"></i> 90°</button>
-              <button class="xf-chip" id="xf-reset"><i data-icon="trash" data-cls="ic ic-sm"></i> Resetar</button>
-            </div>
-          </div>
-        </div>
 
-        <div class="cover-hint"><span class="cover-formats">Aceita PNG, JPG ou WebP — qualquer tamanho (é otimizada automaticamente).</span></div>
-        <div class="cover-actions">
-          <label class="btn ghost" id="cover-add"><i data-icon="image" data-cls="ic ic-sm"></i> <span id="cover-add-label">Trocar imagem</span>
-            <input type="file" accept="image/png,image/jpeg,image/webp,image/*" id="cover-file" hidden></label>
-          <button class="btn ghost" id="cover-clear" hidden><i data-icon="trash" data-cls="ic ic-sm"></i> Remover</button>
-          <button class="btn" id="cover-save"><i data-icon="check" data-cls="ic ic-sm"></i> Salvar</button>
+            <div class="cover-hint"><span class="cover-formats">Aceita PNG, JPG ou WebP — qualquer tamanho (otimizada automaticamente).</span></div>
+            <div class="cover-actions">
+              <label class="btn ghost" id="cover-add"><i data-icon="image" data-cls="ic ic-sm"></i> <span id="cover-add-label">Trocar imagem</span>
+                <input type="file" accept="image/png,image/jpeg,image/webp,image/*" id="cover-file" hidden></label>
+              <button class="btn ghost" id="cover-clear" hidden><i data-icon="trash" data-cls="ic ic-sm"></i> Remover</button>
+              <button class="btn" id="cover-save"><i data-icon="check" data-cls="ic ic-sm"></i> Salvar</button>
+            </div>
+          </div>
         </div>
       </div>
     </div></div>
@@ -341,11 +345,11 @@
     </div>
   </div>
 
-  <script src="js/core/sound.js?v=spa45"></script>
-  <script src="js/core/theme.js?v=spa45"></script>
-  <script src="js/components/ui.js?v=spa45"></script>
-  <script src="js/app.js?v=spa45"></script>
-  <script src="js/core/db.js?v=spa45"></script>
-  <script src="js/views.js?v=spa45"></script>
+  <script src="js/core/sound.js?v=spa46"></script>
+  <script src="js/core/theme.js?v=spa46"></script>
+  <script src="js/components/ui.js?v=spa46"></script>
+  <script src="js/app.js?v=spa46"></script>
+  <script src="js/core/db.js?v=spa46"></script>
+  <script src="js/views.js?v=spa46"></script>
 </body>
 </html>

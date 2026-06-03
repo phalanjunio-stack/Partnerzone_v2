@@ -4,6 +4,7 @@
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 *::selection { background: var(--accent-soft); color: var(--text); }
+[hidden] { display: none !important; }   /* o atributo hidden sempre esconde (vence display:grid/flex dos componentes) */
 
 html, body { height: 100%; }
 html { scroll-behavior: smooth; }
@@ -475,6 +476,7 @@ input[readonly], .lib-search, .topsearch { cursor: pointer; }
 /* placeholder quando a 2ª imagem ainda não foi adicionada — CLICÁVEL (abre o seletor) */
 .cover-empty { position: absolute; inset: 0; z-index: 3; display: grid; place-items: center; text-align: center;
   padding: 24px; background: var(--bg); cursor: pointer; transition: background .18s; }
+.cover-empty[hidden] { display: none; }   /* vence o display:grid quando tem imagem (senão cobre a foto) */
 .cover-empty:hover { background: var(--surface-hover); }
 .cover-empty span { display: flex; flex-direction: column; align-items: center; gap: 6px; max-width: 280px;
   font-size: 12.5px; color: var(--text-muted); line-height: 1.5; }

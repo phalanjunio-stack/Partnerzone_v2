@@ -1,5 +1,5 @@
 /* ============================================================
-   SPLASH — ORBITAL, copiado IGUAL da GALERIA CONTOUR
+   SPLASH — PartnerZone (navy premium · anel + wordmark + glow)
    ============================================================ */
 window.Splash = (() => {
   let el = null;
@@ -10,25 +10,28 @@ window.Splash = (() => {
     el.id = "splash-overlay";
     el.className = "splash-overlay";
     el.innerHTML = `
-      <div class="stage">
-        <div class="ring-outermost"></div>
-        <div class="ring-outer"></div>
-        <div class="ring-inner"></div>
-        <div class="arc"></div>
-        <div class="orbit-fast"><div class="dot"></div></div>
-        <div class="orbit-slow"><div class="dot"></div></div>
-        <div class="orbit-slow"><div class="dot"></div></div>
-        <div class="orbit-slow"><div class="dot"></div></div>
-        <div class="orbit-slow"><div class="dot"></div></div>
-        <div class="core">
-          <img src="assets/splash-logo.png" alt="Contourline"
-               onerror="this.outerHTML='<div class=&quot;fallback&quot;>C</div>'">
+      <div class="sp-aura"></div>
+      <div class="sp-particles"></div>
+      <div class="sp-logo">
+        <div class="sp-ring">
+          <svg viewBox="0 0 120 120" aria-hidden="true">
+            <defs>
+              <linearGradient id="sp-grad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#4cc4ff"/>
+                <stop offset=".5" stop-color="#3b82f6"/>
+                <stop offset="1" stop-color="#7c5cff"/>
+              </linearGradient>
+            </defs>
+            <circle class="sp-ring-base" cx="60" cy="60" r="43" fill="none" stroke="url(#sp-grad)" stroke-width="13" stroke-linecap="round"/>
+            <circle class="sp-ring-spin" cx="60" cy="60" r="43" fill="none" stroke="#d6ecff" stroke-width="4.5" stroke-linecap="round" stroke-dasharray="32 238"/>
+          </svg>
+          <span class="sp-ring-glow"></span>
         </div>
+        <div class="sp-word">PartnerZone</div>
       </div>
-      <div class="splash-title">Iniciando <em>PartnerZone</em></div>
-      <div class="splash-ver">Portal de Parceiros · Contourline</div>
-      <div class="splash-dots"><span></span><span></span><span></span></div>
-      <div class="splash-footer">
+      <div class="sp-bar"><i></i></div>
+      <div class="sp-sub">Portal de Parceiros · Contourline</div>
+      <div class="sp-foot">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
         Seus dados estão protegidos
       </div>
@@ -37,7 +40,7 @@ window.Splash = (() => {
 
     // some quando a página estiver pronta (tempo mínimo agradável)
     const start = performance.now();
-    const go = () => setTimeout(hide, Math.max(0, 1400 - (performance.now() - start)));
+    const go = () => setTimeout(hide, Math.max(0, 1700 - (performance.now() - start)));
     if (document.readyState === "complete") go();
     else window.addEventListener("load", go, { once: true });
   }
@@ -47,7 +50,7 @@ window.Splash = (() => {
     el = el || document.getElementById("splash-overlay");
     if (!el) return;
     el.classList.add("fading");
-    setTimeout(() => { el && el.remove(); el = null; }, 600);
+    setTimeout(() => { el && el.remove(); el = null; }, 650);
   }
 
   return { mount, hide };

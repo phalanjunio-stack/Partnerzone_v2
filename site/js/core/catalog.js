@@ -94,6 +94,21 @@ window.Catalog = (() => {
       });
       MATERIALS.splice(0, MATERIALS.length, ...mapped);
     }
+
+    // ---- ÁUDIO (acervo da página /audio) — materials tipo:"audio" viram TRACKS do player ----
+    if (typeof TRACKS !== "undefined" && Array.isArray(c.materials)) {
+      const audios = c.materials.filter(m => m.tipo === "audio");
+      if (audios.length) {
+        const eqNameA = {}; (c.equipamentos || []).forEach(e => { if (e.slug) eqNameA[e.slug] = e.name; });
+        TRACKS.splice(0, TRACKS.length, ...audios.map(m => ({
+          id:    m.id || m.titulo,
+          title: m.titulo || "",
+          tag:   (m.tags && m.tags[0]) || m.pasta || "Áudio",
+          eq:    eqNameA[m.equipamento] || m.equipamento || "",
+          src:   m.url || "",
+        })));
+      }
+    }
     return true;
   }
 

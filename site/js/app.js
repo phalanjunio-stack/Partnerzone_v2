@@ -1120,7 +1120,7 @@ async function initBrandHub(brand) {
   const DEFAULT_APPS = [['Post institucional','1080×1080'],['Story institucional','1080×1920'],['Capa apresentação','1920×1080'],['Assinatura de e-mail','PNG'],['Papel timbrado','A4'],['Template proposta','A4']];
   const palKey = look => 'cl-pal:' + brand + ':' + look;
   const artKey = look => brand + '::' + look;
-  let sel = 'principal', aurls = [], appsCache = [];
+  let sel = 'principal', aurls = [], appsCache = [], lurls = [], uploadedLogos = [];
 
   function loadPal(look) {
     try { const p = JSON.parse(localStorage.getItem(palKey(look))); if (p && p.length) return { pal: p, custom: true }; } catch (_) {}
@@ -1153,25 +1153,72 @@ async function initBrandHub(brand) {
     logosEl.querySelectorAll('.logo-card').forEach(c => c.classList.toggle('sel', c.dataset.look === look));
     renderColors(); renderApps(); Sound.click && Sound.click();
   }
+  function hasHidden() { try { return (JSON.parse(localStorage.getItem('cl-logohide:' + brand)) || []).length > 0; } catch (_) { return false; } }
+  function logoCardHTML(r, url) {
+    const bg = r.darkBg ? '#0f1b30' : '#f4f6fb';
+    return `<div class="logo-card up-logo${'up:' + r.id === sel ? ' sel' : ''}" data-look="up:${r.id}">
+      <div class="logo-box img" style="background:${bg}"><img src="${url}" alt="${r.title}"></div>
+      <div class="logo-meta"><div><b>${r.title}</b><span>${r.ext || 'PNG'} · ${fmtBytes(r.size)}</span></div>
+        <button class="logo-del" title="Apagar (admin)">${svgIcon('trash','ic ic-sm')}</button>
+        <button class="logo-dl">${svgIcon('download','ic ic-sm')}</button></div></div>`;
+  }
+  async function renderLogos() {
+    logosEl.querySelectorAll('.up-logo, .bh-logos-empty').forEach(n => n.remove());
+    lurls.forEach(u => URL.revokeObjectURL(u)); lurls = [];
+    try { uploadedLogos = (await LogosDB.get(brand)) || []; } catch (_) { uploadedLogos = []; }
+    const html = uploadedLogos.map(r => { const u = URL.createObjectURL(r.blob); lurls.push(u); return logoCardHTML(r, u); }).join('');
+    if (html) logosEl.insertAdjacentHTML('afterbegin', html);
+    if (!logosEl.querySelector('.logo-card')) {
+      logosEl.insertAdjacentHTML('beforeend', `<div class="bh-logos-empty">
+        <span class="pf-empty-ic">${svgIcon('upload','ic')}</span><b>Nenhum logo aqui</b>
+        <span>Solte os logos da marca — a paleta de cores é gerada automaticamente de cada um.</span>
+        <div class="bh-empty-btns"><button class="btn" id="bh-empty-add">${svgIcon('upload','ic ic-sm')} Adicionar logo</button>${hasHidden() ? `<button class="btn ghost" id="bh-restore">Restaurar padrões</button>` : ''}</div></div>`);
+    }
+    renderIcons(logosEl);
+    logosEl.querySelectorAll('.logo-card').forEach(c => c.classList.toggle('sel', c.dataset.look === sel));
+  }
 
-  // esconde versões apagadas + garante uma selecionada
-  try { (JSON.parse(localStorage.getItem('cl-logohide:' + brand)) || []).forEach(id => logosEl.querySelector(`.logo-card[data-look="${id}"]`)?.remove()); } catch (_) {}
-  sel = logosEl.querySelector('.logo-card.sel')?.dataset.look || logosEl.querySelector('.logo-card')?.dataset.look || 'principal';
-  logosEl.querySelectorAll('.logo-card').forEach(c => c.classList.toggle('sel', c.dataset.look === sel));
-
-  // LOGOS: clicar = selecionar · apagar (admin) · download = aviso
-  logosEl.addEventListener('click', e => {
+  // LOGOS: clicar = selecionar · apagar (admin) · adicionar/restaurar (vazio) · download = aviso
+  logosEl.addEventListener('click', async e => {
+    if (e.target.closest('#bh-empty-add')) { document.getElementById('bh-addlogo')?.click(); return; }
+    if (e.target.closest('#bh-restore')) { localStorage.removeItem('cl-logohide:' + brand); window.__route && window.__route(); return; }
     const del = e.target.closest('.logo-del');
     if (del) { e.stopPropagation(); const card = del.closest('.logo-card'), look = card.dataset.look;
-      card.remove();
-      let hid = []; try { hid = JSON.parse(localStorage.getItem('cl-logohide:' + brand)) || []; } catch (_) {}
-      if (!hid.includes(look)) { hid.push(look); localStorage.setItem('cl-logohide:' + brand, JSON.stringify(hid)); }
-      Toast.info('Logo removido.');
+      if (look.indexOf('up:') === 0) {
+        const id = look.slice(3); uploadedLogos = uploadedLogos.filter(r => r.id !== id);
+        try { await LogosDB.set(brand, uploadedLogos); } catch (_) {}
+        localStorage.removeItem(palKey(look));
+      } else {
+        let hid = []; try { hid = JSON.parse(localStorage.getItem('cl-logohide:' + brand)) || []; } catch (_) {}
+        if (!hid.includes(look)) { hid.push(look); localStorage.setItem('cl-logohide:' + brand, JSON.stringify(hid)); }
+      }
+      card.remove(); Toast.info('Logo removido.');
+      await renderLogos();
       if (sel === look) { const first = logosEl.querySelector('.logo-card'); if (first) selectLook(first.dataset.look); else { colorsEl.innerHTML = ''; appsEl.innerHTML = ''; } }
       return;
     }
     if (e.target.closest('.logo-dl')) { e.stopPropagation(); Toast.info('Download do logo (demo).'); return; }
     const card = e.target.closest('.logo-card'); if (card) selectLook(card.dataset.look);
+  });
+
+  // ADICIONAR LOGO (admin) — vira uma versão + paleta automática
+  document.getElementById('bh-addlogo')?.addEventListener('click', () => {
+    const inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'image/png,image/svg+xml,image/jpeg,image/*'; inp.multiple = true;
+    inp.onchange = async () => {
+      const files = [...(inp.files || [])]; if (!files.length) return;
+      let arr = []; try { arr = (await LogosDB.get(brand)) || []; } catch (_) {}
+      let firstId = null;
+      for (let i = 0; i < files.length; i++) { const f = files[i], { ar, darkBg } = await analyzeImg(f);
+        const id = 'lg' + Date.now() + '-' + i; if (!firstId) firstId = id;
+        arr.unshift({ id, title: f.name.replace(/\.[^.]+$/, ''), ext: (f.name.split('.').pop() || 'PNG').toUpperCase().slice(0, 4), size: f.size, ar, darkBg, date: dateBR(), blob: f });
+        try { const url = URL.createObjectURL(f); const pal = await extractPalette(url, 8); URL.revokeObjectURL(url); if (pal.length) localStorage.setItem(palKey('up:' + id), JSON.stringify(pal)); } catch (_) {}
+      }
+      try { await LogosDB.set(brand, arr); Sound.success && Sound.success(); Toast.success(files.length + ' logo(s) — paleta gerada!'); }
+      catch (_) { Toast.error('Não consegui salvar. Tente arquivos menores.'); }
+      await renderLogos();
+      if (firstId) selectLook('up:' + firstId);
+    };
+    inp.click();
   });
 
   // CORES: copiar HEX · apagar cor (admin) · gerar do logo · reset
@@ -1214,7 +1261,20 @@ async function initBrandHub(brand) {
     } }
   });
 
-  renderColors(); renderApps();
+  // INIT: esconde versões apagadas → prepende logos enviados → seleciona a 1ª
+  (async () => {
+    try { (JSON.parse(localStorage.getItem('cl-logohide:' + brand)) || []).forEach(id => logosEl.querySelector(`.logo-card[data-look="${id}"]`)?.remove()); } catch (_) {}
+    await renderLogos();
+    const first = logosEl.querySelector('.logo-card');
+    if (first) {
+      sel = logosEl.querySelector('.logo-card.sel')?.dataset.look || first.dataset.look;
+      logosEl.querySelectorAll('.logo-card').forEach(c => c.classList.toggle('sel', c.dataset.look === sel));
+      renderColors(); renderApps();
+    } else {
+      colorsEl.innerHTML = `<div class="pf-loading">Adicione um logo pra gerar as cores.</div>`;
+      appsEl.innerHTML = `<div class="pf-loading">Adicione um logo (e artes) pra esta versão.</div>`;
+    }
+  })();
 }
 
 /* LIGHTBOX de imagem (galeria) — visual grande + metadados + baixar + navegação */

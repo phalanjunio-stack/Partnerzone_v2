@@ -272,7 +272,7 @@
 
           <div class="brand-cols">
             <section class="bcol" data-enter>
-              <div class="bcol-head"><h2>Logos oficiais</h2><a class="link-more" href="${logosHref}">Ver todos ${svgIcon('arrowR','ic ic-sm')}</a></div>
+              <div class="bcol-head"><h2>Logos oficiais</h2><div class="bh-head-actions"><button class="bh-genbtn" id="bh-addlogo">${svgIcon('upload','ic ic-sm')} Adicionar logo</button><a class="link-more" href="${logosHref}">Ver todos ${svgIcon('arrowR','ic ic-sm')}</a></div></div>
               <div class="logo-grid" id="bh-logos">
                 ${LOGOS.map((l, i) => `<div class="logo-card ${l[1]}${i === 0 ? ' sel' : ''}" data-look="${l[2]}"><div class="logo-box">${blogo(l[1] === 'sym' ? 'sym' : l[1] === 'white' ? 'white' : l[1] === 'blue' ? 'blue' : '')}</div><div class="logo-meta"><div><b>${l[0]}</b><span>PNG · SVG · PDF</span></div><button class="logo-del" title="Apagar (admin)">${svgIcon('trash','ic ic-sm')}</button><button class="logo-dl">${svgIcon('download','ic ic-sm')}</button></div></div>`).join('')}
               </div>

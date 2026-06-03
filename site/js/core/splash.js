@@ -6,7 +6,7 @@ window.Splash = (() => {
 
   /* remove o fundo branco do PNG da logo + recorta (mostra a logo real sobre o navy) */
   function processLogo(cb) {
-    try { const c = localStorage.getItem("cl-pz-splash"); if (c) { cb(c); return; } } catch (_) {}
+    try { const c = localStorage.getItem("cl-pz-splash2"); if (c) { cb(c); return; } } catch (_) {}
     const im = new Image();
     im.onload = () => {
       try {
@@ -14,9 +14,13 @@ window.Splash = (() => {
         const cv = document.createElement("canvas"); cv.width = W; cv.height = H;
         const x = cv.getContext("2d"); x.drawImage(im, 0, 0);
         const d = x.getImageData(0, 0, W, H), p = d.data;
+        // remove branco/quase-branco com BORDA SUAVE (sem halo), só em pixels acinzentados
         for (let i = 0; i < p.length; i += 4) {
-          const r = p[i], g = p[i + 1], b = p[i + 2], mn = Math.min(r, g, b), mx = Math.max(r, g, b);
-          if (mn > 236 && (mx - mn) < 16) p[i + 3] = 0;
+          const r = p[i], g = p[i + 1], b = p[i + 2], mn = Math.min(r, g, b), sat = Math.max(r, g, b) - mn;
+          if (sat < 20) {
+            if (mn >= 243) p[i + 3] = 0;
+            else if (mn >= 216) { const a = Math.round(255 * (243 - mn) / (243 - 216)); if (a < p[i + 3]) p[i + 3] = a; }
+          }
         }
         x.putImageData(d, 0, 0);
         let x0 = W, y0 = H, x1 = 0, y1 = 0, f = false;
@@ -28,7 +32,7 @@ window.Splash = (() => {
         const cc = document.createElement("canvas"); cc.width = cw; cc.height = ch;
         cc.getContext("2d").putImageData(x.getImageData(x0, y0, cw, ch), 0, 0);
         const out = cc.toDataURL("image/png");
-        try { localStorage.setItem("cl-pz-splash", out); } catch (_) {}
+        try { localStorage.setItem("cl-pz-splash2", out); } catch (_) {}
         cb(out);
       } catch (e) { cb(im.src); }
     };
@@ -48,7 +52,7 @@ window.Splash = (() => {
         <img class="sp-logoimg" alt="PartnerZone">
         <div class="sp-fallback">PartnerZone</div>
       </div>
-      <div class="sp-dots"><span></span><span></span><span></span></div>
+      <div class="sp-dots"><span></span><span></span><span></span><span></span><span></span></div>
       <div class="sp-sub">Portal de Parceiros · Contourline</div>
       <div class="sp-foot">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>

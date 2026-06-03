@@ -30,7 +30,7 @@
   50%  { opacity: 1; }
   100% { transform: translate3d(-16px,-12px,0); opacity: .72; }
 }
-@media (prefers-reduced-motion: reduce) { .cat-hero::after { animation: none; } }
+/* partículas do banner: o usuário pede movimento — mantém animado mesmo com prefers-reduced-motion */
 
 .cat-hero-main { position: relative; z-index: 2; flex: 1; max-width: 56%; }
 .cat-badges { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }

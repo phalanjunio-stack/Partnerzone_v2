@@ -67,7 +67,9 @@
 
 .sp-sub { position: relative; z-index: 2; margin-top: 22px; font-size: 12.5px; letter-spacing: .04em; color: rgba(206,224,255,.72);
   animation: sp-up .7s .5s both; }
-.sp-foot { position: absolute; bottom: 28px; left: 50%; transform: translateX(-50%); display: inline-flex; align-items: center; gap: 8px;
+/* centraliza por margin:auto (NÃO por transform) — senão a animação sp-up sobrescreve o transform e joga pro canto */
+.sp-foot { position: absolute; bottom: 28px; left: 0; right: 0; margin: 0 auto; width: max-content; max-width: 90vw;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
   font-size: 11.5px; color: rgba(180,205,245,.6); animation: sp-up .8s .65s both; }
 .sp-foot svg { width: 14px; height: 14px; }
 @keyframes sp-up { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }

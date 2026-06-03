@@ -1,7 +1,7 @@
 /* ============================================================
    APP — ícones (traçado), dados de exemplo e render da Início
    ============================================================ */
-const BUILD = 'spa56';
+const BUILD = 'spa57';
 try { console.log('%cPartnerZone • build ' + BUILD, 'background:#2f7ff2;color:#fff;padding:2px 8px;border-radius:4px;font-weight:700'); } catch (_) {}
 
 /* ---- Ícones (todos outline / currentColor) ---- */

@@ -44,7 +44,9 @@ window.UI = (() => {
     if (!el) return;
     let down = false, startX = 0, startLeft = 0, lastX = 0, vx = 0, lastT = 0, raf = 0, moved = false;
     const onDown = e => {
-      down = true; moved = false; el.classList.add('dragging');
+      moved = false;   // reseta sempre (inclusive em botões), pra não bloquear o clique seguinte
+      if (e.target.closest('button, input, textarea, select, [data-add-equip]')) return;   // não atrapalha cliques nos botões dos cards
+      down = true; el.classList.add('dragging');
       startX = e.clientX; startLeft = el.scrollLeft; lastX = e.clientX; lastT = performance.now(); vx = 0;
       cancelAnimationFrame(raf);
     };

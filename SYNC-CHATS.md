@@ -40,6 +40,18 @@
 
 ## Log (mais recente no topo)
 
+### 2026-06-03 · 🟧 (permissão/URL resolvidos) + 🟦 ENTREGOU o "passo 2" (publish)
+**🟧:** permissão resolvida — o publish **COPIA** os liberados pra uma vitrine DENTRO de
+`00. ORGANIZADO` (`_VITRINE-PARTNERZONE\<equip>`) e compartilha **só ela**; originais read-only,
+nunca tocados. URL final confirmada: `uc?export=download&id=<ID>` / `lh3…/d/<ID>` (ID do arquivo na
+vitrine). Gerador `build-catalog.js` já roda (escreve em `sitelocal\data\catalog.json`, não toca no
+Drive). Falta dele: mapear marca/equip do `catalogo.db` (vários vêm "?"), montar a vitrine + IDs,
+filtrar `publicar_site`.
+**🟦 entregou:** `scripts\publish-catalog.js` + `PUBLICAR-PARTNERZONE.bat` = o **passo 2**: lê
+`sitelocal\data\catalog.json`, valida `schemaVersion>=1` (recusa shape antigo), copia pro
+`site\content\catalog.json` e dá `git push` (deploy).
+**▶️ Fluxo "Publicar" completo:** 🟧 gera `data\catalog.json` → roda `PUBLICAR-PARTNERZONE.bat` (🟦) → site ao ar.
+
 ### 2026-06-03 · 🟦 ENTREGOU · PartnerZone lê o catalog.json (contra o example)
 **Feito (🟦):** criei `site/js/core/catalog.js` (módulo `Catalog`) + pluguei no boot. Ele lê
 `content/catalog.json`, mapeia pro formato do site e substitui `EQUIPMENT`/`MATERIALS`/`MARCAS`

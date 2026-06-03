@@ -1,8 +1,35 @@
 /* ============================================================
    APP — ícones (traçado), dados de exemplo e render da Início
    ============================================================ */
-const BUILD = 'spa66';
+const BUILD = 'spa67';
 try { console.log('%cPartnerZone • build ' + BUILD, 'background:#2f7ff2;color:#fff;padding:2px 8px;border-radius:4px;font-weight:700'); } catch (_) {}
+
+/* ---- MODO CLIENTE × ADMIN ----------------------------------------------
+   Cadastro mora na CENTRAL. O PartnerZone é vitrine do cliente (só lê).
+   O designer entra no "modo admin" por ?admin=1 (fica salvo); ?admin=0 sai.
+   No modo cliente os controles de admin somem (nav Administração, +equip,
+   editar, +logo/arte/áudio). No modo admin tudo aparece (inclui capa/banner). */
+const ADMIN = (() => {
+  try {
+    const q = new URLSearchParams(location.search);
+    if (q.get('admin') === '1') localStorage.setItem('cl-admin', '1');
+    else if (q.get('admin') === '0') localStorage.removeItem('cl-admin');
+    return localStorage.getItem('cl-admin') === '1';
+  } catch (_) { return false; }
+})();
+window.__admin = ADMIN;
+try {
+  const r = document.documentElement;
+  r.classList.toggle('is-admin', ADMIN);
+  r.classList.toggle('is-client', !ADMIN);
+} catch (_) {}
+if (ADMIN) try {
+  const b = document.createElement('a');
+  b.className = 'admin-badge'; b.href = '?admin=0' + (location.hash || '#/');
+  b.title = 'Sair do modo admin (volta pra visão do cliente)';
+  b.innerHTML = '🎨 modo admin · sair';
+  (document.body || document.documentElement).appendChild(b);
+} catch (_) {}
 
 /* ---- Ícones (todos outline / currentColor) ---- */
 const ICONS = {
@@ -92,7 +119,7 @@ const NAV = [
     { icon:'wrench', text:'Meus Equipamentos' },
     { icon:'buoy', text:'Suporte' },
   ]},
-  { label:'Administração', items:[
+  { label:'Administração', admin:true, items:[
     { icon:'package', text:'Catálogo (equip.)', route:'#/cadastro' },
     { icon:'upload', text:'Upload', modal:'modal-upload' },
     { icon:'folder', text:'Materiais', route:'#/buscar' },
@@ -201,9 +228,11 @@ const ACTIONS = [
 /* ---- Render ---- */
 function renderNav() {
   const el = document.getElementById('nav');
-  el.innerHTML = NAV.map((sec, si) => `
-    ${si ? '<div class="side-divider"></div>' : ''}
-    <span class="nav-label">${sec.label}</span>
+  el.innerHTML = NAV.map((sec, si) => {
+    const ac = sec.admin ? ' nav-admin' : '';   // grupo de admin -> some no modo cliente
+    return `
+    ${si ? `<div class="side-divider${ac}"></div>` : ''}
+    <span class="nav-label${ac}">${sec.label}</span>
     ${sec.items.map(it => {
       // submenu dinâmico (ex.: 'marcas' = lista as marcas do sistema)
       const sub = it.dynamic === 'marcas'
@@ -211,13 +240,14 @@ function renderNav() {
         : it.sub;
       const hasSub = sub && sub.length;
       return `
-      <div class="nav-item ${hasSub?'has-sub':''}" title="${it.text}" ${it.route?`data-route="${it.route}"`:''} ${it.modal?`data-open-modal="${it.modal}"`:''}>
+      <div class="nav-item${ac} ${hasSub?'has-sub':''}" title="${it.text}" ${it.route?`data-route="${it.route}"`:''} ${it.modal?`data-open-modal="${it.modal}"`:''}>
         ${svgIcon(it.icon)}<span>${it.text}</span>
         ${hasSub ? `<span class="chev">${svgIcon('chevR','ic ic-sm')}</span>` : ''}
       </div>
       ${hasSub ? `<div class="nav-sub">${sub.map(s=> typeof s==='string' ? `<a>${s}</a>` : `<a href="${s.r}">${s.l}</a>`).join('')}</div>` : ''}`;
     }).join('')}
-  `).join('');
+  `;
+  }).join('');
   // delegação: abre/fecha submenu (has-sub) ou navega (data-route)
   el.addEventListener('click', e => {
     const sub = e.target.closest('.nav-item.has-sub');

@@ -40,6 +40,17 @@
 
 ## Log (mais recente no topo)
 
+### 2026-06-03 · 🎵 áudio confirmado + ⏳ esperando o dono liberar `--apply` (🟧)
+**🟧:** áudio liberado entra no `materials[]` como `tipo:"audio"` (vem da **biblioteca de áudio**
+da Central — `audio-metadata.json` / `/api/audio/list`, 101 músicas — NÃO das pastas de equip). O
+gerador real vai **mergear 2 fontes** no mesmo `materials[]`: (1) materiais de equip (pastas Drive)
++ (2) áudios liberados (biblioteca), ambos `publicar_site` + apontando pra vitrine. **Mesmo shape →
+🟦 não muda nada.** Importador Drive→`catalogo.db` com dry-run OK (45 equip reais). **Esperando o
+DONO liberar `--apply`** no chat da Central.
+**🟦:** ack; alinhando com o dono o "modo cliente" do PartnerZone (esconder controles de admin).
+**Ações abertas:** (dono) autorizar `--apply` no chat da Central · (dono) decidir escopo do modo cliente.
+
+
 ### 2026-06-03 · 🟧 (permissão/URL resolvidos) + 🟦 ENTREGOU o "passo 2" (publish)
 **🟧:** permissão resolvida — o publish **COPIA** os liberados pra uma vitrine DENTRO de
 `00. ORGANIZADO` (`_VITRINE-PARTNERZONE\<equip>`) e compartilha **só ela**; originais read-only,

@@ -2,6 +2,25 @@
    APP — layout + componentes (Início / Dashboard)
    ============================================================ */
 
+/* ============ MODO CLIENTE × ADMIN ============
+   Vitrine do cliente (padrão) esconde os controles de admin (cadastro = Central).
+   Designer entra com ?admin=1 -> html.is-admin mostra tudo (inclui capa/banner/paleta). */
+html.is-client .nav-admin,
+html.is-client .eq-cfg,
+html.is-client .eq-add,
+html.is-client [data-add-equip],
+html.is-client .bh-genbtn,
+html.is-client #blogos-add,
+html.is-client #bh-empty-add { display: none !important; }
+
+.admin-badge { position: fixed; left: 14px; bottom: 14px; z-index: 240;
+  display: inline-flex; align-items: center; gap: 6px; padding: 7px 13px; border-radius: 999px;
+  font-size: 12px; font-weight: 700; text-decoration: none; cursor: pointer; color: #fff;
+  background: linear-gradient(135deg, #7a57ff, #2f7ff2); border: 1px solid rgba(255,255,255,.25);
+  box-shadow: 0 10px 24px -10px rgba(47,127,242,.7); transition: transform .15s, box-shadow .15s; }
+.admin-badge:hover { transform: translateY(-2px); box-shadow: 0 14px 30px -10px rgba(47,127,242,.85); }
+body.has-player .admin-badge, body.has-mini .admin-badge { bottom: 88px; }
+
 /* ============ PLAYER DE ÁUDIO (fixo no rodapé) ============ */
 .player-bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 190; height: 72px;
   display: grid; grid-template-columns: minmax(170px,1fr) 2.2fr minmax(150px,1fr); align-items: center; gap: 18px; padding: 0 20px;

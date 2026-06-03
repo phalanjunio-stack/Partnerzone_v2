@@ -124,6 +124,11 @@
   color: var(--text-muted); background: var(--surface-hover); border: 1px solid var(--border); cursor: pointer; }
 .mat-more:hover { color: var(--accent); border-color: var(--accent-border); }
 
+/* visão MASONRY — força flex de colunas (vence o .lib-grid{display:grid;repeat(6,1fr)} da
+   categoria.css que deixava 1 coluna vazia na direita: JS cria N colunas, flex distribui tudo) */
+.lib-grid.masonry { display: flex; align-items: flex-start; gap: 16px; grid-template-columns: none; }
+.lib-grid.masonry .masonry-col { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 16px; }
+
 /* visão LISTA */
 .lib-grid.list { display: flex; flex-direction: column; gap: 12px; }
 .lib-grid.list .matcard { display: grid; grid-template-columns: 92px 1fr auto; align-items: center; gap: 16px; padding-right: 14px; }

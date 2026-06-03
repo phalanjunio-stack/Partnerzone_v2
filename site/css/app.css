@@ -6,12 +6,23 @@
    Vitrine do cliente (padrão) esconde os controles de admin (cadastro = Central).
    Designer entra com ?admin=1 -> html.is-admin mostra tudo (inclui capa/banner/paleta). */
 html.is-client .nav-admin,
-html.is-client .eq-cfg,
+html.is-client .eq-cfg,            /* editar textos do equip */
+html.is-client .eq-edit,          /* editar CAPA do equip (lápis) */
 html.is-client .eq-add,
 html.is-client [data-add-equip],
-html.is-client .bh-genbtn,
+html.is-client .bh-genbtn,        /* +logo / +arte / gerar paleta / +áudio */
 html.is-client #blogos-add,
-html.is-client #bh-empty-add { display: none !important; }
+html.is-client #bh-empty-add,
+html.is-client .color-del,        /* apagar cor da paleta */
+html.is-client .logo-del,         /* apagar logo */
+html.is-client .lg-del,           /* remover logo enviado */
+html.is-client .app-del,          /* remover arte/aplicação */
+html.is-client .pf-del,           /* remover PDF do portfólio */
+html.is-client .tr-del,           /* remover áudio do acervo */
+html.is-client .uf-rm,            /* remover da fila de upload */
+html.is-client .adm-edit,
+html.is-client .adm-del { display: none !important; }
+/* mantidos pro cliente: .fav-delcol, .lg-unfav, .plc-del (playlists/favoritos dele), downloads */
 
 .admin-badge { position: fixed; left: 14px; bottom: 14px; z-index: 240;
   display: inline-flex; align-items: center; gap: 6px; padding: 7px 13px; border-radius: 999px;

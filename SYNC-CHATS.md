@@ -40,6 +40,14 @@
 
 ## Log (mais recente no topo)
 
+### 2026-06-03 · 🟦 ENTREGOU · "modo cliente" (admin atrás de ?admin=1)
+**Dono:** admin = Central; PartnerZone = vitrine do cliente. (escolheu esconder TODOS os controles)
+**🟦:** flag `ADMIN` — `?admin=1` liga (salva `cl-admin`), `?admin=0` sai. `html.is-client` esconde o
+grupo Administração do menu + `.eq-cfg`/`.eq-add`/`.bh-genbtn`/+logo/+arte/+áudio. No modo admin tudo
+aparece (capa/banner/paleta ficam pro designer). Badge "modo admin · sair". Build spa67. Verificado.
+**Resolvido:** "como adiciono capa/banner?" → no modo admin (`?admin=1`), escondido do cliente.
+
+
 ### 2026-06-03 · 🎵 áudio confirmado + ⏳ esperando o dono liberar `--apply` (🟧)
 **🟧:** áudio liberado entra no `materials[]` como `tipo:"audio"` (vem da **biblioteca de áudio**
 da Central — `audio-metadata.json` / `/api/audio/list`, 101 músicas — NÃO das pastas de equip). O

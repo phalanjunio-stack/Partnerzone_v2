@@ -1,7 +1,7 @@
 /* ============================================================
    APP — ícones (traçado), dados de exemplo e render da Início
    ============================================================ */
-const BUILD = 'spa52';
+const BUILD = 'spa53';
 try { console.log('%cPartnerZone • build ' + BUILD, 'background:#2f7ff2;color:#fff;padding:2px 8px;border-radius:4px;font-weight:700'); } catch (_) {}
 
 /* ---- Ícones (todos outline / currentColor) ---- */
@@ -269,11 +269,12 @@ function eqCardHTML(e) {
   const src = eqCover(e.name, e.img);
   const src2 = eqCover2(e.name);          // 2ª imagem (aparece no hover) — opcional
   return `
-    <a class="eq-card${src2 ? ' has-hover' : ''}" href="#/categoria/${encodeURIComponent(e.name)}" data-eq="${e.name}">
+    <a class="eq-card${src2 ? ' has-hover' : ''}" href="#/categoria/${encodeURIComponent(e.name)}" data-eq="${e.name}" data-cod="${e.codigo || ''}">
       <div class="eq-thumb">
         ${src ? `<img src="${src}" alt="${e.name}" loading="lazy" style="${xfStyle(e.name, 1, eqPos(e.name))}">` : svgIcon('cpu','ic ph')}
         ${src2 ? `<img class="img2" src="${src2}" alt="" loading="lazy" style="${xfStyle(e.name, 2, eqPos2(e.name))}">` : ''}
         <button class="eq-edit" title="Editar capa (admin)">${svgIcon('pencil','ic ic-sm')}</button>
+        <button class="eq-cfg" title="Editar textos (admin)">${svgIcon('settings','ic ic-sm')}</button>
         <button class="fav">${svgIcon('bookmark','ic ic-sm')}</button>
       </div>
       <div class="eq-body">
@@ -282,11 +283,74 @@ function eqCardHTML(e) {
       </div>
     </a>`;
 }
+const eqAddCard = `<button class="eq-card eq-add" data-add-equip><span class="eq-add-in">${svgIcon('plus','ic')}<b>Adicionar equipamento</b><small>Novo card</small></span></button>`;
 function renderEquipment() {
-  document.getElementById('eq-row').innerHTML = EQUIPMENT.map(eqCardHTML).join('');
+  document.getElementById('eq-row').innerHTML = EQUIPMENT.map(eqCardHTML).join('') + eqAddCard;
 }
 function renderEquipmentGrid() {
-  document.getElementById('eq-grid').innerHTML = EQUIPMENT.map(eqCardHTML).join('');
+  document.getElementById('eq-grid').innerHTML = EQUIPMENT.map(eqCardHTML).join('') + eqAddCard;
+}
+/* aplica edições/adições/ocultações de equipamentos salvas no localStorage (overlay sobre o EQUIPMENT base) */
+function applyEquipEdits() {
+  let ov = {}, ex = [], hid = [];
+  try { ov = JSON.parse(localStorage.getItem('cl-equip-ov') || '{}'); } catch (_) {}
+  try { ex = JSON.parse(localStorage.getItem('cl-equip-extra') || '[]'); } catch (_) {}
+  try { hid = JSON.parse(localStorage.getItem('cl-equip-hidden') || '[]'); } catch (_) {}
+  EQUIPMENT.forEach(e => { if (e.codigo && ov[e.codigo]) Object.assign(e, ov[e.codigo]); });
+  ex.forEach(x => { if (!EQUIPMENT.some(e => e.codigo === x.codigo)) EQUIPMENT.push(x); });
+  for (let i = EQUIPMENT.length - 1; i >= 0; i--) if (hid.includes(EQUIPMENT[i].codigo)) EQUIPMENT.splice(i, 1);
+}
+/* editor de CARD do equipamento (textos) + adicionar/excluir — admin */
+function initEquipEditor() {
+  const bd = document.getElementById('modal-eqcard'); if (!bd) return;
+  const G = id => document.getElementById(id);
+  let curCod = null;
+  const reRender = () => {
+    if (document.getElementById('eq-row')) renderEquipment();
+    if (document.getElementById('eq-grid')) renderEquipmentGrid();
+    if (location.hash.indexOf('#/categoria/') === 0 && window.__route) window.__route();
+  };
+  const fillMarcas = () => { const dl = G('eqc-marcas'); if (dl && typeof MARCAS !== 'undefined') dl.innerHTML = MARCAS.map(m => `<option value="${m}">`).join(''); };
+  window.__editEquip = cod => {
+    const e = EQUIPMENT.find(x => x.codigo === cod); if (!e) return;
+    curCod = cod;
+    G('eqc-title').textContent = 'Editar — ' + (e.name || '');
+    G('eqc-name').value = e.name || ''; G('eqc-tag').value = e.tag || ''; G('eqc-count').value = e.count || 0;
+    G('eqc-marca').value = e.marca || ''; G('eqc-linha').value = e.linha || 'Estética';
+    G('eqc-del').hidden = false; G('eqc-img').hidden = false;
+    fillMarcas(); UI.openModal('modal-eqcard');
+  };
+  window.__newEquip = () => {
+    curCod = null;
+    G('eqc-title').textContent = 'Novo equipamento';
+    G('eqc-name').value = ''; G('eqc-tag').value = ''; G('eqc-count').value = 0; G('eqc-marca').value = ''; G('eqc-linha').value = 'Estética';
+    G('eqc-del').hidden = true; G('eqc-img').hidden = true;   // imagem só depois de criar o card
+    fillMarcas(); UI.openModal('modal-eqcard');
+  };
+  G('eqc-img').addEventListener('click', () => { const e = EQUIPMENT.find(x => x.codigo === curCod); if (e) { UI.closeModal(bd); window.__editCover && window.__editCover(e.name); } });
+  G('eqc-save').addEventListener('click', () => {
+    const name = (G('eqc-name').value || '').trim(); if (!name) { Toast.error('Dê um nome ao equipamento.'); return; }
+    const data = { name, tag: (G('eqc-tag').value || '').trim(), count: +G('eqc-count').value || 0, marca: (G('eqc-marca').value || '').trim(), linha: G('eqc-linha').value };
+    if (curCod) {
+      const e = EQUIPMENT.find(x => x.codigo === curCod); if (e) Object.assign(e, data);
+      let ov = {}; try { ov = JSON.parse(localStorage.getItem('cl-equip-ov') || '{}'); } catch (_) {}
+      ov[curCod] = data; localStorage.setItem('cl-equip-ov', JSON.stringify(ov));
+    } else {
+      const cod = 'EQ' + Date.now(), e = Object.assign({ codigo: cod, img: '' }, data);
+      EQUIPMENT.push(e);
+      let ex = []; try { ex = JSON.parse(localStorage.getItem('cl-equip-extra') || '[]'); } catch (_) {}
+      ex.push(e); localStorage.setItem('cl-equip-extra', JSON.stringify(ex));
+    }
+    UI.closeModal(bd); Sound.success && Sound.success(); Toast.success('Equipamento salvo!'); reRender();
+  });
+  G('eqc-del').addEventListener('click', () => {
+    if (!curCod || !confirm('Remover este equipamento do card?')) return;
+    let ex = []; try { ex = JSON.parse(localStorage.getItem('cl-equip-extra') || '[]'); } catch (_) {}
+    if (ex.some(x => x.codigo === curCod)) { localStorage.setItem('cl-equip-extra', JSON.stringify(ex.filter(x => x.codigo !== curCod))); }
+    else { let hid = []; try { hid = JSON.parse(localStorage.getItem('cl-equip-hidden') || '[]'); } catch (_) {} if (!hid.includes(curCod)) hid.push(curCod); localStorage.setItem('cl-equip-hidden', JSON.stringify(hid)); }
+    const idx = EQUIPMENT.findIndex(x => x.codigo === curCod); if (idx >= 0) EQUIPMENT.splice(idx, 1);
+    UI.closeModal(bd); Toast.info('Equipamento removido.'); reRender();
+  });
 }
 function renderRecent() {
   document.getElementById('recent').innerHTML = RECENT.map(r => {
@@ -365,6 +429,7 @@ function initPartnerLogo() {
 }
 
 function initShell() {
+  applyEquipEdits();   // aplica edições/adições de equipamentos antes de renderizar
   renderNav();
   initPartnerLogo();
   renderIcons();                       // ícones dos placeholders do shell
@@ -402,12 +467,19 @@ function initShell() {
 
   // card de equipamento: fav / editar capa (delegação global; não navega)
   document.addEventListener('click', e => {
+    const add = e.target.closest('[data-add-equip]');
+    if (add) { e.preventDefault(); e.stopPropagation(); window.__newEquip?.(); return; }
     const fav = e.target.closest('.eq-card .fav');
     if (fav) { e.preventDefault(); e.stopPropagation(); fav.classList.toggle('on'); return; }
     const ed = e.target.closest('.eq-card .eq-edit');
     if (ed) { e.preventDefault(); e.stopPropagation();
       const name = ed.closest('.eq-card')?.dataset.eq;
-      if (name) window.__editCover?.(name);
+      if (name) window.__editCover?.(name); return;
+    }
+    const cfg = e.target.closest('.eq-card .eq-cfg');
+    if (cfg) { e.preventDefault(); e.stopPropagation();
+      const cod = cfg.closest('.eq-card')?.dataset.cod;
+      if (cod) window.__editEquip?.(cod);
     }
   });
 
@@ -426,6 +498,7 @@ function initShell() {
   Sel.init();
   Player.init();
   initPlaylistModal();
+  initEquipEditor();
 }
 
 /* ============================================================

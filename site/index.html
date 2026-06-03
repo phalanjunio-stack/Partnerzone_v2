@@ -8,17 +8,17 @@
   <title>PartnerZone — Contourline</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/theme.css?v=spa52">
-  <link rel="stylesheet" href="css/app.css?v=spa52">
-  <link rel="stylesheet" href="css/effects.css?v=spa52">
-  <link rel="stylesheet" href="css/categoria.css?v=spa52">
-  <link rel="stylesheet" href="css/pasta.css?v=spa52">
-  <link rel="stylesheet" href="css/material.css?v=spa52">
-  <link rel="stylesheet" href="css/buscar.css?v=spa52">
-  <link rel="stylesheet" href="css/upload.css?v=spa52">
-  <link rel="stylesheet" href="css/sql.css?v=spa52">
-  <link rel="stylesheet" href="css/marca.css?v=spa52">
-  <link rel="stylesheet" href="css/splash.css?v=spa52">
+  <link rel="stylesheet" href="css/theme.css?v=spa53">
+  <link rel="stylesheet" href="css/app.css?v=spa53">
+  <link rel="stylesheet" href="css/effects.css?v=spa53">
+  <link rel="stylesheet" href="css/categoria.css?v=spa53">
+  <link rel="stylesheet" href="css/pasta.css?v=spa53">
+  <link rel="stylesheet" href="css/material.css?v=spa53">
+  <link rel="stylesheet" href="css/buscar.css?v=spa53">
+  <link rel="stylesheet" href="css/upload.css?v=spa53">
+  <link rel="stylesheet" href="css/sql.css?v=spa53">
+  <link rel="stylesheet" href="css/marca.css?v=spa53">
+  <link rel="stylesheet" href="css/splash.css?v=spa53">
   <script>document.documentElement.setAttribute('data-theme', localStorage.getItem('cl-theme') || 'dark');</script>
   <script src="js/core/splash.js"></script>
 </head>
@@ -353,6 +353,35 @@
     </div>
   </div>
 
+  <!-- ===================== MODAL: Editar/Adicionar card de equipamento (admin) ===================== -->
+  <div class="modal-bd" id="modal-eqcard">
+    <div class="modal"><div class="modal-inner">
+      <div class="modal-head">
+        <div><h2 id="eqc-title">Editar equipamento</h2><p>Edite os textos do card (e a imagem da capa)</p></div>
+        <button class="x" data-close-modal><svg class="ic" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+      </div>
+      <div class="modal-body">
+        <div class="field"><label>Nome <span class="req">*</span></label>
+          <div class="input"><i data-icon="cpu" data-cls="ic ic-sm"></i><input id="eqc-name" placeholder="Ex: HIPRO" autocomplete="off"></div></div>
+        <div class="field"><label>Subtítulo</label>
+          <div class="input"><i data-icon="file" data-cls="ic ic-sm"></i><input id="eqc-tag" placeholder="Ex: Tecnologia de Alta Performance" autocomplete="off"></div></div>
+        <div class="field-row">
+          <div class="field"><label>Nº de materiais</label>
+            <div class="input"><i data-icon="folder" data-cls="ic ic-sm"></i><input id="eqc-count" type="number" min="0" placeholder="45"></div></div>
+          <div class="field"><label>Linha</label>
+            <div class="input"><i data-icon="grad" data-cls="ic ic-sm"></i><select id="eqc-linha"><option>Estética</option><option>MED</option></select></div></div>
+        </div>
+        <div class="field"><label>Marca</label>
+          <div class="input"><i data-icon="package" data-cls="ic ic-sm"></i><input id="eqc-marca" list="eqc-marcas" placeholder="Ex: Daeju" autocomplete="off"><datalist id="eqc-marcas"></datalist></div></div>
+        <button class="btn ghost" id="eqc-img" style="width:100%;justify-content:center;margin-top:4px"><i data-icon="image" data-cls="ic ic-sm"></i> Editar imagem da capa</button>
+        <div class="cover-actions" style="display:flex;gap:12px;margin-top:14px">
+          <button class="btn ghost" id="eqc-del" hidden><i data-icon="trash" data-cls="ic ic-sm"></i> Excluir</button>
+          <button class="btn" id="eqc-save"><i data-icon="check" data-cls="ic ic-sm"></i> Salvar</button>
+        </div>
+      </div>
+    </div></div>
+  </div>
+
   <!-- mini player (aparece fora da página de Áudios) -->
   <div class="mini-player" id="mini-player" title="Abrir Áudios">
     <div class="mp-cover" id="mp-cover"><i data-icon="music" data-cls="ic ic-sm"></i></div>
@@ -390,11 +419,11 @@
     </div>
   </div>
 
-  <script src="js/core/sound.js?v=spa52"></script>
-  <script src="js/core/theme.js?v=spa52"></script>
-  <script src="js/components/ui.js?v=spa52"></script>
-  <script src="js/app.js?v=spa52"></script>
-  <script src="js/core/db.js?v=spa52"></script>
-  <script src="js/views.js?v=spa52"></script>
+  <script src="js/core/sound.js?v=spa53"></script>
+  <script src="js/core/theme.js?v=spa53"></script>
+  <script src="js/components/ui.js?v=spa53"></script>
+  <script src="js/app.js?v=spa53"></script>
+  <script src="js/core/db.js?v=spa53"></script>
+  <script src="js/views.js?v=spa53"></script>
 </body>
 </html>

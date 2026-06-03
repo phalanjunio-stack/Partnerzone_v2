@@ -1,5 +1,5 @@
 /* ============================================================
-   SPLASH — PartnerZone (navy premium · anel + wordmark + glow)
+   SPLASH — PartnerZone (navy premium · órbita + anel + glow)
    ============================================================ */
 window.Splash = (() => {
   let el = null;
@@ -12,8 +12,11 @@ window.Splash = (() => {
     el.innerHTML = `
       <div class="sp-aura"></div>
       <div class="sp-particles"></div>
-      <div class="sp-logo">
-        <div class="sp-ring">
+      <div class="sp-stage">
+        <span class="sp-orbit o1"><i></i></span>
+        <span class="sp-orbit o2"><i></i></span>
+        <span class="sp-orbit o3"><i></i></span>
+        <div class="sp-core">
           <svg viewBox="0 0 120 120" aria-hidden="true">
             <defs>
               <linearGradient id="sp-grad" x1="0" y1="0" x2="1" y2="1">
@@ -22,13 +25,12 @@ window.Splash = (() => {
                 <stop offset="1" stop-color="#7c5cff"/>
               </linearGradient>
             </defs>
-            <circle class="sp-ring-base" cx="60" cy="60" r="43" fill="none" stroke="url(#sp-grad)" stroke-width="13" stroke-linecap="round"/>
-            <circle class="sp-ring-spin" cx="60" cy="60" r="43" fill="none" stroke="#d6ecff" stroke-width="4.5" stroke-linecap="round" stroke-dasharray="32 238"/>
+            <circle class="sp-ring-base" cx="60" cy="60" r="40" fill="none" stroke="url(#sp-grad)" stroke-width="13" stroke-linecap="round"/>
+            <circle class="sp-ring-spin" cx="60" cy="60" r="40" fill="none" stroke="#e2f1ff" stroke-width="4.5" stroke-linecap="round" stroke-dasharray="30 222"/>
           </svg>
-          <span class="sp-ring-glow"></span>
         </div>
-        <div class="sp-word">PartnerZone</div>
       </div>
+      <div class="sp-word">PartnerZone</div>
       <div class="sp-bar"><i></i></div>
       <div class="sp-sub">Portal de Parceiros · Contourline</div>
       <div class="sp-foot">
@@ -38,7 +40,6 @@ window.Splash = (() => {
     `;
     (document.body || document.documentElement).appendChild(el);
 
-    // some quando a página estiver pronta (tempo mínimo agradável)
     const start = performance.now();
     const go = () => setTimeout(hide, Math.max(0, 1700 - (performance.now() - start)));
     if (document.readyState === "complete") go();

@@ -1,78 +1,84 @@
 /* ============================================================
-   SPLASH — PartnerZone (navy premium)
+   SPLASH — PartnerZone (navy premium · órbita)
    ============================================================ */
 .splash-overlay {
-  position: fixed; inset: 0; z-index: 99999; display: grid; place-items: center;
-  background: radial-gradient(120% 90% at 50% 34%, #16407f 0%, #0b245c 42%, #06122e 100%);
-  color: #fff; overflow: hidden;
+  position: fixed; inset: 0; z-index: 99999;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  background: radial-gradient(115% 80% at 50% 44%, #173f7d 0%, #0b245c 44%, #06122e 100%);
+  color: #fff; overflow: hidden; text-align: center;
   opacity: 1; transition: opacity .6s ease, visibility .6s;
   font-family: 'Inter', system-ui, sans-serif;
 }
 .splash-overlay.fading { opacity: 0; visibility: hidden; pointer-events: none; }
 
-/* halo de luz pulsante atrás da logo */
+/* halo atrás da logo (centrado na órbita) */
 .sp-aura {
-  position: absolute; top: 42%; left: 50%; width: 620px; height: 620px; transform: translate(-50%, -50%);
-  background: radial-gradient(circle, rgba(80,150,255,.42) 0%, rgba(60,110,230,.16) 35%, transparent 66%);
-  filter: blur(8px); animation: sp-aura 3.6s ease-in-out infinite alternate; pointer-events: none;
+  position: absolute; top: 44%; left: 50%; width: 460px; height: 460px; transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgba(86,156,255,.45) 0%, rgba(60,110,230,.14) 38%, transparent 64%);
+  filter: blur(6px); animation: sp-aura 3.4s ease-in-out infinite alternate; pointer-events: none; z-index: 0;
 }
-@keyframes sp-aura { from { opacity: .55; transform: translate(-50%, -50%) scale(.92); } to { opacity: 1; transform: translate(-50%, -50%) scale(1.08); } }
+@keyframes sp-aura { from { opacity: .5; transform: translate(-50%, -50%) scale(.9); } to { opacity: 1; transform: translate(-50%, -50%) scale(1.06); } }
 
-/* partículas flutuando */
 .sp-particles {
-  position: absolute; inset: -40px; pointer-events: none; opacity: .9;
+  position: absolute; inset: -40px; pointer-events: none; opacity: .85; z-index: 0;
   background-image:
-    radial-gradient(2.4px 2.4px at 18% 28%, rgba(210,232,255,.9), transparent 60%),
-    radial-gradient(2px 2px at 32% 66%, rgba(180,215,255,.7), transparent 60%),
-    radial-gradient(1.8px 1.8px at 52% 22%, rgba(210,232,255,.8), transparent 60%),
-    radial-gradient(2.2px 2.2px at 68% 60%, rgba(180,215,255,.6), transparent 60%),
-    radial-gradient(1.6px 1.6px at 80% 32%, rgba(210,232,255,.7), transparent 60%),
-    radial-gradient(2px 2px at 44% 80%, rgba(180,215,255,.6), transparent 60%),
-    radial-gradient(1.6px 1.6px at 88% 72%, rgba(210,232,255,.6), transparent 60%),
-    radial-gradient(1.8px 1.8px at 12% 76%, rgba(190,220,255,.55), transparent 60%);
+    radial-gradient(2.4px 2.4px at 16% 30%, rgba(210,232,255,.9), transparent 60%),
+    radial-gradient(2px 2px at 30% 70%, rgba(180,215,255,.7), transparent 60%),
+    radial-gradient(1.8px 1.8px at 50% 18%, rgba(210,232,255,.8), transparent 60%),
+    radial-gradient(2.2px 2.2px at 70% 64%, rgba(180,215,255,.6), transparent 60%),
+    radial-gradient(1.6px 1.6px at 82% 30%, rgba(210,232,255,.7), transparent 60%),
+    radial-gradient(2px 2px at 42% 82%, rgba(180,215,255,.6), transparent 60%),
+    radial-gradient(1.6px 1.6px at 88% 74%, rgba(210,232,255,.6), transparent 60%),
+    radial-gradient(1.8px 1.8px at 10% 78%, rgba(190,220,255,.55), transparent 60%);
   animation: sp-drift 12s ease-in-out infinite alternate;
 }
-@keyframes sp-drift { from { transform: translate(0, 0); } to { transform: translate(-22px, -16px); } }
+@keyframes sp-drift { from { transform: translate(0,0); } to { transform: translate(-20px,-14px); } }
 
-/* logo: anel + wordmark */
-.sp-logo { position: relative; z-index: 2; display: flex; align-items: center; gap: 22px;
+/* palco da órbita */
+.sp-stage { position: relative; z-index: 2; width: 196px; height: 196px; display: grid; place-items: center;
   animation: sp-in .9s cubic-bezier(.2,.7,.3,1) both; }
-@keyframes sp-in { from { opacity: 0; transform: translateY(14px) scale(.94); } to { opacity: 1; transform: none; } }
+@keyframes sp-in { from { opacity: 0; transform: scale(.9); } to { opacity: 1; transform: none; } }
 
-.sp-ring { position: relative; width: 104px; height: 104px; }
-.sp-ring svg { width: 100%; height: 100%; display: block; }
-.sp-ring-base { filter: drop-shadow(0 6px 16px rgba(60,130,255,.55));
-  stroke-dasharray: 270; stroke-dashoffset: 270; animation: sp-draw 1.1s .15s cubic-bezier(.4,0,.2,1) forwards; }
+/* anéis de órbita (faint) com um ponto correndo na borda */
+.sp-orbit { position: absolute; border-radius: 50%; border: 1px solid rgba(150,190,255,.16); }
+.sp-orbit i { position: absolute; top: -3.5px; left: 50%; width: 7px; height: 7px; margin-left: -3.5px; border-radius: 50%;
+  background: #dcefff; box-shadow: 0 0 12px 2px rgba(120,180,255,.85); }
+.sp-orbit.o1 { width: 196px; height: 196px; animation: sp-orbit 4.4s linear infinite; }
+.sp-orbit.o2 { width: 152px; height: 152px; animation: sp-orbit 3.2s linear infinite reverse; border-color: rgba(150,190,255,.22); }
+.sp-orbit.o3 { width: 152px; height: 152px; animation: sp-orbit 6s linear infinite; }
+.sp-orbit.o2 i { background: #a78bff; box-shadow: 0 0 12px 2px rgba(167,139,255,.8); }
+.sp-orbit.o3 i { width: 5px; height: 5px; margin-left: -2.5px; top: -2.5px; opacity: .7; }
+@keyframes sp-orbit { to { transform: rotate(360deg); } }
+
+/* anel central (a logo) */
+.sp-core { position: relative; width: 104px; height: 104px; }
+.sp-core svg { width: 100%; height: 100%; display: block; filter: drop-shadow(0 0 18px rgba(80,150,255,.5)); }
+.sp-ring-base { stroke-dasharray: 252; stroke-dashoffset: 252; animation: sp-draw 1.1s .15s cubic-bezier(.4,0,.2,1) forwards; }
 @keyframes sp-draw { to { stroke-dashoffset: 0; } }
-.sp-ring-spin { transform-origin: 60px 60px; opacity: .95; animation: sp-spin 1.15s linear infinite; }
+.sp-ring-spin { transform-origin: 60px 60px; animation: sp-spin 1.15s linear infinite; }
 @keyframes sp-spin { to { transform: rotate(360deg); } }
-.sp-ring-glow { position: absolute; inset: 16px; border-radius: 50%;
-  box-shadow: 0 0 40px 6px rgba(90,160,255,.35) inset, 0 0 30px rgba(90,160,255,.25);
-  animation: sp-aura 3.6s ease-in-out infinite alternate; }
 
-.sp-word { font-size: 42px; font-weight: 700; letter-spacing: -.02em; line-height: 1;
+.sp-word { position: relative; z-index: 2; margin-top: 26px; font-size: 40px; font-weight: 700; letter-spacing: -.02em; line-height: 1;
   background: linear-gradient(180deg, #eaf4ff 0%, #aed4ff 55%, #6fb4ff 100%);
   -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent;
-  text-shadow: 0 4px 30px rgba(110,180,255,.25);
-  animation: sp-word .8s .35s cubic-bezier(.2,.7,.3,1) both; }
-@keyframes sp-word { from { opacity: 0; transform: translateX(-12px); } to { opacity: 1; transform: none; } }
+  text-shadow: 0 4px 30px rgba(110,180,255,.22);
+  animation: sp-up .8s .35s cubic-bezier(.2,.7,.3,1) both; }
 
-/* barra de carregamento (sweep) */
-.sp-bar { position: relative; z-index: 2; width: 220px; height: 4px; border-radius: 999px; margin-top: 40px; overflow: hidden;
-  background: rgba(255,255,255,.12); animation: sp-fade .6s .5s both; }
+.sp-bar { position: relative; z-index: 2; width: 200px; height: 4px; border-radius: 999px; margin-top: 22px; overflow: hidden;
+  background: rgba(255,255,255,.12); animation: sp-up .6s .5s both; }
 .sp-bar i { position: absolute; top: 0; left: -45%; width: 42%; height: 100%; border-radius: 999px;
   background: linear-gradient(90deg, transparent, #6fb4ff, #a78bff, transparent); animation: sp-sweep 1.25s ease-in-out infinite; }
 @keyframes sp-sweep { from { left: -45%; } to { left: 105%; } }
 
-.sp-sub { position: relative; z-index: 2; margin-top: 16px; font-size: 12.5px; letter-spacing: .04em; color: rgba(206,224,255,.72);
-  animation: sp-fade .7s .55s both; }
-.sp-foot { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); display: inline-flex; align-items: center; gap: 8px;
-  font-size: 11.5px; color: rgba(180,205,245,.6); animation: sp-fade .8s .7s both; }
+.sp-sub { position: relative; z-index: 2; margin-top: 14px; font-size: 12.5px; letter-spacing: .04em; color: rgba(206,224,255,.72);
+  animation: sp-up .7s .55s both; }
+.sp-foot { position: absolute; bottom: 28px; left: 50%; transform: translateX(-50%); display: inline-flex; align-items: center; gap: 8px;
+  font-size: 11.5px; color: rgba(180,205,245,.6); animation: sp-up .8s .7s both; }
 .sp-foot svg { width: 14px; height: 14px; }
-@keyframes sp-fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@keyframes sp-up { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 
-@media (max-width: 560px) { .sp-word { font-size: 34px; } .sp-ring { width: 84px; height: 84px; } .sp-logo { gap: 16px; } }
+@media (max-width: 560px) { .sp-word { font-size: 32px; } .sp-stage { width: 168px; height: 168px; } .sp-orbit.o1 { width: 168px; height: 168px; } .sp-orbit.o2, .sp-orbit.o3 { width: 130px; height: 130px; } .sp-core { width: 90px; height: 90px; } }
 @media (prefers-reduced-motion: reduce) {
-  .sp-aura, .sp-particles, .sp-ring-spin, .sp-ring-glow, .sp-bar i { animation: none; }
+  .sp-aura, .sp-particles, .sp-orbit, .sp-ring-spin, .sp-bar i { animation: none; }
   .sp-ring-base { stroke-dashoffset: 0; animation: none; }
 }

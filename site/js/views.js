@@ -635,6 +635,7 @@
     const parts = parseHash();
     recordRecent(parts);
     try { Sel.clear(); } catch (_) {}   // zera seleção ao trocar de página (some a barra do rodapé)
+    try { Player.placement(); } catch (_) {}   // mostra o bar completo na pág. de áudio, mini fora dela
     const view = resolve(parts);
     const main = document.getElementById('view');
     const crumbs = document.getElementById('crumbs');

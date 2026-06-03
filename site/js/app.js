@@ -1,7 +1,7 @@
 /* ============================================================
    APP — ícones (traçado), dados de exemplo e render da Início
    ============================================================ */
-const BUILD = 'spa51';
+const BUILD = 'spa52';
 try { console.log('%cPartnerZone • build ' + BUILD, 'background:#2f7ff2;color:#fff;padding:2px 8px;border-radius:4px;font-weight:700'); } catch (_) {}
 
 /* ---- Ícones (todos outline / currentColor) ---- */
@@ -1379,13 +1379,25 @@ const AudioDB = (() => {
     t.oncomplete = () => res(out && typeof out === 'object' && 'result' in out ? out.result : out); t.onerror = () => rej(t.error); }));
   return { get: () => tx('readonly', st => st.get('all')), set: arr => tx('readwrite', st => st.put(arr, 'all')) };
 })();
+/* gradientes pré-definidos p/ a CAPA da playlist (o cliente escolhe as cores) */
+const GRADS = [
+  ['#2f7ff2', '#7a57ff'], ['#e11d48', '#7a1fff'], ['#0ea5e9', '#22d3ee'],
+  ['#16a34a', '#84cc16'], ['#f59e0b', '#ef4444'], ['#0d9488', '#3b82f6'],
+  ['#ec4899', '#8b5cf6'], ['#111827', '#374151'],
+];
+const gradCss = i => { const g = GRADS[i] || GRADS[0]; return `linear-gradient(135deg, ${g[0]}, ${g[1]})`; };
 const Playlists = {
-  read() { try { return JSON.parse(localStorage.getItem('cl-playlists') || '{}'); } catch (_) { return {}; } },
+  read() {
+    let o; try { o = JSON.parse(localStorage.getItem('cl-playlists') || '{}'); } catch (_) { o = {}; }
+    Object.keys(o).forEach(k => { if (Array.isArray(o[k])) o[k] = { grad: 0, tracks: o[k] }; });   // migra formato antigo
+    return o;
+  },
   write(o) { try { localStorage.setItem('cl-playlists', JSON.stringify(o)); } catch (_) { Toast.error('Sem espaço pra salvar.'); } },
-  create(n) { const o = this.read(); if (!o[n]) o[n] = []; this.write(o); },
-  add(n, ids) { const o = this.read(); const a = o[n] || []; ids.forEach(id => { if (!a.includes(id)) a.push(id); }); o[n] = a; this.write(o); },
-  removeTrack(n, id) { const o = this.read(); if (o[n]) o[n] = o[n].filter(t => t !== id); this.write(o); },
+  create(n, grad) { const o = this.read(); if (!o[n]) o[n] = { grad: grad || 0, tracks: [] }; this.write(o); },
+  add(n, ids) { const o = this.read(); const pl = o[n] || { grad: 0, tracks: [] }; ids.forEach(id => { if (!pl.tracks.includes(id)) pl.tracks.push(id); }); o[n] = pl; this.write(o); },
+  removeTrack(n, id) { const o = this.read(); if (o[n]) o[n].tracks = o[n].tracks.filter(t => t !== id); this.write(o); },
   remove(n) { const o = this.read(); delete o[n]; this.write(o); },
+  tracks(n) { const o = this.read(); return o[n] ? o[n].tracks : []; },
 };
 function fmtTime(s) { s = Math.max(0, Math.floor(s || 0)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); }
 let _uploadedTracks = [];
@@ -1394,7 +1406,7 @@ function allTracks() { return _uploadedTracks.concat(TRACKS); }
 function trackById(id) { return allTracks().find(t => t.id === id); }
 
 const Player = {
-  audio: null, bar: null, queue: [], idx: -1, urls: [],
+  audio: null, bar: null, queue: [], idx: -1, urls: [], grad: 0,
   init() {
     this.audio = document.getElementById('player-audio'); this.bar = document.getElementById('player-bar'); if (!this.audio || !this.bar) return;
     document.getElementById('pl-toggle')?.addEventListener('click', () => this.toggle());
@@ -1409,22 +1421,39 @@ const Player = {
     this.audio.addEventListener('play', () => this.render());
     this.audio.addEventListener('pause', () => this.render());
     this.audio.addEventListener('loadedmetadata', () => this.tick());
+    // mini player (aparece fora da página de áudio)
+    document.getElementById('mp-toggle')?.addEventListener('click', e => { e.stopPropagation(); this.toggle(); });
+    document.getElementById('mini-player')?.addEventListener('click', e => { if (!e.target.closest('.mp-toggle')) location.hash = '#/audio'; });
   },
   srcFor(t) { if (t.src) return t.src; if (t.blob) { const u = URL.createObjectURL(t.blob); this.urls.push(u); return u; } return null; },
   load(i) { this.idx = i; const t = this.queue[i]; if (!t) return; const src = this.srcFor(t); if (!src) { Toast.error('Áudio indisponível.'); return; }
-    this.audio.src = src; this.audio.play().catch(() => {}); this.bar.classList.add('show'); document.body.classList.add('has-player'); this.render(); },
-  play(track, queue) { this.queue = (queue && queue.length ? queue : [track]); const i = this.queue.findIndex(t => t.id === track.id); this.load(i < 0 ? 0 : i); Sound.click && Sound.click(); },
+    this.audio.src = src; this.audio.play().catch(() => {}); this.placement(); this.render(); },
+  play(track, queue, grad) { this.queue = (queue && queue.length ? queue : [track]); this.grad = grad || 0; const i = this.queue.findIndex(t => t.id === track.id); this.load(i < 0 ? 0 : i); Sound.click && Sound.click(); },
   toggle() { if (!this.queue.length) return; if (this.audio.paused) this.audio.play().catch(() => {}); else this.audio.pause(); },
   next() { if (this.idx + 1 < this.queue.length) this.load(this.idx + 1); else this.audio.pause(); },
   prev() { if (this.audio.currentTime > 3) this.audio.currentTime = 0; else if (this.idx > 0) this.load(this.idx - 1); else this.audio.currentTime = 0; },
-  stop() { this.audio.pause(); this.audio.removeAttribute('src'); this.audio.load(); this.queue = []; this.idx = -1; this.bar.classList.remove('show'); document.body.classList.remove('has-player'); this.render(); },
+  stop() { this.audio.pause(); this.audio.removeAttribute('src'); this.audio.load(); this.queue = []; this.idx = -1; this.placement(); this.render(); },
+  // mostra o bar completo na página de áudio, e o MINI player fora dela
+  placement() {
+    const active = this.queue.length > 0, onAudio = location.hash.indexOf('#/audio') === 0;
+    this.bar && this.bar.classList.toggle('show', active && onAudio);
+    document.getElementById('mini-player')?.classList.toggle('show', active && !onAudio);
+    document.body.classList.toggle('has-player', active && onAudio);
+    document.body.classList.toggle('has-mini', active && !onAudio);
+  },
   tick() { const a = this.audio, seek = document.getElementById('pl-seek');
     if (seek && a.duration && document.activeElement !== seek) seek.value = String((a.currentTime / a.duration) * 1000);
     const cur = document.getElementById('pl-cur'), dur = document.getElementById('pl-dur'); if (cur) cur.textContent = fmtTime(a.currentTime); if (dur) dur.textContent = fmtTime(a.duration); },
-  render() { const t = this.queue[this.idx], pl = !this.audio || this.audio.paused;
-    const tg = document.getElementById('pl-toggle'); if (tg) tg.innerHTML = svgIcon(pl ? 'play2' : 'pause', 'ic');
-    if (t) { const T = document.getElementById('pl-title'), S = document.getElementById('pl-sub'); if (T) T.textContent = t.title; if (S) S.textContent = (t.tag || '') + (t.eq ? (' · ' + t.eq) : ''); }
-    document.querySelectorAll('.track-row, .plc-track').forEach(r => r.classList.toggle('playing', !!t && r.dataset.id === t.id && !pl));
+  render() { const t = this.queue[this.idx], paused = !this.audio || this.audio.paused;
+    const tg = document.getElementById('pl-toggle'); if (tg) tg.innerHTML = svgIcon(paused ? 'play2' : 'pause', 'ic');
+    const mtg = document.getElementById('mp-toggle'); if (mtg) mtg.innerHTML = svgIcon(paused ? 'play2' : 'pause', 'ic ic-sm');
+    if (t) {
+      const set = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
+      const sub = (t.tag || '') + (t.eq ? (' · ' + t.eq) : '');
+      set('pl-title', t.title); set('pl-sub', sub); set('mp-title', t.title); set('mp-sub', sub);
+      const cover = document.getElementById('mp-cover'); if (cover) cover.style.background = gradCss(this.grad);
+    }
+    document.querySelectorAll('.track-row, .plc-track').forEach(r => r.classList.toggle('playing', !!t && r.dataset.id === t.id && !paused));
   },
   isPlaying(id) { return this.queue[this.idx] && this.queue[this.idx].id === id && !this.audio.paused; },
 };
@@ -1434,13 +1463,13 @@ let _plPending = [];
 function renderPlPicker() {
   const el = document.getElementById('plpick-list'); if (!el) return;
   const pls = Playlists.read(), names = Object.keys(pls);
-  el.innerHTML = names.length ? names.map(n => `<button class="favc-row" data-name="${n}"><span class="favc-ic">${svgIcon('music')}</span><div class="favc-meta"><b>${n}</b><span>${pls[n].length} áudio(s)</span></div><span class="favc-add">${svgIcon('plus','ic ic-sm')}</span></button>`).join('') : `<div class="fav-empty">Crie uma playlist acima ☝</div>`;
+  el.innerHTML = names.length ? names.map(n => `<button class="favc-row" data-name="${n}"><span class="favc-ic" style="background:${gradCss(pls[n].grad)};color:#fff;border:none">${svgIcon('music')}</span><div class="favc-meta"><b>${n}</b><span>${(pls[n].tracks || []).length} áudio(s)</span></div><span class="favc-add">${svgIcon('plus','ic ic-sm')}</span></button>`).join('') : `<div class="fav-empty">Crie uma playlist acima ☝</div>`;
   renderIcons(el);
 }
 function openPlaylistPicker(ids) { _plPending = ids || []; renderPlPicker(); UI.openModal('modal-playlist'); }
 function initPlaylistModal() {
   const bd = document.getElementById('modal-playlist'); if (!bd) return;
-  const create = () => { const inp = document.getElementById('plpick-new'); const n = (inp.value || '').trim(); if (!n) return; Playlists.create(n); inp.value = ''; renderPlPicker(); Sound.click && Sound.click(); };
+  const create = () => { const inp = document.getElementById('plpick-new'); const n = (inp.value || '').trim(); if (!n) return; Playlists.create(n, Object.keys(Playlists.read()).length % GRADS.length); inp.value = ''; renderPlPicker(); Sound.click && Sound.click(); };
   document.getElementById('plpick-go')?.addEventListener('click', create);
   document.getElementById('plpick-new')?.addEventListener('keydown', e => { if (e.key === 'Enter') create(); });
   document.getElementById('plpick-list')?.addEventListener('click', e => {
@@ -1454,6 +1483,7 @@ function initPlaylistModal() {
 async function initMusica() {
   const root = document.getElementById('audio-page'); if (!root) return;
   await loadAudioTracks();
+  let selGrad = 0;
   const trackRow = t => {
     const playing = Player.isPlaying(t.id);
     return `<div class="track-row${playing ? ' playing' : ''}" data-id="${t.id}">
@@ -1465,10 +1495,10 @@ async function initMusica() {
         ${t.own ? `<button class="tr-del" title="Remover (admin)">${svgIcon('trash', 'ic ic-xs')}</button>` : ''}
       </div></div>`;
   };
-  const playlistCard = (n, ids) => {
-    const tracks = ids.map(trackById).filter(Boolean);
+  const playlistCard = (n, pl) => {
+    const tracks = (pl.tracks || []).map(trackById).filter(Boolean);
     return `<div class="playlist-card" data-pl="${n}">
-      <div class="plc-head"><div class="plc-ic">${svgIcon('music', 'ic')}</div>
+      <div class="plc-head"><div class="plc-cover" style="background:${gradCss(pl.grad)}">${svgIcon('music', 'ic')}</div>
         <div class="plc-meta"><b>${n}</b><span>${tracks.length} áudio(s)</span></div>
         <button class="btn plc-play">${svgIcon('play2', 'ic ic-sm')} Tocar</button>
         <button class="plc-del" title="Excluir playlist">${svgIcon('trash', 'ic ic-sm')}</button></div>
@@ -1485,12 +1515,15 @@ async function initMusica() {
       </section>
       <section class="audio-sec">
         <div class="audio-head"><h2>Minhas playlists</h2></div>
-        <div class="pl-new"><div class="input"><i data-icon="music" data-cls="ic ic-sm"></i><input id="pl-new-name" placeholder="Nova playlist (ex: Recepção, Procedimento)" autocomplete="off"></div><button class="btn" id="pl-new-go">Criar</button></div>
-        <div class="playlist-list">${names.length ? names.map(n => playlistCard(n, pls[n])).join('') : '<div class="pf-loading">Crie uma playlist e adicione áudios com o + 🎵</div>'}</div>
+        <div class="pl-newwrap">
+          <div class="grad-pick" id="grad-pick"><span class="grad-lbl">Cor da capa:</span>${GRADS.map((g, i) => `<button class="grad-sw${i === selGrad ? ' on' : ''}" data-g="${i}" style="background:${gradCss(i)}" title="Cor da capa"></button>`).join('')}</div>
+          <div class="pl-new"><div class="input"><i data-icon="music" data-cls="ic ic-sm"></i><input id="pl-new-name" placeholder="Nome da playlist (ex: Recepção, Procedimento)" autocomplete="off"></div><button class="btn" id="pl-new-go">Criar</button></div>
+        </div>
+        <div class="playlist-list">${names.length ? names.map(n => playlistCard(n, pls[n])).join('') : '<div class="pf-loading">Crie uma playlist (escolha a cor da capa) e adicione áudios com o + 🎵</div>'}</div>
       </section>`;
     renderIcons(root); Player.render();
   }
-  function doCreate() { const inp = document.getElementById('pl-new-name'); const n = (inp.value || '').trim(); if (!n) return; Playlists.create(n); inp.value = ''; render(); }
+  function doCreate() { const inp = document.getElementById('pl-new-name'); const n = (inp.value || '').trim(); if (!n) return; Playlists.create(n, selGrad); inp.value = ''; render(); }
   function addAudio() {
     const inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'audio/*'; inp.multiple = true;
     inp.onchange = async () => { const files = [...(inp.files || [])]; if (!files.length) return;
@@ -1501,6 +1534,8 @@ async function initMusica() {
   }
   root.addEventListener('keydown', e => { if (e.target.id === 'pl-new-name' && e.key === 'Enter') doCreate(); });
   root.addEventListener('click', async e => {
+    const sw = e.target.closest('.grad-sw');
+    if (sw) { selGrad = +sw.dataset.g; root.querySelectorAll('.grad-sw').forEach(s => s.classList.toggle('on', s === sw)); return; }
     if (e.target.closest('#audio-add')) { addAudio(); return; }
     if (e.target.closest('#pl-new-go')) { doCreate(); return; }
     const tr = e.target.closest('.track-row');
@@ -1510,11 +1545,12 @@ async function initMusica() {
       if (e.target.closest('.tr-del')) { _uploadedTracks = _uploadedTracks.filter(t => t.id !== tr.dataset.id); try { await AudioDB.set(_uploadedTracks); } catch (_) {} Toast.info('Áudio removido.'); render(); return; }
     }
     const pc = e.target.closest('.playlist-card'); if (!pc) return;
-    const name = pc.dataset.pl, ids = Playlists.read()[name] || [], tracks = ids.map(trackById).filter(Boolean);
-    if (e.target.closest('.plc-play')) { if (tracks.length) Player.play(tracks[0], tracks); else Toast.info('Playlist vazia.'); return; }
+    const name = pc.dataset.pl, plData = Playlists.read()[name] || { grad: 0, tracks: [] };
+    const grad = plData.grad || 0, tracks = (plData.tracks || []).map(trackById).filter(Boolean);
+    if (e.target.closest('.plc-play')) { if (tracks.length) Player.play(tracks[0], tracks, grad); else Toast.info('Playlist vazia.'); return; }
     if (e.target.closest('.plc-del')) { if (confirm('Excluir a playlist "' + name + '"?')) { Playlists.remove(name); render(); } return; }
     const pt = e.target.closest('.plc-track'); if (!pt) return;
-    if (e.target.closest('.plct-play')) { const t = trackById(pt.dataset.id); if (t) Player.play(t, tracks); return; }
+    if (e.target.closest('.plct-play')) { const t = trackById(pt.dataset.id); if (t) Player.play(t, tracks, grad); return; }
     if (e.target.closest('.plct-rm')) { Playlists.removeTrack(name, pt.dataset.id); render(); return; }
   });
   render();

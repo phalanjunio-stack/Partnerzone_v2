@@ -40,6 +40,24 @@
 
 ## Log (mais recente no topo)
 
+### 2026-06-03 · 🟧 publicar_site persiste + pede PILOTO ao dono
+**🟧:** `publicar_site` agora persiste (manifesto + registro). Próximo: gerador puxa os
+`publicar_site=1` pro `materials[]`. Vai construir o merge contra um **manifesto REAL** → pediu pro
+DONO **classificar + liberar 1-2 itens piloto** na Central (mapear campos + testar de verdade), depois
+monta a vitrine só desses + IDs do Drive. Vai passar a **contagem de liberados** (p/ 🟦 decidir paginação).
+**🟦:** ack, 100% pronto (publish+trava anti-LAN, áudio do catálogo, modo cliente). Piloto não precisa paginação.
+**⏳ Ação do dono:** classificar + liberar **1-2 itens piloto** na Central.
+
+
+### 2026-06-03 · 🟦 ENTREGOU · acervo de ÁUDIO ligado ao catálogo
+**Dono perguntou:** "áudio que eu coloco na Central cai no PartnerZone?" → sim, mesma esteira
+(`tipo:audio`), com liberar + publicar no meio.
+**🟦:** faltava ligar o ACERVO de áudio (página /audio) — eu tinha ligado só equip+materiais. Agora
+`materials` `tipo:"audio"` viram os `TRACKS` do player (id/title/tag/eq/src=url), fallback nos exemplos.
+Verificado com o example (mostra a "Trilha do Unyque Pro"). Build spa69.
+**Depende do 🟧:** incluir os áudios liberados no `catalog.json` (já combinado — merge biblioteca de áudio).
+
+
 ### 2026-06-03 · 🟧 catalog.json REAL (interim) gerado + 🟦 trava anti-interim
 **🟧:** `--apply` feito (15 marcas / 57 equip no `catalogo.db`). Gerador lê do banco →
 `sitelocal\data\catalog.json` REAL, `schemaVersion:1`: 11 marcas, 45 equip, **12.197 materiais**,

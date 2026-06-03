@@ -1,7 +1,7 @@
 /* ============================================================
    APP — ícones (traçado), dados de exemplo e render da Início
    ============================================================ */
-const BUILD = 'spa60';
+const BUILD = 'spa61';
 try { console.log('%cPartnerZone • build ' + BUILD, 'background:#2f7ff2;color:#fff;padding:2px 8px;border-radius:4px;font-weight:700'); } catch (_) {}
 
 /* ---- Ícones (todos outline / currentColor) ---- */
@@ -386,11 +386,8 @@ function processLogo(src) {
       const x = c.getContext('2d'); x.drawImage(im, 0, 0);
       let d; try { d = x.getImageData(0, 0, W, H); } catch (e) { return rej(e); }
       const p = d.data;
-      for (let i = 0; i < p.length; i += 4) {   // branco/quase-branco → transparente
-        const r = p[i], g = p[i + 1], b = p[i + 2], mn = Math.min(r, g, b), mx = Math.max(r, g, b);
-        if (mn > 236 && (mx - mn) < 16) p[i + 3] = 0;
-      }
-      x.putImageData(d, 0, 0);
+      // a logo JÁ é transparente: NÃO remover "branco" (isso quebra o texto claro do "Partner").
+      // só medimos o alfa original pra achar o recorte e separar o anel da palavra.
       const colHas = new Uint8Array(W), rowHas = new Uint8Array(H);
       for (let y = 0; y < H; y++) for (let xx = 0; xx < W; xx++) if (p[(y * W + xx) * 4 + 3] > 30) { colHas[xx] = 1; rowHas[y] = 1; }
       let y0 = 0, y1 = H - 1; while (y0 < H && !rowHas[y0]) y0++; while (y1 > 0 && !rowHas[y1]) y1--;
@@ -421,10 +418,10 @@ function initPartnerLogo() {
     wordEl.innerHTML = `<img class="pz-word" src="${o.word}" alt="PartnerZone">`;
     document.querySelector('.brand')?.classList.add('has-logo');
   };
-  let cached = null; try { cached = JSON.parse(localStorage.getItem('cl-pz-logo-v1')); } catch (_) {}
+  let cached = null; try { cached = JSON.parse(localStorage.getItem('cl-pz-logo-v2')); } catch (_) {}
   if (cached && cached.mark) { apply(cached); return; }
-  processLogo('assets/partnerzone-logo.png?v=1')
-    .then(o => { apply(o); try { localStorage.setItem('cl-pz-logo-v1', JSON.stringify(o)); } catch (_) {} })
+  processLogo('assets/partnerzone-logo.png?v=2')
+    .then(o => { apply(o); try { localStorage.setItem('cl-pz-logo-v2', JSON.stringify(o)); } catch (_) {} })
     .catch(() => {});
 }
 

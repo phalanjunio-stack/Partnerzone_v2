@@ -4,39 +4,30 @@
 window.Splash = (() => {
   let el = null;
 
-  /* remove o fundo branco do PNG da logo + recorta (mostra a logo real sobre o navy) */
+  /* a logo JÁ é um PNG transparente (97% alfa-zero). NÃO mexer nas cores/alfa —
+     qualquer "remoção de fundo" come o texto claro do "Partner" e quebra as letras.
+     Aqui só recortamos as margens transparentes pra logo preencher melhor o espaço. */
   function processLogo(cb) {
-    try { const c = localStorage.getItem("cl-pz-splash3"); if (c) { cb(c); return; } } catch (_) {}
-    try { localStorage.removeItem("cl-pz-splash"); localStorage.removeItem("cl-pz-splash2"); } catch (_) {}
+    try { const c = localStorage.getItem("cl-pz-splash4"); if (c) { cb(c); return; } } catch (_) {}
+    try { localStorage.removeItem("cl-pz-splash"); localStorage.removeItem("cl-pz-splash2"); localStorage.removeItem("cl-pz-splash3"); } catch (_) {}
     const im = new Image();
     im.onload = () => {
       try {
         const W = im.naturalWidth, H = im.naturalHeight;
         const cv = document.createElement("canvas"); cv.width = W; cv.height = H;
         const x = cv.getContext("2d"); x.drawImage(im, 0, 0);
-        const d = x.getImageData(0, 0, W, H), p = d.data;
-        // tira só o fundo branco/franja NEUTRA com rampa larga e suave (anti-serrilhado limpo).
-        // pixels coloridos (texto azul + anel) NÃO são tocados => ficam 100% nítidos.
-        for (let i = 0; i < p.length; i += 4) {
-          const r = p[i], g = p[i + 1], b = p[i + 2], mn = Math.min(r, g, b), sat = Math.max(r, g, b) - mn;
-          if (sat < 34) {
-            let a = 255;
-            if (mn >= 247) a = 0;                                            // branco puro => some
-            else if (mn > 210) a = Math.round(255 * (247 - mn) / (247 - 210)); // rampa suave 210..247
-            if (a < p[i + 3]) p[i + 3] = a;
-          }
-        }
-        x.putImageData(d, 0, 0);
+        const p = x.getImageData(0, 0, W, H).data;
+        // acha a caixa do conteúdo opaco (recorte) — SEM alterar nenhum pixel
         let x0 = W, y0 = H, x1 = 0, y1 = 0, f = false;
-        for (let yy = 0; yy < H; yy++) for (let xx = 0; xx < W; xx++) if (p[(yy * W + xx) * 4 + 3] > 30) { f = true; if (xx < x0) x0 = xx; if (xx > x1) x1 = xx; if (yy < y0) y0 = yy; if (yy > y1) y1 = yy; }
+        for (let yy = 0; yy < H; yy++) for (let xx = 0; xx < W; xx++) if (p[(yy * W + xx) * 4 + 3] > 16) { f = true; if (xx < x0) x0 = xx; if (xx > x1) x1 = xx; if (yy < y0) y0 = yy; if (yy > y1) y1 = yy; }
         if (!f) { cb(im.src); return; }
-        const pad = Math.round(Math.min(W, H) * 0.03);
+        const pad = Math.round(Math.min(W, H) * 0.02);
         x0 = Math.max(0, x0 - pad); y0 = Math.max(0, y0 - pad); x1 = Math.min(W - 1, x1 + pad); y1 = Math.min(H - 1, y1 + pad);
         const cw = x1 - x0 + 1, ch = y1 - y0 + 1;
         const cc = document.createElement("canvas"); cc.width = cw; cc.height = ch;
-        cc.getContext("2d").putImageData(x.getImageData(x0, y0, cw, ch), 0, 0);
+        cc.getContext("2d").drawImage(im, x0, y0, cw, ch, 0, 0, cw, ch); // desenha o ORIGINAL recortado (nítido)
         const out = cc.toDataURL("image/png");
-        try { localStorage.setItem("cl-pz-splash3", out); } catch (_) {}
+        try { localStorage.setItem("cl-pz-splash4", out); } catch (_) {}
         cb(out);
       } catch (e) { cb(im.src); }
     };

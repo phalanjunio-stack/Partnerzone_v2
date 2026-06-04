@@ -40,6 +40,15 @@
 
 ## Log (mais recente no topo)
 
+### 2026-06-03 · 🟦→🟧 (combinado, "depois") · Equipamentos COMPLETOS no catálogo
+**Dono:** a página Equipamentos do PartnerZone deve sincronizar a lista COMPLETA da Central
+(~45-57: UNYQUE, VISBODY, XERF, SUPREMEPRO, CONTOURLINE MED…), não só os com material liberado.
+**🟦:** meu lado já renderiza qualquer `equipamentos[]`. Ajuste é no gerador 🟧:
+**`equipamentos[]` = TODOS os ativos** (portfólio navegável, mesmo sem material) com
+`slug,name,marca,segmento/tipo,cover,materialCount`; **`materials[]` = só `publicar_site=1`**.
+Combinado pro próximo ciclo (sem pressa). Quando vier completo, a página mostra automático.
+
+
 ### 2026-06-03 · 🟦 Buscar/Biblioteca 100% do catálogo (filtros + contador reais)
 **Dono:** "o #/buscar também é organizado pela Central." Estava meio-ligado (cards do catálogo, mas
 filtros/contador de exemplo: "4.170", "HIPRO 892").

@@ -250,7 +250,12 @@
         'Lumenis':     { logo:'L',  tag:'energy to transform lives',   cor:'#e11d48' },
       };
       const brand = brandArg || 'Contourline';
-      const info = BRANDS[brand] || { logo: brand.split(/\s+/).map(w => w[0]).join('').slice(0, 2).toUpperCase(), tag: 'identidade da marca', cor: '#2f7ff2' };
+      const info = Object.assign(
+        { logo: brand.split(/\s+/).map(w => w[0]).join('').slice(0, 2).toUpperCase(), tag: 'identidade da marca', cor: '#2f7ff2' },
+        BRANDS[brand] || {}
+      );
+      // cor do hero vem da PALETA que o designer gerar (se houver), senão a padrão da marca
+      try { const p = JSON.parse(localStorage.getItem('cl-pal:' + brand + ':principal')); const c0 = p && p[0]; const hex = (typeof c0 === 'string') ? c0 : (c0 && c0.hex); if (hex) info.cor = hex; } catch (_) {}
       const blogo = (cls = '') => `<div class="blogo ${cls}" style="--bcor:${info.cor}"><span class="bl-c">${info.logo}</span><span class="bl-word">${brand.toLowerCase()}<small>${info.tag}</small></span></div>`;
       const logosHref = '#/marca/' + encodeURIComponent(brand) + '/logos';
       const CATS = [
@@ -286,10 +291,9 @@
             <div class="bh-side">
               <div class="bh-logo">${blogo('white big')}</div>
               <div class="bh-stats">
-                <div class="bh-stat"><span class="bs-ic"><i data-icon="image" data-cls="ic ic-sm"></i></span><div><b>12</b><span>Logos Disponíveis</span></div></div>
-                <div class="bh-stat"><span class="bs-ic"><i data-icon="sliders" data-cls="ic ic-sm"></i></span><div><b>8</b><span>Cores Oficiais</span></div></div>
-                <div class="bh-stat"><span class="bs-ic"><i data-icon="grid" data-cls="ic ic-sm"></i></span><div><b>24</b><span>Templates Prontos</span></div></div>
-                <div class="bh-stat"><span class="bs-ic"><i data-icon="download" data-cls="ic ic-sm"></i></span><div><b>120+</b><span>Downloads Este mês</span></div></div>
+                <div class="bh-stat"><span class="bs-ic"><i data-icon="image" data-cls="ic ic-sm"></i></span><div><b id="bs-logos">—</b><span>Logos</span></div></div>
+                <div class="bh-stat"><span class="bs-ic"><i data-icon="sliders" data-cls="ic ic-sm"></i></span><div><b id="bs-cores">—</b><span>Cores Oficiais</span></div></div>
+                <div class="bh-stat"><span class="bs-ic"><i data-icon="grid" data-cls="ic ic-sm"></i></span><div><b id="bs-apps">—</b><span>Aplicações</span></div></div>
               </div>
             </div>
           </div>

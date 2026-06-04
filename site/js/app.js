@@ -1,7 +1,7 @@
 /* ============================================================
    APP — ícones (traçado), dados de exemplo e render da Início
    ============================================================ */
-const BUILD = 'spa72';
+const BUILD = 'spa73';
 try { console.log('%cPartnerZone • build ' + BUILD, 'background:#2f7ff2;color:#fff;padding:2px 8px;border-radius:4px;font-weight:700'); } catch (_) {}
 
 /* ---- MODO CLIENTE × ADMIN ----------------------------------------------
@@ -1283,6 +1283,14 @@ async function initBrandHub(brand) {
   const appsEl = document.getElementById('bh-apps');
   if (!logosEl || !colorsEl || !appsEl) return;
 
+  // stats REAIS do hero (conta o que está na página) — sem números fake
+  const setStats = () => {
+    const set = (id, n) => { const el = document.getElementById(id); if (el) el.textContent = n; };
+    set('bs-logos', logosEl.querySelectorAll('.logo-card').length);
+    set('bs-cores', colorsEl.querySelectorAll('.color-card').length);
+    set('bs-apps', appsEl.querySelectorAll('.app-card').length);
+  };
+
   // paleta padrão por versão (distinta) — o admin pode regerar do logo
   const DEF = {
     principal: [cor, '#1B2655', '#6B7280', '#F4F5F7', '#1F2937', '#FFFFFF'],
@@ -1308,7 +1316,7 @@ async function initBrandHub(brand) {
         <button class="color-cp" data-hex="${c.hex}" title="Copiar HEX">${svgIcon('file','ic ic-sm')}</button>
         <button class="color-del" data-i="${i}" title="Apagar (admin)">${svgIcon('trash','ic ic-xs')}</button></div>`).join('')
       + (custom ? `<button class="bh-resetpal" id="bh-resetpal">${svgIcon('trash','ic ic-xs')} Voltar pra paleta padrão</button>` : '');
-    renderIcons(colorsEl);
+    renderIcons(colorsEl); setStats();
   }
   async function renderApps() {
     aurls.forEach(u => URL.revokeObjectURL(u)); aurls = [];
@@ -1321,7 +1329,7 @@ async function initBrandHub(brand) {
       const tint = (loadPal(sel).pal[0] || {}).hex || cor;   // placeholders tingidos na cor da versão
       appsEl.innerHTML = DEFAULT_APPS.map(a => `<div class="app-card"><div class="app-thumb" style="background:linear-gradient(155deg, ${tint}2e, var(--surface)); color:${tint}; border-color:${tint}33">${svgIcon('image','ic ph')}</div><b>${a[0]}</b><span>${a[1]}</span></div>`).join('');
     }
-    renderIcons(appsEl);
+    renderIcons(appsEl); setStats();
   }
   function selectLook(look) {
     sel = look;
@@ -1344,7 +1352,7 @@ async function initBrandHub(brand) {
       logosEl.innerHTML = `<div class="bh-logos-empty"><span class="pf-empty-ic">${svgIcon('upload','ic')}</span><b>Nenhum logo aqui</b>
         <span>Solte os logos da marca — a paleta de cores é gerada automaticamente de cada um.</span>
         <div class="bh-empty-btns"><button class="btn" id="bh-empty-add">${svgIcon('upload','ic ic-sm')} Adicionar logo</button>${hasHidden() ? `<button class="btn ghost" id="bh-restore">Restaurar padrões</button>` : ''}</div></div>`;
-      renderIcons(logosEl); return;
+      renderIcons(logosEl); setStats(); return;
     }
     logosEl.className = 'logo-grid masonry';
     const gap = 12, CAP = 48, W = logosEl.clientWidth || 340;
@@ -1364,7 +1372,7 @@ async function initBrandHub(brand) {
           <button class="logo-dl">${svgIcon('download','ic ic-sm')}</button></div></div>`;
       colEls[t].appendChild(wrap.firstElementChild); heights[t] += h + CAP + gap;
     });
-    renderIcons(logosEl);
+    renderIcons(logosEl); setStats();
   }
   let bhrt; window.addEventListener('resize', () => { clearTimeout(bhrt); bhrt = setTimeout(() => { if (document.body.contains(logosEl)) renderLogos(); }, 150); });
 

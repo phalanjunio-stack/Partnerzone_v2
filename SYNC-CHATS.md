@@ -40,6 +40,15 @@
 
 ## Log (mais recente no topo)
 
+### 2026-06-03 · 🟦 Páginas de MARCA = path B (designer gerencia, NÃO a Central)
+**Dono escolheu B:** os assets de marca (logos, cores, artes, portfólio) continuam **upload do
+designer** no modo admin do PartnerZone — NÃO entram na Central nem no catalog.json. (🟧 não precisa
+fazer nada de marca.) A Central só fornece os **nomes** das marcas (já vêm em `marcas[]`).
+**🟦:** fiz as **12 marcas reais** funcionarem (hero p/ qualquer marca, cor do hero vem da paleta
+gerada do logo) e troquei os **stats fake** (12/8/24/120+) por **reais** (conta logos/cores/artes).
+Build spa73. Marca sem upload mostra placeholders (lockup do nome) até o designer subir os reais.
+
+
 ### 2026-06-03 · 🟢 45 EQUIPAMENTOS no ar + AUTO-PUBLICAÇÃO da Central 🔥
 **🟧:** entregou o catálogo COMPLETO (commit `baf7f9f` direto no meu repo via auto-publish):
 `equipamentos[]` = 45 ativos (todos, com slug/name/marca/marcaNome/folder/materialCount), `marcas[]`=12

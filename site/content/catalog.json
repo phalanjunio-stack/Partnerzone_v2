@@ -1,17 +1,575 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-06-03T22:16:42.974Z",
-  "source": "liberados (manifests + audio-metadata)",
-  "marcas": [],
+  "generatedAt": "2026-06-03T20:38:56.470Z",
+  "source": "equipamentos: catalogo.db (completo) · materials: liberados (manifests + audio-metadata)",
+  "marcas": [
+    {
+      "slug": "lumenis",
+      "code": "LUM",
+      "name": "Lumenis",
+      "logo": ""
+    },
+    {
+      "slug": "body-health",
+      "code": "BOD",
+      "name": "Body Health",
+      "logo": ""
+    },
+    {
+      "slug": "daeju",
+      "code": "DAE",
+      "name": "Daeju",
+      "logo": ""
+    },
+    {
+      "slug": "luthronic",
+      "code": "LUT",
+      "name": "Luthronic",
+      "logo": ""
+    },
+    {
+      "slug": "eurofeedback",
+      "code": "EUR",
+      "name": "Eurofeedback",
+      "logo": ""
+    },
+    {
+      "slug": "visbody",
+      "code": "VIS",
+      "name": "Visbody",
+      "logo": ""
+    },
+    {
+      "slug": "zelotech",
+      "code": "ZEL",
+      "name": "ZELOTECH",
+      "logo": ""
+    },
+    {
+      "slug": "line-skin",
+      "code": "LIN",
+      "name": "LINE SKIN",
+      "logo": ""
+    },
+    {
+      "slug": "skinled",
+      "code": "SKI",
+      "name": "SKINLED",
+      "logo": ""
+    },
+    {
+      "slug": "contourline-med",
+      "code": "CON",
+      "name": "CONTOURLINE MED",
+      "logo": ""
+    },
+    {
+      "slug": "innove",
+      "code": "INN",
+      "name": "INNOVE",
+      "logo": ""
+    },
+    {
+      "slug": "indiba",
+      "code": "IND",
+      "name": "INDIBA",
+      "logo": ""
+    }
+  ],
   "equipamentos": [
     {
-      "slug": "hipro",
-      "name": "HIPRO",
-      "marca": null,
+      "slug": "alpha",
+      "name": "Alpha",
+      "marca": "lumenis",
+      "marcaNome": "Lumenis",
+      "segmento": null,
+      "folder": "LUMENIS/Alpha",
+      "cover": "",
+      "materialCount": 0,
+      "pastas": []
+    },
+    {
+      "slug": "folix",
+      "name": "FOLIX",
+      "marca": "lumenis",
+      "marcaNome": "Lumenis",
+      "segmento": null,
+      "folder": "3. LUMENIS/06. FOLIX",
+      "cover": "",
+      "materialCount": 0,
+      "pastas": []
+    },
+    {
+      "slug": "nuera-tight",
+      "name": "NUERA TIGHT",
+      "marca": "lumenis",
+      "marcaNome": "Lumenis",
+      "segmento": null,
+      "folder": "3. LUMENIS/04. NUERA TIGHT",
+      "cover": "",
+      "materialCount": 0,
+      "pastas": []
+    },
+    {
+      "slug": "nuera",
+      "name": "Nuera",
+      "marca": "lumenis",
+      "marcaNome": "Lumenis",
+      "segmento": null,
+      "folder": "LUMENIS/Nuera",
+      "cover": "",
+      "materialCount": 0,
+      "pastas": []
+    },
+    {
+      "slug": "splendor-x",
+      "name": "SPLENDOR X",
+      "marca": "lumenis",
+      "marcaNome": "Lumenis",
+      "segmento": null,
+      "folder": "3. LUMENIS/05. SPLENDOR X",
+      "cover": "",
+      "materialCount": 0,
+      "pastas": []
+    },
+    {
+      "slug": "stellar",
+      "name": "STELLAR",
+      "marca": "lumenis",
+      "marcaNome": "Lumenis",
+      "segmento": null,
+      "folder": "3. LUMENIS/02. STELLAR",
+      "cover": "",
+      "materialCount": 0,
+      "pastas": []
+    },
+    {
+      "slug": "trilift",
+      "name": "TRILIFT",
+      "marca": "lumenis",
+      "marcaNome": "Lumenis",
+      "segmento": null,
+      "folder": "3. LUMENIS/03. TRILIFT",
+      "cover": "",
+      "materialCount": 0,
+      "pastas": []
+    },
+    {
+      "slug": "ultrapulse-alpha",
+      "name": "ULTRAPULSE ALPHA",
+      "marca": "lumenis",
+      "marcaNome": "Lumenis",
+      "segmento": null,
+      "folder": "3. LUMENIS/01. ULTRAPULSE ALPHA",
+      "cover": "",
+      "materialCount": 0,
+      "pastas": []
+    },
+    {
+      "slug": "bhs-156-full",
+      "name": "BHS 156 FULL",
+      "marca": "body-health",
+      "marcaNome": "Body Health",
+      "segmento": null,
+      "folder": "2. BODY HEALTH/6. BHS 156 FULL",
+      "cover": "",
+      "materialCount": 0,
+      "pastas": []
+    },
+    {
+      "slug": "crystal-3d",
+      "name": "CRYSTAL 3D",
+      "marca": "body-health",
+      "marcaNome": "Body Health",
+      "segmento": null,
+      "folder": "2. BODY HEALTH/5. CRYSTAL 3D",
+      "cover": "",
+      "materialCount": 0,
+      "pastas": []
+    },
+    {
+      "slug": "enygma",
+      "name": "ENYGMA",
+      "marca": "body-health",
+      "marcaNome": "Body Health",
+      "segmento": null,
+      "folder": "2. BODY HEALTH/3. ENYGMA",
+      "cover": "",
+      "materialCount": 0,
+      "pastas": []
+    },
+    {
+      "slug": "iconyc",
+      "name": "ICONYC",
+      "marca": "body-health",
+      "marcaNome": "Body Health",
+      "segmento": null,
+      "folder": "2. BODY HEALTH/4. ICONYC",
+      "cover": "",
+      "materialCount": 0,
+      "pastas": []
+    },
+    {
+      "slug": "supreme-pro",
+      "name": "Supreme Pro",
+      "marca": "body-health",
+      "marcaNome": "Body Health",
       "segmento": null,
       "folder": "",
       "cover": "",
+      "materialCount": 0,
+      "pastas": []
+    },
+    {
+      "slug": "unyque",
+      "name": "UNYQUE",
+      "marca": "body-health",
+      "marcaNome": "Body Health",
+      "segmento": null,
+      "folder": "2. BODY HEALTH/1. UNYQUE",
+      "cover": "",
+      "materialCount": 0,
+      "pastas": []
+    },
+    {
+      "slug": "unyque-pro",
+      "name": "Unyque Pro",
+      "marca": "body-health",
+      "marcaNome": "Body Health",
+      "segmento": null,
+      "folder": "",
+      "cover": "",
+      "materialCount": 0,
+      "pastas": []
+    },
+    {
+      "slug": "hipro",
+      "name": "Hipro",
+      "marca": "daeju",
+      "marcaNome": "Daeju",
+      "segmento": null,
+      "folder": "HIPRO",
+      "cover": "",
       "materialCount": 1,
+      "pastas": []
+    },
+    {
+      "slug": "xerf",
+      "name": "Xerf",
+      "marca": "luthronic",
+      "marcaNome": "Luthronic",
+      "segmento": null,
+      "folder": "",
+      "cover": "",
+      "materialCount": 0,
+      "pastas": []
+    },
+    {
+      "slug": "adena",
+      "name": "ADENA",
+      "marca": "eurofeedback",
+      "marcaNome": "Eurofeedback",
+      "segmento": null,
+      "folder": "8. EUROFEEDBACK/ADENA",
+      "cover": "",
+      "materialCount": 0,
+      "pastas": []
+    },
+    {
+      "slug": "adella",
+      "name": "ADÉLLA",
+      "marca": "eurofeedback",
+      "marcaNome": "Eurofeedback",
+      "segmento": null,
+      "folder": "8. EUROFEEDBACK/ADÉLLA",
+      "cover": "",
+      "materialCount": 0,
+      "pastas": []
+    },
+    {
+      "slug": "eurofeedback",
+      "name": "Eurofeedback",
+      "marca": "eurofeedback",
+      "marcaNome": "Eurofeedback",
+      "segmento": null,
+      "folder": "EUROFEEDBACK",
+      "cover": "",
+      "materialCount": 0,
+      "pastas": []
+    },
+    {
+      "slug": "creator-600",
+      "name": "Creator 600",
+      "marca": "visbody",
+      "marcaNome": "Visbody",
+      "segmento": null,
+      "folder": "6. VISBODY/Creator 600",
+      "cover": "",
+      "materialCount": 0,
+      "pastas": []
+    },
+    {
+      "slug": "m30",
+      "name": "M30",
+      "marca": "visbody",
+      "marcaNome": "Visbody",
+      "segmento": null,
+      "folder": "6. VISBODY/M30",
+      "cover": "",
+      "materialCount": 0,
+      "pastas": []
+    },
+    {
+      "slug": "s30",
+      "name": "S30",
+      "marca": "visbody",
+      "marcaNome": "Visbody",
+      "segmento": null,
+      "folder": "6. VISBODY/S30",
+      "cover": "",
+      "materialCount": 0,
+      "pastas": []
+    },
+    {
+      "slug": "visbody-scanner",
+      "name": "Visbody Scanner",
+      "marca": "visbody",
+      "marcaNome": "Visbody",
+      "segmento": null,
+      "folder": "VISBODY",
+      "cover": "",
+      "materialCount": 0,
+      "pastas": []
+    },
+    {
+      "slug": "attracton",
+      "name": "ATTRACTON",
+      "marca": "zelotech",
+      "marcaNome": "ZELOTECH",
+      "segmento": null,
+      "folder": "9. ZELOTECH/ATTRACTON",
+      "cover": "",
+      "materialCount": 0,
+      "pastas": []
+    },
+    {
+      "slug": "hs-900-saphire",
+      "name": "HS 900 - SAPHIRE",
+      "marca": "zelotech",
+      "marcaNome": "ZELOTECH",
+      "segmento": null,
+      "folder": "9. ZELOTECH/HS 900 - SAPHIRE",
+      "cover": "",
+      "materialCount": 0,
+      "pastas": []
+    },
+    {
+      "slug": "inkie-hof",
+      "name": "INKIE HOF",
+      "marca": "zelotech",
+      "marcaNome": "ZELOTECH",
+      "segmento": null,
+      "folder": "9. ZELOTECH/INKIE HOF",
+      "cover": "",
+      "materialCount": 0,
+      "pastas": []
+    },
+    {
+      "slug": "inkie-laser",
+      "name": "INKIE LASER",
+      "marca": "zelotech",
+      "marcaNome": "ZELOTECH",
+      "segmento": null,
+      "folder": "9. ZELOTECH/INKIE LASER",
+      "cover": "",
+      "materialCount": 0,
+      "pastas": []
+    },
+    {
+      "slug": "inkie-light",
+      "name": "INKIE LIGHT",
+      "marca": "zelotech",
+      "marcaNome": "ZELOTECH",
+      "segmento": null,
+      "folder": "9. ZELOTECH/INKIE LIGHT",
+      "cover": "",
+      "materialCount": 0,
+      "pastas": []
+    },
+    {
+      "slug": "laser-fusion",
+      "name": "LASER FUSION",
+      "marca": "zelotech",
+      "marcaNome": "ZELOTECH",
+      "segmento": null,
+      "folder": "9. ZELOTECH/LASER FUSION",
+      "cover": "",
+      "materialCount": 0,
+      "pastas": []
+    },
+    {
+      "slug": "laser-safiras",
+      "name": "LASER SAFIRAs",
+      "marca": "zelotech",
+      "marcaNome": "ZELOTECH",
+      "segmento": null,
+      "folder": "9. ZELOTECH/LASER SAFIRA's",
+      "cover": "",
+      "materialCount": 0,
+      "pastas": []
+    },
+    {
+      "slug": "vitalien",
+      "name": "VITALIEN",
+      "marca": "zelotech",
+      "marcaNome": "ZELOTECH",
+      "segmento": null,
+      "folder": "9. ZELOTECH/VITALIEN",
+      "cover": "",
+      "materialCount": 0,
+      "pastas": []
+    },
+    {
+      "slug": "line-skin",
+      "name": "LINE SKIN",
+      "marca": "line-skin",
+      "marcaNome": "LINE SKIN",
+      "segmento": null,
+      "folder": "11. LINE SKIN",
+      "cover": "",
+      "materialCount": 0,
+      "pastas": []
+    },
+    {
+      "slug": "skinled",
+      "name": "SKINLED",
+      "marca": "skinled",
+      "marcaNome": "SKINLED",
+      "segmento": null,
+      "folder": "10. SKINLED",
+      "cover": "",
+      "materialCount": 0,
+      "pastas": []
+    },
+    {
+      "slug": "hipro-med",
+      "name": "HIPRO MED",
+      "marca": "contourline-med",
+      "marcaNome": "CONTOURLINE MED",
+      "segmento": null,
+      "folder": "1. CONTOURLINE MED/1. HIPRO MED",
+      "cover": "",
+      "materialCount": 0,
+      "pastas": []
+    },
+    {
+      "slug": "duet",
+      "name": "DUET",
+      "marca": "innove",
+      "marcaNome": "INNOVE",
+      "segmento": null,
+      "folder": "4. INNOVE/6. DUET",
+      "cover": "",
+      "materialCount": 0,
+      "pastas": []
+    },
+    {
+      "slug": "europlasma",
+      "name": "EUROPLASMA",
+      "marca": "innove",
+      "marcaNome": "INNOVE",
+      "segmento": null,
+      "folder": "4. INNOVE/8. EUROPLASMA",
+      "cover": "",
+      "materialCount": 0,
+      "pastas": []
+    },
+    {
+      "slug": "focuskin",
+      "name": "FOCUSKIN",
+      "marca": "innove",
+      "marcaNome": "INNOVE",
+      "segmento": null,
+      "folder": "4. INNOVE/4. FOCUSKIN",
+      "cover": "",
+      "materialCount": 0,
+      "pastas": []
+    },
+    {
+      "slug": "hive-pro",
+      "name": "HIVE PRO",
+      "marca": "innove",
+      "marcaNome": "INNOVE",
+      "segmento": null,
+      "folder": "4. INNOVE/4. HIVE PRO",
+      "cover": "",
+      "materialCount": 0,
+      "pastas": []
+    },
+    {
+      "slug": "multishape",
+      "name": "MULTISHAPE",
+      "marca": "innove",
+      "marcaNome": "INNOVE",
+      "segmento": null,
+      "folder": "4. INNOVE/2. MULTISHAPE",
+      "cover": "",
+      "materialCount": 0,
+      "pastas": []
+    },
+    {
+      "slug": "raytrace",
+      "name": "RAYTRACE",
+      "marca": "innove",
+      "marcaNome": "INNOVE",
+      "segmento": null,
+      "folder": "4. INNOVE/7. RAYTRACE",
+      "cover": "",
+      "materialCount": 0,
+      "pastas": []
+    },
+    {
+      "slug": "skinpulse",
+      "name": "SKINPULSE",
+      "marca": "innove",
+      "marcaNome": "INNOVE",
+      "segmento": null,
+      "folder": "4. INNOVE/5. SKINPULSE",
+      "cover": "",
+      "materialCount": 0,
+      "pastas": []
+    },
+    {
+      "slug": "ultralift",
+      "name": "ULTRALIFT",
+      "marca": "innove",
+      "marcaNome": "INNOVE",
+      "segmento": null,
+      "folder": "4. INNOVE/9. ULTRALIFT",
+      "cover": "",
+      "materialCount": 0,
+      "pastas": []
+    },
+    {
+      "slug": "xtonus",
+      "name": "XTONUS",
+      "marca": "innove",
+      "marcaNome": "INNOVE",
+      "segmento": null,
+      "folder": "4. INNOVE/3. XTONUS",
+      "cover": "",
+      "materialCount": 0,
+      "pastas": []
+    },
+    {
+      "slug": "reverso",
+      "name": "REVERSO",
+      "marca": "indiba",
+      "marcaNome": "INDIBA",
+      "segmento": null,
+      "folder": "7. INDIBA/REVERSO",
+      "cover": "",
+      "materialCount": 0,
       "pastas": []
     }
   ],

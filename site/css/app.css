@@ -32,6 +32,11 @@ html.is-client .adm-del { display: none !important; }
 .admin-badge:hover { transform: translateY(-2px); box-shadow: 0 14px 30px -10px rgba(47,127,242,.85); }
 body.has-player .admin-badge, body.has-mini .admin-badge { bottom: 88px; }
 
+/* card de equipamento SEM foto -> sigla num gradiente (estilo Central) */
+.eq-thumb .eq-ph2 { position: absolute; inset: 0; display: grid; place-items: center; z-index: 0;
+  background: linear-gradient(155deg, color-mix(in srgb, var(--accent) 16%, var(--surface)) 0%, var(--surface) 88%); }
+.eq-thumb .eq-ph2 b { font-size: clamp(34px, 5vw, 64px); font-weight: 800; letter-spacing: .04em; color: var(--accent); opacity: .92; }
+
 /* ============ PLAYER DE ÁUDIO (fixo no rodapé) ============ */
 .player-bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 190; height: 72px;
   display: grid; grid-template-columns: minmax(170px,1fr) 2.2fr minmax(150px,1fr); align-items: center; gap: 18px; padding: 0 20px;

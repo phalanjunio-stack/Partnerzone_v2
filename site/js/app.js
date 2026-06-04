@@ -1,7 +1,7 @@
 /* ============================================================
    APP — ícones (traçado), dados de exemplo e render da Início
    ============================================================ */
-const BUILD = 'spa71';
+const BUILD = 'spa72';
 try { console.log('%cPartnerZone • build ' + BUILD, 'background:#2f7ff2;color:#fff;padding:2px 8px;border-radius:4px;font-weight:700'); } catch (_) {}
 
 /* ---- MODO CLIENTE × ADMIN ----------------------------------------------
@@ -295,13 +295,19 @@ function xfStyle(name, slot, legacyPos) {
   if (t) return `--ox:${t.x}%;--oy:${t.y}%;--os:${t.s};--or:${t.r}deg;object-position:50% 50%`;
   return `object-position:${legacyPos || '50% 50%'}`;
 }
+function eqInitials(e) {
+  const name = (e.name || '').trim();
+  const words = name.replace(/[^A-Za-zÀ-ÿ0-9 ]/g, '').split(/\s+/).filter(Boolean);
+  const ini = (words.length >= 2 ? (words[0][0] + words[1][0]) : name.slice(0, 2)).toUpperCase();
+  return `<span class="eq-ph2"><b>${ini || '–'}</b></span>`;   // sem foto -> sigla num gradiente (estilo Central)
+}
 function eqCardHTML(e) {
   const src = eqCover(e.name, e.img);
   const src2 = eqCover2(e.name);          // 2ª imagem (aparece no hover) — opcional
   return `
     <a class="eq-card${src2 ? ' has-hover' : ''}" href="#/categoria/${encodeURIComponent(e.name)}" data-eq="${e.name}" data-cod="${e.codigo || ''}">
       <div class="eq-thumb">
-        ${src ? `<img src="${src}" alt="${e.name}" loading="lazy" style="${xfStyle(e.name, 1, eqPos(e.name))}">` : svgIcon('cpu','ic ph')}
+        ${src ? `<img src="${src}" alt="${e.name}" loading="lazy" style="${xfStyle(e.name, 1, eqPos(e.name))}">` : eqInitials(e)}
         ${src2 ? `<img class="img2" src="${src2}" alt="" loading="lazy" style="${xfStyle(e.name, 2, eqPos2(e.name))}">` : ''}
         <button class="eq-edit" title="Editar capa (admin)">${svgIcon('pencil','ic ic-sm')}</button>
         <button class="eq-cfg" title="Editar textos (admin)">${svgIcon('settings','ic ic-sm')}</button>

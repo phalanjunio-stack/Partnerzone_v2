@@ -1,7 +1,7 @@
 /* ============================================================
    APP — ícones (traçado), dados de exemplo e render da Início
    ============================================================ */
-const BUILD = 'spa70';
+const BUILD = 'spa71';
 try { console.log('%cPartnerZone • build ' + BUILD, 'background:#2f7ff2;color:#fff;padding:2px 8px;border-radius:4px;font-weight:700'); } catch (_) {}
 
 /* ---- MODO CLIENTE × ADMIN ----------------------------------------------
@@ -1883,7 +1883,8 @@ function initBuscar() {
   function relayout() {
     if (!document.body.contains(grid)) return;
     const list = filtered();
-    const total = (filter === 'todos' && !query) ? 4170 : list.length;
+    const _catOn = (typeof Catalog !== 'undefined' && Catalog.active && Catalog.active());
+    const total = (!_catOn && filter === 'todos' && !query) ? 4170 : list.length;
     const totalStr = total.toLocaleString('pt-BR');
     if (countEl) countEl.textContent = totalStr;
     const totEl = document.getElementById('lib-total'); if (totEl) totEl.textContent = totalStr;

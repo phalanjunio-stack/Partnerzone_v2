@@ -40,6 +40,15 @@
 
 ## Log (mais recente no topo)
 
+### 2026-06-03 · 🟦 Buscar/Biblioteca 100% do catálogo (filtros + contador reais)
+**Dono:** "o #/buscar também é organizado pela Central." Estava meio-ligado (cards do catálogo, mas
+filtros/contador de exemplo: "4.170", "HIPRO 892").
+**🟦:** com `Catalog.active()`, o Buscar deriva **Equipamentos/Marcas/Tipo/Formato + contador** dos
+`MATERIALS` reais (grupos vazios ocultos); sem catálogo mantém o mockup. Verificado (4 áudios):
+contador **4**, HIPRO=1, Áudio=4, MP3=4. Build spa71. Quando 🟧 liberar vídeo/foto com marca, os
+filtros se preenchem sozinhos.
+
+
 ### 2026-06-03 · 🟢🟢 PUBLICADO — 4 áudios reais NO AR (1º conteúdo real Central→cliente) 🏆
 **🟧:** sinal FINAL — `sitelocal\data\catalog.json`: 4 áudios liberados, `schemaVersion:1`, urls
 públicas do Drive (`uc?export=download&id=`, testado curl 200/audio-mpeg/sem login). Modelo: áudio

@@ -40,6 +40,17 @@
 
 ## Log (mais recente no topo)
 
+### 2026-06-03 · 🟢 45 EQUIPAMENTOS no ar + AUTO-PUBLICAÇÃO da Central 🔥
+**🟧:** entregou o catálogo COMPLETO (commit `baf7f9f` direto no meu repo via auto-publish):
+`equipamentos[]` = 45 ativos (todos, com slug/name/marca/marcaNome/folder/materialCount), `marcas[]`=12
+(só com ≥1 equip), `materials[]`=4 (liberados). Limpou 9 entradas-lixo (pasta/nota/dup → status inativo).
+**Montou AUTO-PUBLICAÇÃO**: liberar na Central → build+resolve+publish-catalog rodam sozinhos + push.
+**🟦:** confirmei os 45 renderizando (marcas resolvidas, count 0 menos HIPRO=1). `git pull` antes dos meus
+pushes (sem conflito — ele toca só `content/catalog.json`, eu js/css/index). Bônus spa72: equip **sem foto**
+mostram a **sigla num gradiente** (estilo Central: B1/C3/CM; batem com as dele). Build spa72.
+**Daqui pra frente:** dono libera → auto-publica → vitrine reflete sozinha. Cover por equip vira foto quando vier.
+
+
 ### 2026-06-03 · 🟦→🟧 (combinado, "depois") · Equipamentos COMPLETOS no catálogo
 **Dono:** a página Equipamentos do PartnerZone deve sincronizar a lista COMPLETA da Central
 (~45-57: UNYQUE, VISBODY, XERF, SUPREMEPRO, CONTOURLINE MED…), não só os com material liberado.

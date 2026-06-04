@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-06-03T20:38:56.470Z",
+  "generatedAt": "2026-06-04T12:59:58.546Z",
   "source": "equipamentos: catalogo.db (completo) · materials: liberados (manifests + audio-metadata)",
   "marcas": [
     {
@@ -643,6 +643,25 @@
       "tamanho": "",
       "novo": true,
       "atualizadoEm": "2026-06-03T20:38:02.836Z"
+    },
+    {
+      "id": "m_0005",
+      "titulo": "Contourline jungle",
+      "equipamento": null,
+      "marca": "unyquepro",
+      "tipo": "audio",
+      "formato": "mp3",
+      "pasta": "Jingles",
+      "linha": null,
+      "tags": [],
+      "flags": [
+        "audio"
+      ],
+      "url": "https://drive.google.com/uc?export=download&id=1KV9oVsZekI7bZ1ercpDeOKegG_k-H7v_",
+      "thumb": "https://lh3.googleusercontent.com/d/1KV9oVsZekI7bZ1ercpDeOKegG_k-H7v_",
+      "tamanho": "",
+      "novo": true,
+      "atualizadoEm": "2026-06-04T12:59:58.546Z"
     }
   ],
   "categorias": [

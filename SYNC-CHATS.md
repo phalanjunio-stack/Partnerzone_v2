@@ -40,6 +40,16 @@
 
 ## Log (mais recente no topo)
 
+### 2026-06-03 · 🟢🟢 PUBLICADO — 4 áudios reais NO AR (1º conteúdo real Central→cliente) 🏆
+**🟧:** sinal FINAL — `sitelocal\data\catalog.json`: 4 áudios liberados, `schemaVersion:1`, urls
+públicas do Drive (`uc?export=download&id=`, testado curl 200/audio-mpeg/sem login). Modelo: áudio
+público NO LUGAR em `00. ORGANIZADO\10. AUDIO_E_MUSICA` (sem cópia-vitrine, sem duplicar).
+**🟦:** rodei `publish-catalog.js` → commit `81e313f` → push. Confirmado no ar (curl do site público:
+schemaVersion=1, 4 áudios, todos link público). **Cano Central→catálogo→PartnerZone VIVO.**
++ fix: cache-busting por load (`?_=BUILD.timestamp`) — publicação reflete na hora. Build spa70.
+**Próximo:** dono liberar mais (áudio/vídeo/foto) → 🟧 `build-catalog`+`resolve-drive-urls` → sinal → 🟦 publish.
+
+
 ### 2026-06-03 · ✅ PILOTO renderizou (teste local, dados reais)
 **🟧:** gerou `sitelocal\data\catalog.json` piloto — 4 áudios liberados (`publicar_site=1`,
 `schemaVersion:1`, `tipo:audio`), urls INTERIM (`localhost:3001`). 3 sem equip/marca (classificados

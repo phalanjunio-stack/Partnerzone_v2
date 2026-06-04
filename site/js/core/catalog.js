@@ -13,7 +13,8 @@ window.Catalog = (() => {
   }
 
   async function load() {
-    const bust = (typeof BUILD !== "undefined" ? BUILD : "1");
+    // único por load -> sempre pega o catálogo publicado mais recente (fura o cache do CDN/navegador)
+    const bust = (typeof BUILD !== "undefined" ? BUILD : "1") + "." + Date.now();
     const u = srcUrl() + "?_=" + bust;
     try {
       const ctrl = new AbortController();

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-06-05T20:08:56.170Z",
+  "generatedAt": "2026-06-05T20:09:51.494Z",
   "source": "equipamentos: catalogo.db (completo) · materials: liberados (manifests + audio-metadata)",
   "marcas": [
     {
@@ -684,6 +684,25 @@
       "tamanho": "",
       "novo": true,
       "atualizadoEm": "2026-06-05T20:05:25.545Z"
+    },
+    {
+      "id": "1cWKD2nytsDdH4PKO4A_F9A8YiBF8V344",
+      "titulo": "TriLift Lumenis",
+      "equipamento": null,
+      "marca": "trilift",
+      "tipo": "audio",
+      "formato": "mp3",
+      "pasta": "Áudio",
+      "linha": null,
+      "tags": [],
+      "flags": [
+        "audio"
+      ],
+      "url": "https://drive.google.com/uc?export=download&id=1cWKD2nytsDdH4PKO4A_F9A8YiBF8V344",
+      "thumb": "https://lh3.googleusercontent.com/d/1cWKD2nytsDdH4PKO4A_F9A8YiBF8V344",
+      "tamanho": "",
+      "novo": true,
+      "atualizadoEm": "2026-06-05T20:09:51.494Z"
     }
   ],
   "categorias": [

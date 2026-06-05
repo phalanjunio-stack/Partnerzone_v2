@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-06-05T20:10:14.339Z",
+  "generatedAt": "2026-06-05T20:10:44.554Z",
   "source": "equipamentos: catalogo.db (completo) · materials: liberados (manifests + audio-metadata)",
   "marcas": [
     {
@@ -250,7 +250,7 @@
       "segmento": null,
       "folder": "HIPRO",
       "cover": "",
-      "materialCount": 2,
+      "materialCount": 3,
       "pastas": []
     },
     {

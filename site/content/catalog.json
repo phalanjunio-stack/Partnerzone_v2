@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-06-04T12:59:58.546Z",
+  "generatedAt": "2026-06-05T20:05:25.545Z",
   "source": "equipamentos: catalogo.db (completo) · materials: liberados (manifests + audio-metadata)",
   "marcas": [
     {
@@ -250,7 +250,7 @@
       "segmento": null,
       "folder": "HIPRO",
       "cover": "",
-      "materialCount": 1,
+      "materialCount": 2,
       "pastas": []
     },
     {
@@ -662,6 +662,28 @@
       "tamanho": "",
       "novo": true,
       "atualizadoEm": "2026-06-04T12:59:58.546Z"
+    },
+    {
+      "id": "114QM0PC7E-43X-7HY9wXT8HrrhUIJhJx",
+      "titulo": "Contourline Unyque",
+      "equipamento": "hipro",
+      "marca": "unyquepro",
+      "tipo": "audio",
+      "formato": "mp3",
+      "pasta": "Jingles",
+      "linha": null,
+      "tags": [
+        "alan",
+        "teste"
+      ],
+      "flags": [
+        "audio"
+      ],
+      "url": "https://drive.google.com/uc?export=download&id=114QM0PC7E-43X-7HY9wXT8HrrhUIJhJx",
+      "thumb": "https://lh3.googleusercontent.com/d/114QM0PC7E-43X-7HY9wXT8HrrhUIJhJx",
+      "tamanho": "",
+      "novo": true,
+      "atualizadoEm": "2026-06-05T20:05:25.545Z"
     }
   ],
   "categorias": [

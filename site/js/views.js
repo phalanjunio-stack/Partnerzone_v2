@@ -451,6 +451,21 @@
       };
     },
 
+    /* ---------- SUPORTE (área privada · chamados + chat bidirecional) ---------- */
+    suporte(chamadoId) {
+      return {
+        title: chamadoId ? 'Chamado de Suporte' : 'Suporte',
+        crumbs: chamadoId
+          ? `<i data-icon="buoy" data-cls="ic ic-sm"></i><a href="#/">PartnerZone</a><span>›</span><a href="#/suporte">Suporte</a><span>›</span><span class="here">Chamado</span>`
+          : `<i data-icon="buoy" data-cls="ic ic-sm"></i><a href="#/">PartnerZone</a><span>›</span><span class="here">Suporte</span>`,
+        html: `
+        <div class="conta-wrap" data-enter>
+          <div id="suporte-page"><div class="pf-loading">Carregando…</div></div>
+        </div>`,
+        init: () => { window.initSuporte && window.initSuporte(chamadoId); },
+      };
+    },
+
     /* ---------- CONTRATO (área privada · login Supabase · RLS por cliente) ---------- */
     contrato() {
       return {
@@ -715,6 +730,7 @@
     if (p[0] === 'boletos')             return Views.boletos();
     if (p[0] === 'contrato')            return Views.contrato();
     if (p[0] === 'minha-conta')         return Views.minhaConta();
+    if (p[0] === 'suporte')             return Views.suporte(p[1]);
     if (p[0] === 'audio')               return Views.musica();
     if (p[0] === 'marca')               return p[2] === 'logos' ? Views.marcaLogos(p[1]) : Views.marca(p[1]);
     if (p[0] === 'cadastro')            return Views.cadastro();

@@ -1,7 +1,7 @@
 /* ============================================================
    APP — ícones (traçado), dados de exemplo e render da Início
    ============================================================ */
-const BUILD = 'spa77';
+const BUILD = 'spa78';
 try { console.log('%cPartnerZone • build ' + BUILD, 'background:#2f7ff2;color:#fff;padding:2px 8px;border-radius:4px;font-weight:700'); } catch (_) {}
 
 /* ---- MODO CLIENTE × ADMIN ----------------------------------------------
@@ -120,7 +120,7 @@ const NAV = [
     { icon:'signature', text:'Contrato', route:'#/contrato' },
     { icon:'receipt', text:'Boletos', route:'#/boletos' },
     { icon:'wrench', text:'Meus Equipamentos', route:'#/meus-equipamentos' },
-    { icon:'buoy', text:'Suporte' },
+    { icon:'buoy', text:'Suporte', route:'#/suporte' },
   ]},
   { label:'Administração', admin:true, items:[
     { icon:'package', text:'Catálogo (equip.)', route:'#/cadastro' },
@@ -1228,7 +1228,7 @@ function renderConta(root, cli, sess) {
           <a class="conta-link soon"><span>${svgIcon('signature','ic ic-sm')} Contrato</span><small>em breve</small></a>
           <a class="conta-link soon"><span>${svgIcon('receipt','ic ic-sm')} Boletos</span><small>em breve</small></a>
           <a class="conta-link soon"><span>${svgIcon('wrench','ic ic-sm')} Meus Equipamentos</span><small>em breve</small></a>
-          <a class="conta-link" data-open-modal="modal-solicitar"><span>${svgIcon('buoy','ic ic-sm')} Suporte</span>${svgIcon('chevR','ic ic-sm')}</a>
+          <a class="conta-link" href="#/suporte"><span>${svgIcon('buoy','ic ic-sm')} Suporte</span>${svgIcon('chevR','ic ic-sm')}</a>
         </div>
       </section>
     </div>
@@ -1354,7 +1354,7 @@ function renderMeusEquipamentos(root, equips) {
           <div class="meuseq-actions">
             ${count ? `<span class="meuseq-count">${svgIcon('folder','ic ic-sm')} ${count} materiais</span>` : ''}
             <a class="btn ghost btn-sm" href="${href}">${svgIcon('folder','ic ic-sm')} Ver materiais</a>
-            <button class="btn ghost btn-sm meuseq-chamado" data-eq="${escHtml(name)}" data-open-modal="modal-solicitar">${svgIcon('buoy','ic ic-sm')} Suporte</button>
+            <a class="btn ghost btn-sm" href="#/suporte">${svgIcon('buoy','ic ic-sm')} Suporte</a>
           </div>
           <div class="meuseq-privado">
             ${svgIcon('wrench','ic ic-sm')} <span>Nº série, garantia e manutenção — <b>em breve</b></span>
@@ -1673,6 +1673,315 @@ function renderContrato(root, contratos) {
     Sound && Sound.click && Sound.click();
     initContrato();
   });
+}
+
+/* ============================================================
+   SUPORTE — área privada (lista de chamados + chat bidirecional)
+   Tabelas Supabase:
+     chamados(id UUID, cliente_email TEXT, titulo TEXT, categoria TEXT,
+              prioridade TEXT, status TEXT, criado_em TIMESTAMPTZ)
+     chamado_mensagens(id UUID, chamado_id UUID, autor TEXT,
+                       texto TEXT, criado_em TIMESTAMPTZ)
+   RLS (Central cria):
+     chamados — cliente lê/cria onde cliente_email = auth.email()
+     chamado_mensagens — cliente lê/cria via JOIN em chamados
+   ============================================================ */
+
+/* limpa polling de mensagens quando muda de rota */
+let _suportePoll = null;
+function clearSuportePoll() { if (_suportePoll) { clearInterval(_suportePoll); _suportePoll = null; } }
+window.clearSuportePoll = clearSuportePoll;
+
+async function initSuporte(chamadoId) {
+  clearSuportePoll();
+  const root = document.getElementById('suporte-page'); if (!root) return;
+  root.innerHTML = `<div class="pf-loading">Carregando…</div>`;
+  let ok = false;
+  try { ok = await Portal.configured(); } catch (_) {}
+  if (!ok) { contaNotConfigured(root, 'Suporte'); return; }
+  let sess = null;
+  try { sess = await Portal.session(); } catch (_) {}
+  if (!sess) {
+    const cb = chamadoId ? () => initSuporte(chamadoId) : initSuporte;
+    renderLogin(root, 'Suporte', 'Abra chamados e acompanhe o atendimento da equipe Contourline.', cb);
+    return;
+  }
+  let sb = null;
+  try { sb = await Portal.db(); } catch (_) {}
+  if (!sb) { contaNotConfigured(root, 'Suporte'); return; }
+  if (chamadoId) {
+    await renderSuporteDetalhe(root, sb, sess, chamadoId);
+  } else {
+    await renderSuporteLista(root, sb, sess);
+  }
+}
+window.initSuporte = initSuporte;
+
+/* ---- Lista de chamados ---- */
+async function renderSuporteLista(root, sb, sess) {
+  let chamados = [];
+  try {
+    const { data, error } = await sb.from('chamados')
+      .select('id,titulo,categoria,prioridade,status,criado_em,atualizado_em')
+      .order('atualizado_em', { ascending: false });
+    if (!error && data) chamados = data;
+  } catch (_) {}
+
+  const stLabels = { aberto:'Aberto', em_atendimento:'Em atendimento', resolvido:'Resolvido', cancelado:'Cancelado' };
+  const stIcons  = { aberto:'clock', em_atendimento:'users', resolvido:'check', cancelado:'alert' };
+  const catMap   = { tecnico:'Técnico', comercial:'Comercial', financeiro:'Financeiro', outro:'Outro' };
+
+  const listaHTML = chamados.length ? `
+    <div class="suporte-list">
+      ${chamados.map(ch => {
+        const stTxt = stLabels[ch.status] || ch.status || '—';
+        const stIc  = stIcons[ch.status] || 'clock';
+        const cat   = catMap[(ch.categoria||'').toLowerCase()] || ch.categoria || '';
+        const prio  = (ch.prioridade||'').toLowerCase() === 'urgente';
+        return `<a class="ch-item" href="#/suporte/${escHtml(String(ch.id))}">
+          <div class="ch-main">
+            <span class="ch-titulo">${escHtml(ch.titulo || 'Chamado')}</span>
+            <span class="ch-meta">
+              ${cat ? `<span class="ch-cat">${escHtml(cat)}</span>` : ''}
+              ${prio ? `<span class="ch-urgente">Urgente</span>` : ''}
+              <span class="ch-data">${svgIcon('calendar','ic ic-xs')} ${dataBR(ch.criado_em)}</span>
+            </span>
+          </div>
+          <div class="ch-right">
+            <span class="ch-status ch-st-${escHtml(ch.status||'aberto')}">${svgIcon(stIc,'ic ic-sm')} ${escHtml(stTxt)}</span>
+            ${svgIcon('chevR','ic ic-sm')}
+          </div>
+        </a>`;
+      }).join('')}
+    </div>` : `
+    <div class="suporte-blank">
+      ${svgIcon('buoy','ic')}
+      <b>Nenhum chamado ainda</b>
+      <p>Quando você precisar de ajuda, clique em "Abrir chamado" e a equipe Contourline entra em contato.</p>
+    </div>`;
+
+  root.innerHTML = `
+    <div class="suporte-header">
+      <div>
+        <h1 class="suporte-title">Suporte</h1>
+        <p class="suporte-sub">${chamados.length ? `${chamados.length} chamado${chamados.length!==1?'s':''} registrado${chamados.length!==1?'s':''}` : 'Nenhum chamado ainda'}</p>
+      </div>
+      <button class="btn" id="suporte-novo-btn">${svgIcon('plus','ic ic-sm')} Abrir chamado</button>
+    </div>
+
+    <div id="abrir-chamado-wrap" hidden>
+      <div class="acf-card">
+        <div class="acf-head">${svgIcon('buoy','ic ic-sm')} <b>Abrir chamado</b></div>
+        <form class="acf-form" id="acf-form" autocomplete="off">
+          <div class="field"><label>Assunto <span class="acf-req">*</span></label>
+            <div class="input"><i data-icon="pencil" data-cls="ic ic-sm"></i>
+            <input id="acf-titulo" type="text" placeholder="Descreva brevemente o problema" maxlength="120" required></div></div>
+          <div class="acf-row">
+            <div class="field"><label>Categoria</label>
+              <select id="acf-cat" class="select-native">
+                <option value="tecnico">Técnico</option>
+                <option value="comercial">Comercial</option>
+                <option value="financeiro">Financeiro</option>
+                <option value="outro">Outro</option>
+              </select></div>
+            <div class="field"><label>Prioridade</label>
+              <select id="acf-prio" class="select-native">
+                <option value="normal">Normal</option>
+                <option value="urgente">Urgente</option>
+              </select></div>
+          </div>
+          <div class="field"><label>Mensagem inicial <span class="acf-req">*</span></label>
+            <textarea id="acf-msg" rows="4" placeholder="Descreva em detalhes o que você precisa…" required></textarea></div>
+          <div class="acf-err" id="acf-err" hidden></div>
+          <div class="acf-actions">
+            <button type="button" class="btn ghost" id="acf-cancelar">Cancelar</button>
+            <button type="submit" class="btn" id="acf-enviar">${svgIcon('send','ic ic-sm')} Enviar chamado</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    ${listaHTML}
+    <div class="conta-note" style="margin-top:18px">${svgIcon('shield','ic ic-sm')} Você vê apenas os seus chamados.</div>`;
+
+  renderIcons(root);
+
+  const wrap  = root.querySelector('#abrir-chamado-wrap');
+  const btn   = root.querySelector('#suporte-novo-btn');
+  const form  = root.querySelector('#acf-form');
+  const errEl = root.querySelector('#acf-err');
+
+  btn?.addEventListener('click', () => {
+    wrap.hidden = !wrap.hidden;
+    if (!wrap.hidden) { root.querySelector('#acf-titulo')?.focus(); Sound?.success?.(); }
+    else Sound?.click?.();
+  });
+  root.querySelector('#acf-cancelar')?.addEventListener('click', () => { wrap.hidden = true; Sound?.click?.(); });
+
+  form?.addEventListener('submit', async e => {
+    e.preventDefault();
+    const titulo    = (root.querySelector('#acf-titulo').value || '').trim();
+    const categoria = root.querySelector('#acf-cat').value;
+    const prioridade= root.querySelector('#acf-prio').value;
+    const mensagem  = (root.querySelector('#acf-msg').value || '').trim();
+    if (!titulo || !mensagem) return;
+
+    const envBtn = root.querySelector('#acf-enviar');
+    const old = envBtn.innerHTML; envBtn.disabled = true; envBtn.innerHTML = 'Enviando…';
+    errEl.hidden = true;
+
+    try {
+      const email = sess.user?.email || '';
+      const { data: ch, error: e1 } = await sb.from('chamados')
+        .insert({ titulo, categoria, prioridade, status:'aberto', cliente_email: email })
+        .select().single();
+      if (e1 || !ch) throw e1 || new Error('Falha ao criar chamado');
+      const { error: e2 } = await sb.from('chamado_mensagens')
+        .insert({ chamado_id: ch.id, autor: email, texto: mensagem });
+      if (e2) throw e2;
+      Sound?.success?.();
+      location.hash = '#/suporte/' + ch.id;
+    } catch (_) {
+      errEl.textContent = 'Não consegui abrir o chamado. Verifique sua conexão e tente novamente.';
+      errEl.hidden = false;
+      envBtn.disabled = false; envBtn.innerHTML = old; renderIcons(envBtn);
+      Sound?.error?.();
+    }
+  });
+}
+
+/* ---- Detalhe do chamado + chat ---- */
+async function renderSuporteDetalhe(root, sb, sess, chamadoId) {
+  const myEmail = ((sess.user && sess.user.email) || '').toLowerCase();
+
+  async function fetchMensagens() {
+    const { data } = await sb.from('chamado_mensagens')
+      .select('id,autor,texto,criado_em')
+      .eq('chamado_id', chamadoId)
+      .order('criado_em', { ascending: true });
+    return data || [];
+  }
+
+  let chamado = null;
+  let mensagens = [];
+  try {
+    const { data: ch } = await sb.from('chamados').select('*').eq('id', chamadoId).single();
+    chamado = ch;
+    mensagens = await fetchMensagens();
+  } catch (_) {}
+
+  if (!chamado) {
+    root.innerHTML = `
+      <div class="suporte-blank">
+        ${svgIcon('buoy','ic')}
+        <b>Chamado não encontrado</b>
+        <p>Este chamado não existe ou você não tem permissão para acessá-lo.</p>
+        <a class="btn ghost" href="#/suporte">${svgIcon('chevL','ic ic-sm')} Voltar ao Suporte</a>
+      </div>`;
+    renderIcons(root); return;
+  }
+
+  const stLabels = { aberto:'Aberto', em_atendimento:'Em atendimento', resolvido:'Resolvido', cancelado:'Cancelado' };
+  const catMap   = { tecnico:'Técnico', comercial:'Comercial', financeiro:'Financeiro', outro:'Outro' };
+  const isEncerrado = ['resolvido','cancelado'].includes((chamado.status||'').toLowerCase());
+  const stTxt = stLabels[chamado.status] || chamado.status || '—';
+  const cat   = catMap[(chamado.categoria||'').toLowerCase()] || chamado.categoria || '';
+  const prio  = (chamado.prioridade||'').toLowerCase() === 'urgente';
+
+  function renderThread(msgs) {
+    const threadEl = root.querySelector('#cd-thread');
+    if (!threadEl) return;
+    if (!msgs.length) {
+      threadEl.innerHTML = `<div class="cd-empty-thread">Ainda não há mensagens neste chamado.</div>`;
+      return;
+    }
+    threadEl.innerHTML = msgs.map(m => {
+      const mine = (m.autor||'').toLowerCase() === myEmail;
+      return `<div class="msg ${mine ? 'mine' : 'deles'}">
+        <div class="msg-bubble">${escHtml(m.texto)}</div>
+        <div class="msg-meta">${mine ? 'Você' : 'Equipe Contourline'} · ${dataBR(m.criado_em)}</div>
+      </div>`;
+    }).join('');
+    threadEl.scrollTop = threadEl.scrollHeight;
+  }
+
+  const replyBlock = isEncerrado ? `
+    <div class="cd-resolvido">
+      ${svgIcon('check','ic ic-sm')}
+      <span>Chamado ${escHtml(stTxt.toLowerCase())} — você pode abrir um novo chamado se precisar.</span>
+      <a href="#/suporte">${svgIcon('plus','ic ic-sm')} Novo chamado</a>
+    </div>` : `
+    <div class="cd-reply">
+      <textarea class="cd-input" id="cd-input" rows="3" placeholder="Escreva uma mensagem… (Ctrl+Enter para enviar)" maxlength="2000"></textarea>
+      <div class="cd-reply-actions">
+        <span class="cd-hint">${svgIcon('lock','ic ic-sm')} Apenas você e a equipe veem estas mensagens</span>
+        <button class="btn cd-send" id="cd-send">${svgIcon('send','ic ic-sm')} Enviar</button>
+      </div>
+      <div class="cd-err" id="cd-err" hidden></div>
+    </div>`;
+
+  root.innerHTML = `
+    <div class="chamado-detail">
+      <a class="cd-back" href="#/suporte">${svgIcon('chevL','ic ic-sm')} Voltar ao Suporte</a>
+      <div class="cd-header">
+        <div class="cd-title-row">
+          <h1 class="cd-titulo">${escHtml(chamado.titulo || 'Chamado')}</h1>
+          <span class="ch-status ch-st-${escHtml(chamado.status||'aberto')}">${escHtml(stTxt)}</span>
+        </div>
+        <div class="cd-meta-row">
+          ${cat ? `<span class="ch-cat">${escHtml(cat)}</span>` : ''}
+          ${prio ? `<span class="ch-urgente">Urgente</span>` : ''}
+          <span class="cd-data">${svgIcon('calendar','ic ic-sm')} Aberto em ${dataBR(chamado.criado_em)}</span>
+        </div>
+      </div>
+
+      <div class="cd-thread" id="cd-thread"></div>
+
+      ${replyBlock}
+    </div>`;
+
+  renderIcons(root);
+  renderThread(mensagens);
+
+  if (!isEncerrado) {
+    const input  = root.querySelector('#cd-input');
+    const sendBtn= root.querySelector('#cd-send');
+    const errEl  = root.querySelector('#cd-err');
+
+    async function enviarMensagem() {
+      const texto = (input?.value || '').trim(); if (!texto) return;
+      const old = sendBtn.innerHTML; sendBtn.disabled = true; sendBtn.innerHTML = 'Enviando…';
+      errEl.hidden = true;
+      try {
+        const { error } = await sb.from('chamado_mensagens')
+          .insert({ chamado_id: chamadoId, autor: myEmail, texto });
+        if (error) throw error;
+        input.value = '';
+        mensagens = await fetchMensagens();
+        renderThread(mensagens);
+        Sound?.success?.();
+      } catch (_) {
+        errEl.textContent = 'Não consegui enviar. Verifique sua conexão e tente de novo.';
+        errEl.hidden = false;
+        Sound?.error?.();
+      }
+      sendBtn.disabled = false; sendBtn.innerHTML = old; renderIcons(sendBtn);
+    }
+
+    sendBtn?.addEventListener('click', enviarMensagem);
+    input?.addEventListener('keydown', e => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); enviarMensagem(); }
+    });
+
+    /* polling: atualiza mensagens a cada 15s */
+    _suportePoll = setInterval(async () => {
+      if (!document.getElementById('cd-thread')) { clearSuportePoll(); return; }
+      try {
+        const fresh = await fetchMensagens();
+        if (fresh.length !== mensagens.length) { mensagens = fresh; renderThread(mensagens); }
+      } catch (_) {}
+    }, 15000);
+  }
 }
 
 async function initFavoritos() {

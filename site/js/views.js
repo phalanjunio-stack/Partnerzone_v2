@@ -425,6 +425,32 @@
       };
     },
 
+    /* ---------- BOLETOS (área privada · login Supabase · RLS por cliente) ---------- */
+    boletos() {
+      return {
+        title: 'Boletos',
+        crumbs: `<i data-icon="receipt" data-cls="ic ic-sm"></i><a href="#/">PartnerZone</a><span>›</span><span class="here">Boletos</span>`,
+        html: `
+        <div class="conta-wrap" data-enter>
+          <div id="boletos-page"><div class="pf-loading">Carregando…</div></div>
+        </div>`,
+        init: () => { window.initBoletos && window.initBoletos(); },
+      };
+    },
+
+    /* ---------- CONTRATO (área privada · login Supabase · RLS por cliente) ---------- */
+    contrato() {
+      return {
+        title: 'Contrato',
+        crumbs: `<i data-icon="signature" data-cls="ic ic-sm"></i><a href="#/">PartnerZone</a><span>›</span><span class="here">Contrato</span>`,
+        html: `
+        <div class="conta-wrap" data-enter>
+          <div id="contrato-page"><div class="pf-loading">Carregando…</div></div>
+        </div>`,
+        init: () => { window.initContrato && window.initContrato(); },
+      };
+    },
+
     /* ---------- ÁUDIOS & MÚSICAS (acervo + playlists) ---------- */
     musica() {
       return {
@@ -672,6 +698,8 @@
     if (p[0] === 'buscar')              return Views.buscar();
     if (p[0] === 'sql')                 return Views.sql();
     if (p[0] === 'favoritos')           return Views.favoritos();
+    if (p[0] === 'boletos')             return Views.boletos();
+    if (p[0] === 'contrato')            return Views.contrato();
     if (p[0] === 'minha-conta')         return Views.minhaConta();
     if (p[0] === 'audio')               return Views.musica();
     if (p[0] === 'marca')               return p[2] === 'logos' ? Views.marcaLogos(p[1]) : Views.marca(p[1]);

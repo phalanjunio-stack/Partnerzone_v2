@@ -1,7 +1,7 @@
 /* ============================================================
    APP — ícones (traçado), dados de exemplo e render da Início
    ============================================================ */
-const BUILD = 'spa75';
+const BUILD = 'spa76';
 try { console.log('%cPartnerZone • build ' + BUILD, 'background:#2f7ff2;color:#fff;padding:2px 8px;border-radius:4px;font-weight:700'); } catch (_) {}
 
 /* ---- MODO CLIENTE × ADMIN ----------------------------------------------
@@ -86,6 +86,9 @@ const ICONS = {
   zap:'<path d="M13 2 3 14h9l-1 8 10-12h-9z"/>',
   smartphone:'<rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/>',
   eye:'<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/>',
+  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/>',
+  alert:'<path d="M10.3 3.3 2 19h20L13.7 3.3a2 2 0 0 0-3.4 0z"/><path d="M12 10v4M12 16.5v.5"/>',
+  calendar:'<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
   dots:'<circle cx="12" cy="5" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="12" cy="19" r="1.4"/>',
   play:'<circle cx="12" cy="12" r="9"/><path d="m10 8.5 6 3.5-6 3.5z"/>',
   crop:'<path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M2 6h14a2 2 0 0 1 2 2v14"/>',
@@ -114,8 +117,8 @@ const NAV = [
   ]},
   { label:'Área do Cliente', items:[
     { icon:'user', text:'Minha Conta', route:'#/minha-conta' },
-    { icon:'signature', text:'Contrato' },
-    { icon:'receipt', text:'Boletos' },
+    { icon:'signature', text:'Contrato', route:'#/contrato' },
+    { icon:'receipt', text:'Boletos', route:'#/boletos' },
     { icon:'wrench', text:'Meus Equipamentos' },
     { icon:'buoy', text:'Suporte' },
   ]},
@@ -1112,11 +1115,11 @@ async function initMinhaConta() {
 }
 window.initMinhaConta = initMinhaConta;
 
-function contaNotConfigured(root) {
+function contaNotConfigured(root, titulo) {
   root.innerHTML = `
     <div class="login-card">
       <div class="login-logo"><span class="foot-burst">C</span></div>
-      <h1 class="login-title">Área do Cliente</h1>
+      <h1 class="login-title">${escHtml(titulo || 'Área do Cliente')}</h1>
       <p class="login-sub">Esta área está sendo preparada e ficará disponível em breve. Em caso de dúvida, fale com a equipe Contourline.</p>
       <div class="conta-note">${svgIcon('lock','ic ic-sm')} Acesso exclusivo para parceiros autorizados.</div>
     </div>`;
@@ -1133,12 +1136,19 @@ function loginErroPT(msg) {
   return msg || 'Não foi possível entrar. Tente de novo.';
 }
 
-function renderLogin(root) {
+/* renderLogin(root, titulo?, sub?, onSuccess?)
+   titulo   → título do card (padrão "Área do Cliente")
+   sub      → subtítulo descritivo
+   onSuccess → função chamada após login bem-sucedido (padrão: initMinhaConta) */
+function renderLogin(root, titulo, sub, onSuccess) {
+  const tit = titulo || 'Área do Cliente';
+  const desc = sub || 'Entre com seu e-mail e senha para acessar sua conta, contrato, boletos e equipamentos.';
+  const cb = onSuccess || initMinhaConta;
   root.innerHTML = `
     <div class="login-card">
       <div class="login-logo"><span class="foot-burst">C</span></div>
-      <h1 class="login-title">Área do Cliente</h1>
-      <p class="login-sub">Entre com seu e-mail e senha para acessar sua conta, contrato, boletos e equipamentos.</p>
+      <h1 class="login-title">${escHtml(tit)}</h1>
+      <p class="login-sub">${escHtml(desc)}</p>
       <form class="login-form" id="login-form" autocomplete="on">
         <div class="field"><label>E-mail</label>
           <div class="input"><i data-icon="mail" data-cls="ic ic-sm"></i><input id="login-email" type="email" placeholder="seu@email.com" autocomplete="username" required></div></div>
@@ -1177,7 +1187,7 @@ function renderLogin(root) {
       return;
     }
     Sound && Sound.success && Sound.success();
-    initMinhaConta();   // sucesso → recarrega (agora com sessão)
+    cb();   // sucesso → recarrega a área que chamou o login
   });
 }
 
@@ -1230,6 +1240,328 @@ function renderConta(root, cli, sess) {
     try { await Portal.logout(); } catch (_) {}
     Sound && Sound.click && Sound.click();
     initMinhaConta();
+  });
+}
+
+/* ============================================================
+   HELPERS de formatação BR (reutilizados em Boletos + Contrato)
+   ============================================================ */
+function brl(v) { return (v == null) ? '—' : Number(v).toLocaleString('pt-BR', { style:'currency', currency:'BRL' }); }
+function dataBR(iso) { if (!iso) return '—'; const p = String(iso).slice(0,10).split('-'); return p.length === 3 ? `${p[2]}/${p[1]}/${p[0]}` : iso; }
+function competLabel(ym) {
+  if (!ym) return '—';
+  const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  const [a,m] = ym.split('-');
+  return `${meses[(parseInt(m,10)||1)-1]}/${a}`;
+}
+function diasParaVencer(isoDate) {
+  const hoje = new Date(); hoje.setHours(0,0,0,0);
+  const d = new Date(String(isoDate).slice(0,10)+'T00:00:00'); return Math.round((d-hoje)/86400000);
+}
+function statusBoletoReal(b) {
+  // recalcula 'vencido' pela data — não confia só no status do banco
+  if ((b.status||'') === 'pago') return 'pago';
+  const dias = diasParaVencer(b.vencimento);
+  return dias < 0 ? 'vencido' : 'em_aberto';
+}
+
+/* ============================================================
+   BOLETOS — área privada do cliente (RLS Supabase)
+   A Central (SQLite) já tem o schema e a telinha do admin.
+   Quando a Central sincronizar boletos→Supabase, o SELECT aqui
+   devolve os boletos do cliente logado (RLS filtra server-side).
+   Enquanto não sincroniza → estado "em configuração" / vazio.
+   ============================================================ */
+async function initBoletos() {
+  const root = document.getElementById('boletos-page'); if (!root) return;
+  root.innerHTML = `<div class="pf-loading">Carregando…</div>`;
+  let ok = false;
+  try { ok = await Portal.configured(); } catch (_) {}
+  if (!ok) { contaNotConfigured(root, 'Boletos'); return; }
+  let sess = null;
+  try { sess = await Portal.session(); } catch (_) {}
+  if (!sess) { renderLogin(root, 'Boletos', 'Acesse seus boletos, vencimentos e faça o download dos PDFs.', initBoletos); return; }
+  let boletos = [];
+  try {
+    const sb = await Portal.db();
+    if (sb) {
+      const { data, error } = await sb.from('boletos').select('*').order('vencimento', { ascending: false });
+      if (!error && data) boletos = data;
+    }
+  } catch (_) {}
+  renderBoletos(root, boletos);
+}
+window.initBoletos = initBoletos;
+
+function renderBoletos(root, boletos) {
+  // recalcular status real pela data
+  const lista = boletos.map(b => ({ ...b, _st: statusBoletoReal(b) }));
+  // filtros client-side (state)
+  let filtroMes = '', filtroSt = 'todos';
+
+  function applyFilters() {
+    return lista.filter(b => {
+      if (filtroMes && b.competencia !== filtroMes) return false;
+      if (filtroSt !== 'todos' && b._st !== filtroSt) return false;
+      return true;
+    });
+  }
+
+  function renderLista() {
+    const filtrado = applyFilters();
+    const listEl = root.querySelector('#bo-list'); if (!listEl) return;
+    if (!filtrado.length) {
+      listEl.innerHTML = `<div class="bo-empty-filter">Nenhum boleto encontrado para este filtro.</div>`; return;
+    }
+    // agrupar por competencia
+    const grupos = {};
+    filtrado.forEach(b => {
+      const g = b.competencia || 'Sem data';
+      if (!grupos[g]) grupos[g] = [];
+      grupos[g].push(b);
+    });
+    const gKeys = Object.keys(grupos).sort((a,b) => b.localeCompare(a));
+    listEl.innerHTML = gKeys.map(g => {
+      const items = grupos[g];
+      return `<section class="boletos-group">
+        <div class="bo-group-head"><b>${competLabel(g)}</b><span>${items.length} boleto${items.length>1?'s':''}</span></div>
+        ${items.map(b => {
+          const dias = diasParaVencer(b.vencimento);
+          const vencTxt = b._st === 'vencido'
+            ? `Venceu ${dataBR(b.vencimento)} · há ${Math.abs(dias)} dia${Math.abs(dias)!==1?'s':''}`
+            : `Vence ${dataBR(b.vencimento)}${dias === 0 ? ' · <b style="color:var(--warning)">hoje</b>' : dias === 1 ? ' · amanhã' : ''}`;
+          const stMap = { pago:['st-pago','check','Pago'], em_aberto:['st-aberto','clock','Em aberto'], vencido:['st-vencido','alert','Vencido'] };
+          const [stCls, stIc, stTxt] = stMap[b._st] || ['st-aberto','clock','Em aberto'];
+          return `<div class="boleto-row ${b._st==='vencido'?'is-vencido':''}">
+            <div class="bo-main">
+              <span class="bo-valor">${brl(b.valor)}</span>
+              <span class="bo-venc">${svgIcon('calendar','ic ic-sm')} ${vencTxt}</span>
+            </div>
+            <span class="bo-status ${stCls}">${svgIcon(stIc,'ic ic-sm')} ${stTxt}</span>
+            <button class="btn ghost btn-sm bo-pdf" data-boleto-id="${escHtml(b.id)}">${svgIcon('download','ic ic-sm')} Baixar PDF</button>
+          </div>`;
+        }).join('')}
+      </section>`;
+    }).join('');
+    renderIcons(listEl);
+    // attach PDF handlers
+    listEl.querySelectorAll('.bo-pdf').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const id = btn.dataset.boletoId;
+        const bo = lista.find(b => String(b.id) === String(id)); if (!bo || !bo.arquivo_pdf) { alert('PDF não disponível.'); return; }
+        const old = btn.innerHTML; btn.disabled = true; btn.innerHTML = 'Gerando…';
+        try {
+          const sb = await Portal.db();
+          const { data, error } = await sb.storage.from('boletos').createSignedUrl(bo.arquivo_pdf, 60);
+          if (error || !data?.signedUrl) throw new Error('signed URL falhou');
+          window.open(data.signedUrl, '_blank');
+        } catch (_) { alert('Não consegui gerar o PDF agora. Tente de novo em instantes.'); }
+        btn.disabled = false; btn.innerHTML = old; renderIcons(btn);
+      });
+    });
+  }
+
+  if (!lista.length) {
+    root.innerHTML = `
+      <div class="boletos-blank">
+        ${svgIcon('receipt','ic')}
+        <b>Nenhum boleto por aqui</b>
+        <p>Quando a Contourline emitir um boleto pra você, ele aparece aqui — com valor, vencimento e o PDF pra baixar.</p>
+        <button class="btn ghost" data-open-modal="modal-solicitar">${svgIcon('buoy','ic ic-sm')} Falar com a equipe</button>
+      </div>`;
+    renderIcons(root); return;
+  }
+
+  // resumo geral (ignora filtros — visão financeira real)
+  const emAberto = lista.filter(b => b._st !== 'pago');
+  const totalAberto = emAberto.reduce((s,b) => s+(Number(b.valor)||0), 0);
+  const vencidos = lista.filter(b => b._st === 'vencido');
+  const proxVenc = lista.filter(b => b._st === 'em_aberto' && b.vencimento)
+    .sort((a,b) => a.vencimento.localeCompare(b.vencimento))[0];
+  const proxDias = proxVenc ? diasParaVencer(proxVenc.vencimento) : null;
+  const proxTxt = proxVenc ? `${dataBR(proxVenc.vencimento)} · em ${proxDias} dia${proxDias!==1?'s':''}` : 'Nenhum';
+  const meses = [...new Set(lista.map(b => b.competencia).filter(Boolean))].sort((a,b)=>b.localeCompare(a));
+
+  root.innerHTML = `
+    <div class="boletos-summary">
+      <div class="bo-stat ${totalAberto>0&&vencidos.length>0?'is-danger':totalAberto===0?'is-ok':''}">
+        ${svgIcon('receipt','ic ic-sm')}
+        <div><b>${brl(totalAberto)}</b><span>${totalAberto===0?'Tudo em dia ✓':'Total em aberto'}</span></div>
+      </div>
+      <div class="bo-stat">
+        ${svgIcon('calendar','ic ic-sm')}
+        <div><b>${proxTxt}</b><span>Próximo vencimento</span></div>
+      </div>
+      <div class="bo-stat ${vencidos.length>0?'is-danger':''}">
+        ${svgIcon('alert','ic ic-sm')}
+        <div><b>${vencidos.length}</b><span>Vencido${vencidos.length!==1?'s':''}</span></div>
+      </div>
+    </div>
+
+    <div class="boletos-filters">
+      <label class="bo-select">
+        ${svgIcon('calendar','ic ic-sm')}
+        <select id="bo-mes"><option value="">Todos os meses</option>
+          ${meses.map(m=>`<option value="${escHtml(m)}">${competLabel(m)}</option>`).join('')}
+        </select>
+      </label>
+      <div class="bo-chips">
+        <button class="lchip on" data-st="todos">Todos</button>
+        <button class="lchip" data-st="em_aberto">${svgIcon('clock','ic ic-sm')} Em aberto</button>
+        <button class="lchip" data-st="pago">${svgIcon('check','ic ic-sm')} Pago</button>
+        <button class="lchip" data-st="vencido">${svgIcon('alert','ic ic-sm')} Vencido</button>
+      </div>
+    </div>
+
+    <div id="bo-list"></div>
+
+    <div class="conta-note" style="margin-top:20px">${svgIcon('shield','ic ic-sm')} Você vê apenas os seus boletos. O PDF é gerado por link seguro e temporário.</div>`;
+
+  renderIcons(root);
+  renderLista();
+
+  root.querySelector('#bo-mes')?.addEventListener('change', e => { filtroMes = e.target.value; renderLista(); });
+  root.querySelectorAll('.bo-chips .lchip').forEach(c => {
+    c.addEventListener('click', () => {
+      filtroSt = c.dataset.st;
+      root.querySelectorAll('.bo-chips .lchip').forEach(x => x.classList.toggle('on', x===c));
+      renderLista();
+    });
+  });
+}
+
+/* ============================================================
+   CONTRATO — área privada do cliente (RLS Supabase)
+   A tabela 'contratos' será criada pela Central quando Fase B
+   começar. Enquanto não existe, mostra "em configuração".
+   ============================================================ */
+async function initContrato() {
+  const root = document.getElementById('contrato-page'); if (!root) return;
+  root.innerHTML = `<div class="pf-loading">Carregando…</div>`;
+  let ok = false;
+  try { ok = await Portal.configured(); } catch (_) {}
+  if (!ok) { contaNotConfigured(root, 'Contrato'); return; }
+  let sess = null;
+  try { sess = await Portal.session(); } catch (_) {}
+  if (!sess) { renderLogin(root, 'Contrato', 'Acesse seu contrato, vigência e faça o download do PDF.', initContrato); return; }
+  let contratos = [];
+  try {
+    const sb = await Portal.db();
+    if (sb) {
+      const { data, error } = await sb.from('contratos').select('*').order('vigencia_inicio', { ascending: false });
+      if (!error && data) contratos = data;
+    }
+  } catch (_) {}
+  renderContrato(root, contratos);
+}
+window.initContrato = initContrato;
+
+function statusContratoReal(c) {
+  const hoje = new Date(); hoje.setHours(0,0,0,0);
+  if ((c.status||'') === 'cancelado') return 'cancelado';
+  if (!c.vigencia_fim) return 'vigente';
+  const fim = new Date(String(c.vigencia_fim).slice(0,10)+'T00:00:00');
+  const dias = Math.round((fim-hoje)/86400000);
+  if (dias < 0) return 'encerrado';
+  if (dias <= 30) return 'a_vencer';
+  return 'vigente';
+}
+
+function renderContrato(root, contratos) {
+  if (!contratos.length) {
+    root.innerHTML = `
+      <div class="contrato-blank">
+        ${svgIcon('signature','ic')}
+        <b>Ainda não encontramos um contrato por aqui</b>
+        <p>Se você já fechou com a Contourline, seu contrato pode estar em cadastro.<br>Fale com a gente que resolvemos rápido.</p>
+        <button class="btn" data-open-modal="modal-solicitar">${svgIcon('buoy','ic ic-sm')} Falar com o suporte</button>
+      </div>`;
+    renderIcons(root); return;
+  }
+
+  // separa vigente (ou o mais recente) dos anteriores
+  const comStatus = contratos.map(c => ({ ...c, _st: statusContratoReal(c) }));
+  const vigente = comStatus.find(c => c._st === 'vigente' || c._st === 'a_vencer') || comStatus[0];
+  const anteriores = comStatus.filter(c => c !== vigente);
+
+  const stLabel = { vigente:'Vigente', a_vencer:'A vencer', encerrado:'Encerrado', cancelado:'Cancelado' };
+  const stCls   = { vigente:'st-active', a_vencer:'st-pending', encerrado:'st-inactive', cancelado:'st-inactive' };
+  const st = vigente._st || 'vigente';
+  const fimDias = vigente.vigencia_fim ? diasParaVencer(vigente.vigencia_fim) : null;
+
+  function pdfBtn(id, path, label) {
+    return `<button class="btn ct-pdf" id="${id}" data-path="${escHtml(path||'')}">${svgIcon('download','ic ic-sm')} ${label}</button>`;
+  }
+
+  root.innerHTML = `
+    <div class="conta-head">
+      <div class="conta-avatar contrato-av">${svgIcon('signature','ic')}</div>
+      <div class="conta-id">
+        <h1>${escHtml(vigente.numero || 'Contrato')}</h1>
+        <span class="conta-email">
+          ${vigente.vigencia_inicio ? `Início ${dataBR(vigente.vigencia_inicio)}` : ''}
+          ${vigente.vigencia_fim ? ` · até ${dataBR(vigente.vigencia_fim)}` : ''}
+          ${vigente.valor_mensal ? ` · ${brl(vigente.valor_mensal)}/mês` : ''}
+        </span>
+      </div>
+      <span class="conta-status ${stCls[st]||'st-active'}">${stLabel[st]||'Vigente'}${st==='a_vencer'&&fimDias!=null?` · ${fimDias}d`:''}</span>
+    </div>
+
+    <div class="conta-grid">
+      <section class="conta-card">
+        <div class="conta-card-head">${svgIcon('file','ic ic-sm')} <b>Resumo do contrato</b></div>
+        <div class="conta-fields">
+          ${vigente.numero ? `<div class="conta-f"><span class="cf-lab">${svgIcon('file','ic ic-sm')} Número</span><span class="cf-val">${escHtml(vigente.numero)}</span></div>` : ''}
+          ${vigente.vigencia_inicio ? `<div class="conta-f"><span class="cf-lab">${svgIcon('check','ic ic-sm')} Início</span><span class="cf-val">${dataBR(vigente.vigencia_inicio)}</span></div>` : ''}
+          ${vigente.vigencia_fim ? `<div class="conta-f"><span class="cf-lab">${svgIcon('check','ic ic-sm')} Término</span><span class="cf-val">${dataBR(vigente.vigencia_fim)}</span></div>` : ''}
+          ${vigente.valor_mensal != null ? `<div class="conta-f"><span class="cf-lab">${svgIcon('receipt','ic ic-sm')} Valor mensal</span><span class="cf-val">${brl(vigente.valor_mensal)}</span></div>` : ''}
+          ${vigente.periodicidade ? `<div class="conta-f"><span class="cf-lab">${svgIcon('folder','ic ic-sm')} Periodicidade</span><span class="cf-val">${escHtml(vigente.periodicidade)}</span></div>` : ''}
+        </div>
+      </section>
+
+      <section class="conta-card">
+        <div class="conta-card-head">${svgIcon('lock','ic ic-sm')} <b>Documento</b></div>
+        <p class="ct-doc-hint">${vigente.assinado_em ? `Assinado em ${dataBR(vigente.assinado_em)}.` : 'Seu contrato em PDF.'}</p>
+        ${vigente.arquivo_pdf ? pdfBtn('ct-dl-main', vigente.arquivo_pdf, 'Baixar PDF') : `<p class="cf-lab">PDF não disponível ainda.</p>`}
+        <div class="conta-note" style="margin-top:12px">${svgIcon('shield','ic ic-sm')} Link de download privado e temporário (expira em segundos).</div>
+      </section>
+    </div>
+
+    ${anteriores.length ? `
+    <section class="conta-card contrato-hist" style="margin-top:16px">
+      <div class="conta-card-head">${svgIcon('folder','ic ic-sm')} <b>Contratos anteriores</b></div>
+      <div class="conta-links">
+        ${anteriores.map(c => `
+          <div class="conta-link contrato-ant">
+            <span>${svgIcon('file','ic ic-sm')} ${escHtml(c.numero||'Contrato')} · ${dataBR(c.vigencia_inicio)}</span>
+            ${c.arquivo_pdf ? `<button class="btn ghost btn-sm ct-pdf" data-path="${escHtml(c.arquivo_pdf)}">${svgIcon('download','ic ic-sm')}</button>` : ''}
+          </div>`).join('')}
+      </div>
+    </section>` : ''}
+
+    <div class="conta-foot" style="margin-top:22px">
+      <button class="btn ghost" id="ct-sair">${svgIcon('logout','ic ic-sm')} Sair da conta</button>
+    </div>`;
+
+  renderIcons(root);
+
+  // PDF download handler (signed URL 60s, bucket privado)
+  async function handlePdf(btn) {
+    const path = btn.dataset.path; if (!path) { alert('PDF não disponível.'); return; }
+    const old = btn.innerHTML; btn.disabled = true; btn.innerHTML = 'Gerando…';
+    try {
+      const sb = await Portal.db();
+      const { data, error } = await sb.storage.from('contratos').createSignedUrl(path, 60);
+      if (error || !data?.signedUrl) throw new Error('falhou');
+      window.open(data.signedUrl, '_blank');
+    } catch (_) { alert('Não consegui gerar o PDF agora. Tente de novo.'); }
+    btn.disabled = false; btn.innerHTML = old; renderIcons(btn);
+  }
+  root.querySelectorAll('.ct-pdf').forEach(b => b.addEventListener('click', () => handlePdf(b)));
+  document.getElementById('ct-sair')?.addEventListener('click', async () => {
+    try { await Portal.logout(); } catch (_) {}
+    Sound && Sound.click && Sound.click();
+    initContrato();
   });
 }
 

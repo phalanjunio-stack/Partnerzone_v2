@@ -1,7 +1,7 @@
 /* ============================================================
    APP — ícones (traçado), dados de exemplo e render da Início
    ============================================================ */
-const BUILD = 'spa80';
+const BUILD = 'spa81';
 try { console.log('%cPartnerZone • build ' + BUILD, 'background:#2f7ff2;color:#fff;padding:2px 8px;border-radius:4px;font-weight:700'); } catch (_) {}
 
 /* ---- MODO CLIENTE × ADMIN ----------------------------------------------
@@ -1970,6 +1970,23 @@ async function renderSuporteLista(root, sb, sess) {
         .insert({ titulo, categoria, prioridade, status:'aberto', cliente_email: email })
         .select().single();
       if (e1 || !ch) throw e1 || new Error('Falha ao criar chamado');
+
+      // mensagem automática com dados do cliente (a Central vê ao abrir o ticket)
+      try {
+        const cli = Portal.client?.() || null;
+        let equips = [];
+        try { const { data: eq } = await sb.from('equipamentos').select('name').limit(15); equips = eq || []; } catch (_) {}
+        const linhas = [];
+        if (cli?.nome)     linhas.push('Nome: ' + cli.nome);
+        if (cli?.telefone) linhas.push('Telefone: ' + cli.telefone);
+        if (cli?.cidade)   linhas.push('Cidade: ' + cli.cidade);
+        if (equips.length) linhas.push('Equipamentos: ' + equips.map(e => e.name).filter(Boolean).join(', '));
+        if (linhas.length) {
+          await sb.from('chamado_mensagens')
+            .insert({ chamado_id: ch.id, autor: '__sistema__', texto: '[Dados do cliente]\n' + linhas.join('\n') });
+        }
+      } catch (_) {}
+
       const { error: e2 } = await sb.from('chamado_mensagens')
         .insert({ chamado_id: ch.id, autor: email, texto: mensagem });
       if (e2) throw e2;
@@ -1998,10 +2015,16 @@ async function renderSuporteDetalhe(root, sb, sess, chamadoId) {
 
   let chamado = null;
   let mensagens = [];
+  let equips = [];
   try {
-    const { data: ch } = await sb.from('chamados').select('*').eq('id', chamadoId).single();
-    chamado = ch;
-    mensagens = await fetchMensagens();
+    const [chRes, msRes, eqRes] = await Promise.all([
+      sb.from('chamados').select('*').eq('id', chamadoId).single(),
+      fetchMensagens(),
+      sb.from('equipamentos').select('name,slug').limit(15)
+    ]);
+    chamado   = chRes.data;
+    mensagens = msRes;
+    equips    = eqRes.data || [];
   } catch (_) {}
 
   if (!chamado) {
@@ -2025,11 +2048,13 @@ async function renderSuporteDetalhe(root, sb, sess, chamadoId) {
   function renderThread(msgs) {
     const threadEl = root.querySelector('#cd-thread');
     if (!threadEl) return;
-    if (!msgs.length) {
+    // filtra msgs visíveis (exclui __sistema__ da thread — aparece só na ficha)
+    const visiveis = msgs.filter(m => (m.autor||'') !== '__sistema__');
+    if (!visiveis.length) {
       threadEl.innerHTML = `<div class="cd-empty-thread">Ainda não há mensagens neste chamado.</div>`;
       return;
     }
-    threadEl.innerHTML = msgs.map(m => {
+    threadEl.innerHTML = visiveis.map(m => {
       const mine = (m.autor||'').toLowerCase() === myEmail;
       return `<div class="msg ${mine ? 'mine' : 'deles'}">
         <div class="msg-bubble">${escHtml(m.texto)}</div>
@@ -2054,6 +2079,39 @@ async function renderSuporteDetalhe(root, sb, sess, chamadoId) {
       <div class="cd-err" id="cd-err" hidden></div>
     </div>`;
 
+  // ficha de contexto do cliente
+  const cli       = Portal.client?.() || null;
+  const cliNome   = (cli && cli.nome)     || (chamado.cliente_email || myEmail).split('@')[0] || 'Cliente';
+  const cliTel    = (cli && cli.telefone) || '';
+  const cliCidade = (cli && cli.cidade)   || '';
+  const cliInits  = (cliNome.trim().split(/\s+/).slice(0,2).map(w=>w[0]||'').join('') || 'CL').toUpperCase();
+  const cliEmail  = chamado.cliente_email || myEmail;
+
+  const equipsHtml = equips.length
+    ? `<div class="cd-ctx-equips">${equips.map(e => `<span class="cd-ctx-chip">${escHtml(e.name||'')}</span>`).join('')}</div>`
+    : '';
+
+  const fichaHtml = `
+    <div class="cd-ctx" id="cd-ctx">
+      <button class="cd-ctx-toggle" id="cd-ctx-toggle" type="button">
+        ${svgIcon('user','ic ic-sm')}
+        <span>Dados do cliente</span>
+        <i data-icon="chevD" data-cls="ic ic-xs cd-ctx-chev"></i>
+      </button>
+      <div class="cd-ctx-body" id="cd-ctx-body" hidden>
+        <div class="cd-ctx-row">
+          <div class="pf-av pf-av-sm">${escHtml(cliInits)}</div>
+          <div class="cd-ctx-info">
+            <div class="cd-ctx-nome">${escHtml(cliNome)}</div>
+            <div class="cd-ctx-email">${escHtml(cliEmail)}</div>
+            ${cliTel    ? `<div class="cd-ctx-line">${svgIcon('phone','ic ic-xs')} ${escHtml(cliTel)}</div>`    : ''}
+            ${cliCidade ? `<div class="cd-ctx-line">${svgIcon('map','ic ic-xs')} ${escHtml(cliCidade)}</div>` : ''}
+          </div>
+        </div>
+        ${equipsHtml}
+      </div>
+    </div>`;
+
   root.innerHTML = `
     <div class="chamado-detail">
       <a class="cd-back" href="#/suporte">${svgIcon('chevL','ic ic-sm')} Voltar ao Suporte</a>
@@ -2069,10 +2127,21 @@ async function renderSuporteDetalhe(root, sb, sess, chamadoId) {
         </div>
       </div>
 
+      ${fichaHtml}
+
       <div class="cd-thread" id="cd-thread"></div>
 
       ${replyBlock}
     </div>`;
+
+  // toggle da ficha
+  root.querySelector('#cd-ctx-toggle')?.addEventListener('click', () => {
+    const body = root.querySelector('#cd-ctx-body');
+    const ctx  = root.querySelector('#cd-ctx');
+    if (!body) return;
+    body.hidden = !body.hidden;
+    ctx?.classList.toggle('open', !body.hidden);
+  });
 
   renderIcons(root);
   renderThread(mensagens);

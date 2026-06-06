@@ -1413,3 +1413,61 @@ input[readonly], .lib-search, .topsearch { cursor: pointer; }
   animation:spin .6s linear infinite; vertical-align:middle;
 }
 @keyframes spin { to { transform:rotate(360deg); } }
+
+/* ============================================================
+   CHAMADO DETALHE — ficha de contexto do cliente  (spa81)
+   ============================================================ */
+.cd-ctx {
+  border:1px solid var(--border);
+  border-radius:12px;
+  margin-bottom:16px;
+  overflow:hidden;
+  background:var(--surface);
+}
+.cd-ctx-toggle {
+  display:flex; align-items:center; gap:8px;
+  width:100%; padding:12px 16px;
+  background:none; border:none; cursor:pointer;
+  color:var(--text-muted); font-size:13.5px; font-weight:500;
+  text-align:left; transition:color .15s;
+}
+.cd-ctx-toggle:hover { color:var(--text); }
+.cd-ctx-toggle .ic { flex-shrink:0; }
+.cd-ctx-toggle span { flex:1; }
+.cd-ctx-chev { transition:transform .2s; flex-shrink:0; }
+.cd-ctx.open .cd-ctx-chev { transform:rotate(180deg); }
+
+.cd-ctx-body {
+  padding:0 16px 16px;
+  border-top:1px solid var(--border);
+  display:flex; flex-direction:column; gap:12px;
+}
+.cd-ctx-row {
+  display:flex; align-items:flex-start; gap:12px;
+  padding-top:14px;
+}
+.pf-av-sm {
+  width:40px; height:40px; border-radius:50%;
+  background:var(--accent); color:#fff;
+  display:flex; align-items:center; justify-content:center;
+  font-size:14px; font-weight:700; flex-shrink:0;
+  letter-spacing:.04em;
+}
+.cd-ctx-info { display:flex; flex-direction:column; gap:3px; }
+.cd-ctx-nome  { font-size:14px; font-weight:600; color:var(--text); }
+.cd-ctx-email { font-size:12.5px; color:var(--text-muted); }
+.cd-ctx-line  {
+  display:flex; align-items:center; gap:5px;
+  font-size:12.5px; color:var(--text-muted);
+}
+.cd-ctx-line .ic { width:12px; height:12px; color:var(--accent); flex-shrink:0; }
+.cd-ctx-equips {
+  display:flex; flex-wrap:wrap; gap:6px;
+}
+.cd-ctx-chip {
+  display:inline-flex; align-items:center;
+  padding:3px 10px; border-radius:20px;
+  background:var(--surface-2); border:1px solid var(--border);
+  font-size:12px; color:var(--text-muted);
+  white-space:nowrap;
+}

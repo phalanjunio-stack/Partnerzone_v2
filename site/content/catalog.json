@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-06-06T15:07:30.589Z",
+  "generatedAt": "2026-06-03T20:38:56.470Z",
   "source": "equipamentos: catalogo.db (completo) · materials: liberados (manifests + audio-metadata)",
   "marcas": [
     {
@@ -239,7 +239,7 @@
       "segmento": null,
       "folder": "",
       "cover": "",
-      "materialCount": 1,
+      "materialCount": 0,
       "pastas": []
     },
     {
@@ -250,7 +250,7 @@
       "segmento": null,
       "folder": "HIPRO",
       "cover": "",
-      "materialCount": 3,
+      "materialCount": 1,
       "pastas": []
     },
     {
@@ -625,149 +625,6 @@
       "tamanho": "",
       "novo": true,
       "atualizadoEm": "2026-06-03T20:38:02.836Z"
-    },
-    {
-      "id": "1KV9oVsZekI7bZ1ercpDeOKegG_k-H7v_",
-      "titulo": "Contourline jungle",
-      "equipamento": null,
-      "marca": "unyquepro",
-      "tipo": "audio",
-      "formato": "mp3",
-      "pasta": "Jingles",
-      "categoria": "Jingles",
-      "linha": null,
-      "tags": [],
-      "flags": [
-        "audio"
-      ],
-      "url": "content/media/1KV9oVsZekI7bZ1ercpDeOKegG_k-H7v_.mp3",
-      "thumb": "https://lh3.googleusercontent.com/d/1KV9oVsZekI7bZ1ercpDeOKegG_k-H7v_",
-      "tamanho": "",
-      "novo": true,
-      "atualizadoEm": "2026-06-05T20:58:33.218Z"
-    },
-    {
-      "id": "114QM0PC7E-43X-7HY9wXT8HrrhUIJhJx",
-      "titulo": "Contourline Unyque",
-      "equipamento": "hipro",
-      "marca": "unyquepro",
-      "tipo": "audio",
-      "formato": "mp3",
-      "pasta": "Jingles",
-      "categoria": "Jingles",
-      "linha": null,
-      "tags": [
-        "alan",
-        "teste"
-      ],
-      "flags": [
-        "audio"
-      ],
-      "url": "content/media/114QM0PC7E-43X-7HY9wXT8HrrhUIJhJx.mp3",
-      "thumb": "https://lh3.googleusercontent.com/d/114QM0PC7E-43X-7HY9wXT8HrrhUIJhJx",
-      "tamanho": "",
-      "novo": true,
-      "atualizadoEm": "2026-06-06T15:07:06.533Z"
-    },
-    {
-      "id": "1cWKD2nytsDdH4PKO4A_F9A8YiBF8V344",
-      "titulo": "TriLift Lumenis",
-      "equipamento": null,
-      "marca": "trilift",
-      "tipo": "audio",
-      "formato": "mp3",
-      "pasta": "Áudio",
-      "categoria": "Músicas",
-      "linha": null,
-      "tags": [],
-      "flags": [
-        "audio"
-      ],
-      "url": "content/media/1cWKD2nytsDdH4PKO4A_F9A8YiBF8V344.mp3",
-      "thumb": "https://lh3.googleusercontent.com/d/1cWKD2nytsDdH4PKO4A_F9A8YiBF8V344",
-      "tamanho": "",
-      "novo": true,
-      "atualizadoEm": "2026-06-05T20:09:51.494Z"
-    },
-    {
-      "id": "1RSg1usZ81vn4cE9s8Io0HJpJGYFY1rSy",
-      "titulo": "Contourline em Paris Toy Story Remix 1",
-      "equipamento": null,
-      "marca": "contourline",
-      "tipo": "audio",
-      "formato": "mp3",
-      "pasta": "Áudio",
-      "categoria": "Músicas",
-      "linha": null,
-      "tags": [],
-      "flags": [
-        "audio"
-      ],
-      "url": "content/media/1RSg1usZ81vn4cE9s8Io0HJpJGYFY1rSy.mp3",
-      "thumb": "https://lh3.googleusercontent.com/d/1RSg1usZ81vn4cE9s8Io0HJpJGYFY1rSy",
-      "tamanho": "",
-      "novo": true,
-      "atualizadoEm": "2026-06-05T20:10:14.339Z"
-    },
-    {
-      "id": "m_0005",
-      "titulo": "Bruma Sobre o Mar",
-      "equipamento": null,
-      "marca": null,
-      "tipo": "audio",
-      "formato": "mp3",
-      "pasta": "Áudio",
-      "categoria": "Músicas",
-      "linha": null,
-      "tags": [],
-      "flags": [
-        "audio"
-      ],
-      "url": "content/media/m_0005.mp3",
-      "thumb": "https://lh3.googleusercontent.com/d/13tZPbelvialTvKq8LV1DimUFT9ehs65w",
-      "tamanho": "",
-      "novo": true,
-      "atualizadoEm": "2026-06-05T20:42:25.161Z"
-    },
-    {
-      "id": "13tZPbelvialTvKq8LV1DimUFT9ehs65w",
-      "titulo": "Bruma Sobre o Mar",
-      "equipamento": null,
-      "marca": "unyquepro",
-      "tipo": "audio",
-      "formato": "mp3",
-      "pasta": "Áudio",
-      "categoria": "Músicas",
-      "linha": null,
-      "tags": [],
-      "flags": [
-        "audio"
-      ],
-      "url": "content/media/13tZPbelvialTvKq8LV1DimUFT9ehs65w.mp3",
-      "thumb": "https://lh3.googleusercontent.com/d/13tZPbelvialTvKq8LV1DimUFT9ehs65w",
-      "tamanho": "",
-      "novo": true,
-      "atualizadoEm": "2026-06-06T00:55:54.594Z"
-    },
-    {
-      "id": "1Eju4jgA4pLKuT6uq3LHCA9ukzVEk3mJj",
-      "titulo": "UNYQUE PRO",
-      "equipamento": null,
-      "marca": "unyquepro",
-      "tipo": "audio",
-      "formato": "mp3",
-      "pasta": "Áudio",
-      "categoria": "Músicas",
-      "linha": null,
-      "tags": [],
-      "flags": [
-        "audio"
-      ],
-      "url": "content/media/1Eju4jgA4pLKuT6uq3LHCA9ukzVEk3mJj.mp3",
-      "thumb": "https://lh3.googleusercontent.com/d/1Eju4jgA4pLKuT6uq3LHCA9ukzVEk3mJj",
-      "tamanho": "",
-      "novo": true,
-      "atualizadoEm": "2026-06-06T00:56:04.168Z"
     }
   ],
   "categorias": [

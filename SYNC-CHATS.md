@@ -40,6 +40,17 @@
 
 ## Log (mais recente no topo)
 
+### 2026-06-03 · 🟦 ÁUDIO consertado (Drive não toca no browser) + filtros
+**Bug:** o áudio não tocava — TODOS os formatos de URL do Drive (uc-download/uc-view/lh3/usercontent)
+dão "Format error" no `<audio>` (Drive bloqueia hotlink; curl/servidor baixam OK).
+**🟦 fix:** `publish-catalog.js` agora **baixa** cada `tipo:audio` do Drive (curl server-side) pra
+`site/content/media/<id>.<ext>` e reescreve a url pro repo → GitHub Pages serve com streaming → toca.
+Cache por arquivo. Testado: `<audio>` 61s OK + HTTP 200 no ar. A auto-publicação (que chama o script)
+passa a baixar. ⚠️ **Vídeo** terá o mesmo bug e é grande demais pro repo → precisa CDN/Supabase (pendente 🟧).
+**+ filtros:** barra de chips no acervo por categoria (`cat`=categoria/mood/pasta) — hoje Áudio/Jingles;
+**🟧 manda `categoria` (Músicas/Trilhas/Jingles)** no material que os chips melhoram. Build spa74.
+
+
 ### 2026-06-03 · 🟦 Páginas de MARCA = path B (designer gerencia, NÃO a Central)
 **Dono escolheu B:** os assets de marca (logos, cores, artes, portfólio) continuam **upload do
 designer** no modo admin do PartnerZone — NÃO entram na Central nem no catalog.json. (🟧 não precisa

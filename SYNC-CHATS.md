@@ -40,6 +40,25 @@
 
 ## Log (mais recente no topo)
 
+### 2026-06-06 · 🟦 BOLETOS + CONTRATO construídos no PartnerZone (spa76) 🧾
+**Feito (🟦):** duas novas áreas privadas prontas no site público:
+- **`#/boletos`** — lista agrupada por competência (mês), resumo 3 cards (total em aberto R$,
+  próximo vencimento, vencidos), filtros cliente-side (mês + status chips), status "vencido"
+  recalculado pela data (não só o campo do banco), botão "Baixar PDF" via `sb.storage.createSignedUrl(60s)` (bucket privado, nunca URL pública).
+- **`#/contrato`** — ficha com número, vigência, valor mensal, badge de status calculado pela
+  data (Vigente/A vencer/Encerrado), download do PDF via signed URL, histórico de versões.
+- Ambas reusam `renderLogin()` (com título/sub/callback dinâmico) e `contaNotConfigured()` —
+  zero duplicação de código de login/auth.
+- Adicionados helpers de formatação BR: `brl()`, `dataBR()`, `competLabel()`, `diasParaVencer()`.
+- Ícones `clock`, `alert`, `calendar` adicionados ao ICONS.
+**Verificado (DOM, local :4399):** Boletos — resumo R$ 2.480,00, grupos Jun/Mai, status
+Em aberto/Vencido/Pago, 3 PDFs. Contrato — badge Vigente, campos formatados, estado vazio correto.
+**⏳ PENDENTE DO 🟧 (pra ligar tudo de verdade):**
+1. Publicar `site/content/portal-config.json` {url, anonKey} (SÓ anon key) — destrava o LOGIN.
+2. Sync `boletos` Central→Supabase (Fase B) + RLS `cli_self` pra tabela boletos.
+3. Criar tabela `contratos` no Supabase + RLS (schema: numero, vigencia_inicio, vigencia_fim, status, valor_mensal, arquivo_pdf) + bucket privado `contratos`.
+4. Confirmar 8 perguntas de alinhamento (ver mensagem anterior neste log ⬆️).
+
 ### 2026-06-06 · 🟦 LOGIN + MINHA CONTA construídos no PartnerZone (Fase 2 começou) 🔐
 **Feito (🟦):** construí a **Área do Cliente** no site público (build **spa75**):
 - `site/js/core/portal.js` — módulo de auth Supabase. Carrega o `@supabase/supabase-js@2` **sob

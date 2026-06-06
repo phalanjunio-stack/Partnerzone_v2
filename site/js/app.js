@@ -1,7 +1,7 @@
 /* ============================================================
    APP — ícones (traçado), dados de exemplo e render da Início
    ============================================================ */
-const BUILD = 'spa78';
+const BUILD = 'spa79';
 try { console.log('%cPartnerZone • build ' + BUILD, 'background:#2f7ff2;color:#fff;padding:2px 8px;border-radius:4px;font-weight:700'); } catch (_) {}
 
 /* ---- MODO CLIENTE × ADMIN ----------------------------------------------
@@ -109,7 +109,7 @@ function renderIcons(root=document) { root.querySelectorAll('[data-icon]').forEa
 const NAV = [
   { label:'Navegação', items:[
     { icon:'home', text:'Início', route:'#/' },
-    { icon:'file', text:'Solicitações' },
+    { icon:'file', text:'Solicitações', route:'#/solicitacoes' },
     { icon:'search', text:'Buscar', route:'#/buscar' },
     { icon:'heart', text:'Favoritos', route:'#/favoritos' },
     { icon:'music', text:'Áudios', route:'#/audio' },
@@ -1982,6 +1982,194 @@ async function renderSuporteDetalhe(root, sb, sess, chamadoId) {
       } catch (_) {}
     }, 15000);
   }
+}
+
+/* ============================================================
+   SOLICITAÇÕES — área privada do cliente
+   Pede material novo (apresentação, vídeo, design…) com briefing
+   e acompanha o andamento. Reutiliza padrões do Suporte.
+   Tabela Supabase:
+     solicitacoes(id, cliente_email, tipo_material, titulo,
+                  equipamento, briefing, prazo, status,
+                  arquivo_url, criado_em, atualizado_em)
+   ============================================================ */
+async function initSolicitacoes() {
+  const root = document.getElementById('sol-page'); if (!root) return;
+  root.innerHTML = `<div class="pf-loading">Carregando…</div>`;
+  let ok = false;
+  try { ok = await Portal.configured(); } catch (_) {}
+  if (!ok) { contaNotConfigured(root, 'Solicitações'); return; }
+  let sess = null;
+  try { sess = await Portal.session(); } catch (_) {}
+  if (!sess) {
+    renderLogin(root, 'Solicitações', 'Solicite materiais personalizados e acompanhe o andamento das criações.', initSolicitacoes);
+    return;
+  }
+  let sb = null;
+  try { sb = await Portal.db(); } catch (_) {}
+  if (!sb) { contaNotConfigured(root, 'Solicitações'); return; }
+  let solic = [];
+  try {
+    const { data, error } = await sb.from('solicitacoes')
+      .select('*')
+      .order('atualizado_em', { ascending: false });
+    if (!error && data) solic = data;
+  } catch (_) {}
+  renderSolicitacoes(root, sb, sess, solic);
+}
+window.initSolicitacoes = initSolicitacoes;
+
+function renderSolicitacoes(root, sb, sess, solic) {
+  const tipoMap = {
+    apresentacao:'Apresentação', video:'Vídeo', design:'Design / Arte',
+    foto:'Foto', social:'Redes Sociais', impresso:'Material Impresso', outro:'Outro',
+  };
+  const tipoIc = {
+    apresentacao:'presentation', video:'video', design:'pencil',
+    foto:'image', social:'message', impresso:'printer', outro:'file',
+  };
+  const stLabels = { recebida:'Recebida', em_analise:'Em análise', em_producao:'Em produção', entregue:'Entregue', cancelada:'Cancelada' };
+  const stIcons  = { recebida:'clock', em_analise:'search', em_producao:'settings', entregue:'check', cancelada:'alert' };
+
+  const listaHTML = solic.map((s, i) => {
+    const tipo  = tipoMap[(s.tipo_material||'').toLowerCase()] || s.tipo_material || '—';
+    const ic    = tipoIc[(s.tipo_material||'').toLowerCase()] || 'file';
+    const stTxt = stLabels[s.status] || s.status || '—';
+    const stI   = stIcons[s.status] || 'clock';
+    return `<div class="sol-item">
+      <div class="sol-row">
+        <div class="sol-tipo-ic">${svgIcon(ic,'ic ic-sm')}</div>
+        <div class="sol-main">
+          <span class="sol-titulo">${escHtml(s.titulo || 'Solicitação')}</span>
+          <span class="sol-meta">
+            <span class="sol-tipo-label">${escHtml(tipo)}</span>
+            ${s.equipamento ? `<span class="sol-eq">${escHtml(s.equipamento)}</span>` : ''}
+            <span class="sol-data">${svgIcon('calendar','ic ic-xs')} ${dataBR(s.criado_em)}</span>
+          </span>
+        </div>
+        <div class="sol-right">
+          <span class="sol-status sol-st-${escHtml(s.status||'recebida')}">${svgIcon(stI,'ic ic-sm')} ${escHtml(stTxt)}</span>
+          <button class="sol-expand-btn" title="Ver briefing">${svgIcon('chevD','ic ic-sm')}</button>
+        </div>
+      </div>
+      <div class="sol-detail" hidden>
+        ${s.briefing ? `<div class="sol-briefing"><span class="sol-d-label">Briefing</span><p>${escHtml(s.briefing)}</p></div>` : ''}
+        ${s.prazo ? `<div class="sol-prazo">${svgIcon('calendar','ic ic-sm')} <span><b>Prazo desejado:</b> ${escHtml(s.prazo)}</span></div>` : ''}
+        ${s.status === 'entregue' && s.arquivo_url ? `<a class="btn btn-sm" href="${escHtml(s.arquivo_url)}" target="_blank" rel="noopener">${svgIcon('download','ic ic-sm')} Baixar material entregue</a>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+
+  root.innerHTML = `
+    <div class="suporte-header">
+      <div>
+        <h1 class="suporte-title">Solicitações</h1>
+        <p class="suporte-sub">${solic.length ? `${solic.length} solicitaç${solic.length!==1?'ões':'ão'} registrada${solic.length!==1?'s':''}` : 'Nenhuma solicitação ainda'}</p>
+      </div>
+      <button class="btn" id="sol-novo-btn">${svgIcon('plus','ic ic-sm')} Nova solicitação</button>
+    </div>
+
+    <div id="sol-form-wrap" hidden>
+      <div class="acf-card">
+        <div class="acf-head">${svgIcon('send','ic ic-sm')} <b>Nova solicitação de material</b></div>
+        <form class="acf-form" id="sol-form" autocomplete="off">
+          <div class="acf-row">
+            <div class="field"><label>Tipo de material <span class="acf-req">*</span></label>
+              <select id="sol-tipo" class="select-native">
+                <option value="apresentacao">Apresentação</option>
+                <option value="video">Vídeo</option>
+                <option value="design">Design / Arte</option>
+                <option value="foto">Foto</option>
+                <option value="social">Redes Sociais</option>
+                <option value="impresso">Material Impresso</option>
+                <option value="outro">Outro</option>
+              </select></div>
+            <div class="field"><label>Equipamento relacionado <span class="sol-opt">(opcional)</span></label>
+              <div class="input"><i data-icon="wrench" data-cls="ic ic-sm"></i>
+              <input id="sol-eq" type="text" placeholder="Ex: HIPRO, Crystal 3D…"></div></div>
+          </div>
+          <div class="field"><label>Objetivo / título <span class="acf-req">*</span></label>
+            <div class="input"><i data-icon="pencil" data-cls="ic ic-sm"></i>
+            <input id="sol-titulo" type="text" placeholder="O que você precisa?" maxlength="120" required></div></div>
+          <div class="field"><label>Briefing <span class="acf-req">*</span></label>
+            <textarea id="sol-briefing" rows="5" placeholder="Objetivo, público-alvo, tom de voz, formato, onde vai ser usado, referências que você gosta…" required></textarea></div>
+          <div class="field"><label>Prazo desejado <span class="sol-opt">(opcional)</span></label>
+            <div class="input"><i data-icon="calendar" data-cls="ic ic-sm"></i>
+            <input id="sol-prazo" type="text" placeholder="Ex: até 15/07/2026, semana que vem…"></div></div>
+          <div class="acf-err" id="sol-err" hidden></div>
+          <div class="acf-actions">
+            <button type="button" class="btn ghost" id="sol-cancelar">Cancelar</button>
+            <button type="submit" class="btn" id="sol-enviar">${svgIcon('send','ic ic-sm')} Enviar solicitação</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    ${solic.length
+      ? `<div class="sol-list">${listaHTML}</div>`
+      : `<div class="suporte-blank">
+          ${svgIcon('send','ic')}
+          <b>Nenhuma solicitação ainda</b>
+          <p>Clique em "Nova solicitação" e peça apresentações, vídeos, artes ou qualquer material personalizado. Nossa equipe entra em contato com prazo e proposta.</p>
+        </div>`}
+    <div class="conta-note" style="margin-top:18px">${svgIcon('shield','ic ic-sm')} Você vê apenas as suas solicitações.</div>`;
+
+  renderIcons(root);
+
+  /* toggle form */
+  const wrap   = root.querySelector('#sol-form-wrap');
+  const novoBtn= root.querySelector('#sol-novo-btn');
+  const form   = root.querySelector('#sol-form');
+  const errEl  = root.querySelector('#sol-err');
+
+  novoBtn?.addEventListener('click', () => {
+    wrap.hidden = !wrap.hidden;
+    if (!wrap.hidden) { root.querySelector('#sol-titulo')?.focus(); Sound?.success?.(); }
+    else Sound?.click?.();
+  });
+  root.querySelector('#sol-cancelar')?.addEventListener('click', () => { wrap.hidden = true; Sound?.click?.(); });
+
+  form?.addEventListener('submit', async e => {
+    e.preventDefault();
+    const tipo     = root.querySelector('#sol-tipo').value;
+    const titulo   = (root.querySelector('#sol-titulo').value || '').trim();
+    const eq       = (root.querySelector('#sol-eq').value || '').trim();
+    const briefing = (root.querySelector('#sol-briefing').value || '').trim();
+    const prazo    = (root.querySelector('#sol-prazo').value || '').trim();
+    if (!titulo || !briefing) return;
+
+    const envBtn = root.querySelector('#sol-enviar');
+    const old = envBtn.innerHTML; envBtn.disabled = true; envBtn.innerHTML = 'Enviando…';
+    errEl.hidden = true;
+
+    try {
+      const email = sess.user && sess.user.email ? sess.user.email : '';
+      const ins = { tipo_material:tipo, titulo, briefing, status:'recebida', cliente_email:email };
+      if (eq) ins.equipamento = eq;
+      if (prazo) ins.prazo = prazo;
+      const { error } = await sb.from('solicitacoes').insert(ins);
+      if (error) throw error;
+      Sound?.success?.();
+      initSolicitacoes();   // recarrega com a nova solicitação no topo
+    } catch (_) {
+      errEl.textContent = 'Não consegui enviar a solicitação. Verifique sua conexão e tente novamente.';
+      errEl.hidden = false;
+      envBtn.disabled = false; envBtn.innerHTML = old; renderIcons(envBtn);
+      Sound?.error?.();
+    }
+  });
+
+  /* accordion: expandir / colapsar briefing */
+  root.querySelector('.sol-list')?.addEventListener('click', e => {
+    const btn = e.target.closest('.sol-expand-btn'); if (!btn) return;
+    const row    = btn.closest('.sol-row');
+    const detail = row && row.nextElementSibling;
+    if (!detail || !detail.classList.contains('sol-detail')) return;
+    const open = !detail.hidden;
+    detail.hidden = open;
+    btn.classList.toggle('open', !open);
+    Sound?.click?.();
+  });
 }
 
 async function initFavoritos() {

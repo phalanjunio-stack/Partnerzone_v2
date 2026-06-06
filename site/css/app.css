@@ -1292,3 +1292,81 @@ input[readonly], .lib-search, .topsearch { cursor: pointer; }
 }
 .cd-resolvido a:hover { text-decoration:underline; }
 .cd-resolvido a .ic { width:13px; height:13px; }
+
+/* ==============================================================
+   SOLICITAÇÕES — lista de pedidos de material + briefing accordion
+   ============================================================== */
+.sol-opt { font-size:11px; color:var(--text-faint); font-weight:400; }
+
+.sol-list { display:flex; flex-direction:column; gap:4px; }
+.sol-item {
+  background:var(--card); border:1px solid var(--border);
+  border-radius:12px; overflow:hidden;
+  transition:box-shadow .15s, border-color .15s;
+}
+.sol-item:hover { box-shadow:var(--shadow); border-color:var(--accent-border); }
+
+.sol-row { display:flex; align-items:center; gap:12px; padding:14px 16px; }
+.sol-tipo-ic {
+  width:34px; height:34px; display:grid; place-items:center;
+  background:var(--bg-alt); border-radius:9px; flex-shrink:0;
+}
+.sol-tipo-ic .ic { width:16px; height:16px; color:var(--accent); }
+.sol-main { flex:1 1 auto; min-width:0; }
+.sol-titulo {
+  display:block; font-size:14.5px; font-weight:700; margin-bottom:4px;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.sol-meta { display:flex; align-items:center; gap:7px; flex-wrap:wrap; }
+.sol-tipo-label {
+  font-size:11.5px; font-weight:600; color:var(--text-soft);
+  background:var(--bg-alt); border-radius:6px; padding:2px 7px;
+}
+.sol-eq {
+  font-size:11.5px; font-weight:600; color:var(--accent);
+  background:rgba(47,127,242,.1); border-radius:6px; padding:2px 7px;
+}
+.sol-data { font-size:12px; color:var(--text-faint); display:flex; align-items:center; gap:3px; }
+.sol-data .ic { width:11px; height:11px; }
+
+.sol-right { display:flex; align-items:center; gap:10px; flex-shrink:0; }
+.sol-expand-btn {
+  background:none; border:0; cursor:pointer; color:var(--text-faint);
+  display:grid; place-items:center; width:28px; height:28px;
+  border-radius:6px; transition:background .15s;
+}
+.sol-expand-btn:hover { background:var(--bg-alt); }
+.sol-expand-btn .ic { transition:transform .2s; }
+.sol-expand-btn.open .ic { transform:rotate(180deg); }
+
+/* status chips solicitações */
+.sol-status { display:inline-flex; align-items:center; gap:5px; font-size:12px; font-weight:700; border-radius:8px; padding:4px 10px; white-space:nowrap; }
+.sol-status .ic { width:13px; height:13px; }
+.sol-st-recebida    { background:rgba(59,130,246,.12); color:#60a5fa; }
+.sol-st-em_analise  { background:rgba(245,158,11,.12); color:var(--warning); }
+.sol-st-em_producao { background:rgba(122,87,255,.12); color:#a78bfa; }
+.sol-st-entregue    { background:var(--success-bg); color:var(--success); }
+.sol-st-cancelada   { background:rgba(239,68,68,.1); color:#f87171; }
+
+/* Detalhe expandido (briefing accordion) */
+.sol-detail {
+  padding:0 16px 16px 62px;
+  display:flex; flex-direction:column; gap:10px;
+  border-top:1px solid var(--border);
+}
+.sol-d-label {
+  font-size:11px; font-weight:700; color:var(--text-soft);
+  display:block; margin-bottom:4px;
+  text-transform:uppercase; letter-spacing:.05em;
+}
+.sol-briefing p {
+  font-size:13.5px; line-height:1.65;
+  color:var(--text-muted); margin:0;
+  white-space:pre-wrap; word-break:break-word;
+}
+.sol-prazo {
+  display:flex; align-items:center; gap:6px;
+  font-size:13px; color:var(--text-muted);
+}
+.sol-prazo .ic { width:14px; height:14px; color:var(--accent); flex-shrink:0; }
+@media (max-width:600px) { .sol-detail { padding-left:16px; } }

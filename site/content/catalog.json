@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-06-06T00:56:04.168Z",
+  "generatedAt": "2026-06-06T15:07:06.533Z",
   "source": "equipamentos: catalogo.db (completo) · materials: liberados (manifests + audio-metadata)",
   "marcas": [
     {
@@ -19,12 +19,6 @@
       "slug": "daeju",
       "code": "DAE",
       "name": "Daeju",
-      "logo": ""
-    },
-    {
-      "slug": "luthronic",
-      "code": "LUT",
-      "name": "Luthronic",
       "logo": ""
     },
     {
@@ -67,6 +61,12 @@
       "slug": "innove",
       "code": "INN",
       "name": "INNOVE",
+      "logo": ""
+    },
+    {
+      "slug": "lutronic",
+      "code": "LUT",
+      "name": "LUTRONIC",
       "logo": ""
     },
     {
@@ -254,17 +254,6 @@
       "pastas": []
     },
     {
-      "slug": "xerf",
-      "name": "Xerf",
-      "marca": "luthronic",
-      "marcaNome": "Luthronic",
-      "segmento": null,
-      "folder": "",
-      "cover": "",
-      "materialCount": 0,
-      "pastas": []
-    },
-    {
       "slug": "adena",
       "name": "ADENA",
       "marca": "eurofeedback",
@@ -282,17 +271,6 @@
       "marcaNome": "Eurofeedback",
       "segmento": null,
       "folder": "8. EUROFEEDBACK/ADÉLLA",
-      "cover": "",
-      "materialCount": 0,
-      "pastas": []
-    },
-    {
-      "slug": "eurofeedback",
-      "name": "Eurofeedback",
-      "marca": "eurofeedback",
-      "marcaNome": "Eurofeedback",
-      "segmento": null,
-      "folder": "EUROFEEDBACK",
       "cover": "",
       "materialCount": 0,
       "pastas": []
@@ -326,17 +304,6 @@
       "marcaNome": "Visbody",
       "segmento": null,
       "folder": "6. VISBODY/S30",
-      "cover": "",
-      "materialCount": 0,
-      "pastas": []
-    },
-    {
-      "slug": "visbody-scanner",
-      "name": "Visbody Scanner",
-      "marca": "visbody",
-      "marcaNome": "Visbody",
-      "segmento": null,
-      "folder": "VISBODY",
       "cover": "",
       "materialCount": 0,
       "pastas": []
@@ -562,6 +529,17 @@
       "pastas": []
     },
     {
+      "slug": "xerf",
+      "name": "XERF",
+      "marca": "lutronic",
+      "marcaNome": "LUTRONIC",
+      "segmento": null,
+      "folder": "5. LUTRONIC/2. XERF",
+      "cover": "",
+      "materialCount": 0,
+      "pastas": []
+    },
+    {
       "slug": "reverso",
       "name": "REVERSO",
       "marca": "indiba",
@@ -582,6 +560,7 @@
       "tipo": "audio",
       "formato": "mp3",
       "pasta": "Áudio",
+      "categoria": "Músicas",
       "linha": null,
       "tags": [],
       "flags": [],
@@ -599,6 +578,7 @@
       "tipo": "audio",
       "formato": "mp3",
       "pasta": "Áudio",
+      "categoria": "Músicas",
       "linha": null,
       "tags": [
         "HIPRO"
@@ -618,6 +598,7 @@
       "tipo": "audio",
       "formato": "mp3",
       "pasta": "Áudio",
+      "categoria": "Músicas",
       "linha": null,
       "tags": [],
       "flags": [],
@@ -635,6 +616,7 @@
       "tipo": "audio",
       "formato": "mp3",
       "pasta": "Áudio",
+      "categoria": "Músicas",
       "linha": null,
       "tags": [],
       "flags": [],
@@ -652,6 +634,7 @@
       "tipo": "audio",
       "formato": "mp3",
       "pasta": "Jingles",
+      "categoria": "Jingles",
       "linha": null,
       "tags": [],
       "flags": [
@@ -671,6 +654,7 @@
       "tipo": "audio",
       "formato": "mp3",
       "pasta": "Jingles",
+      "categoria": "Jingles",
       "linha": null,
       "tags": [
         "alan",
@@ -683,7 +667,7 @@
       "thumb": "https://lh3.googleusercontent.com/d/114QM0PC7E-43X-7HY9wXT8HrrhUIJhJx",
       "tamanho": "",
       "novo": true,
-      "atualizadoEm": "2026-06-05T20:58:18.775Z"
+      "atualizadoEm": "2026-06-06T15:07:06.533Z"
     },
     {
       "id": "1cWKD2nytsDdH4PKO4A_F9A8YiBF8V344",
@@ -693,6 +677,7 @@
       "tipo": "audio",
       "formato": "mp3",
       "pasta": "Áudio",
+      "categoria": "Músicas",
       "linha": null,
       "tags": [],
       "flags": [
@@ -712,6 +697,7 @@
       "tipo": "audio",
       "formato": "mp3",
       "pasta": "Áudio",
+      "categoria": "Músicas",
       "linha": null,
       "tags": [],
       "flags": [
@@ -731,6 +717,7 @@
       "tipo": "audio",
       "formato": "mp3",
       "pasta": "Áudio",
+      "categoria": "Músicas",
       "linha": null,
       "tags": [],
       "flags": [
@@ -750,6 +737,7 @@
       "tipo": "audio",
       "formato": "mp3",
       "pasta": "Áudio",
+      "categoria": "Músicas",
       "linha": null,
       "tags": [],
       "flags": [
@@ -769,6 +757,7 @@
       "tipo": "audio",
       "formato": "mp3",
       "pasta": "Áudio",
+      "categoria": "Músicas",
       "linha": null,
       "tags": [],
       "flags": [

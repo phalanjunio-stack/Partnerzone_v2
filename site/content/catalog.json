@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-06-05T20:58:33.218Z",
+  "generatedAt": "2026-06-06T00:56:04.168Z",
   "source": "equipamentos: catalogo.db (completo) · materials: liberados (manifests + audio-metadata)",
   "marcas": [
     {
@@ -759,7 +759,26 @@
       "thumb": "https://lh3.googleusercontent.com/d/13tZPbelvialTvKq8LV1DimUFT9ehs65w",
       "tamanho": "",
       "novo": true,
-      "atualizadoEm": "2026-06-05T20:14:13.137Z"
+      "atualizadoEm": "2026-06-06T00:55:54.594Z"
+    },
+    {
+      "id": "1Eju4jgA4pLKuT6uq3LHCA9ukzVEk3mJj",
+      "titulo": "UNYQUE PRO",
+      "equipamento": null,
+      "marca": "unyquepro",
+      "tipo": "audio",
+      "formato": "mp3",
+      "pasta": "Áudio",
+      "linha": null,
+      "tags": [],
+      "flags": [
+        "audio"
+      ],
+      "url": "https://drive.google.com/uc?export=download&id=1Eju4jgA4pLKuT6uq3LHCA9ukzVEk3mJj",
+      "thumb": "https://lh3.googleusercontent.com/d/1Eju4jgA4pLKuT6uq3LHCA9ukzVEk3mJj",
+      "tamanho": "",
+      "novo": true,
+      "atualizadoEm": "2026-06-06T00:56:04.168Z"
     }
   ],
   "categorias": [

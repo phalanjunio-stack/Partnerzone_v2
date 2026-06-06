@@ -1372,40 +1372,148 @@ input[readonly], .lib-search, .topsearch { cursor: pointer; }
 @media (max-width:600px) { .sol-detail { padding-left:16px; } }
 
 /* ============================================================
-   PERFIL — modal editar perfil do cliente  (spa80)
+   PERFIL — modal editar perfil do cliente  (spa82)
    ============================================================ */
-.modal.modal-sm { width: min(440px, 100%); }
+.modal.modal-sm { width: min(460px, 100%); }
 
-.pf-head {
-  display:flex; align-items:center; gap:16px;
-  padding:4px 0 20px;
-  border-bottom:1px solid var(--border);
-  margin-bottom:20px;
+/* === avatar section === */
+.pf-av-section {
+  display:flex; flex-direction:column; align-items:center;
+  gap:14px; padding:8px 0 4px;
 }
-.pf-av {
-  width:56px; height:56px; border-radius:50%;
+
+/* wrap: contém o ring + o círculo + o botão câmera */
+.pf-av-wrap {
+  position:relative;
+  width:88px; height:88px;
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer;
+}
+
+/* borda giratória — reutiliza @property --ang e @keyframes orbit de effects.css */
+.pf-av-ring {
+  position:absolute;
+  inset:-2px; border-radius:50%;
+  background: conic-gradient(from var(--ang),
+    transparent 0deg, var(--glow-blue) 65deg, var(--glow-purple) 145deg,
+    transparent 205deg, var(--glow-blue) 295deg, transparent 360deg);
+  animation: orbit 3.2s linear infinite;
+  z-index:0;
+}
+/* halo borrado atrás */
+.pf-av-ring::after {
+  content:"";
+  position:absolute;
+  inset:-14px; border-radius:50%;
+  background: conic-gradient(from var(--ang),
+    transparent, rgba(0,174,255,.42), rgba(122,87,255,.32), transparent 46%);
+  filter:blur(16px); opacity:.85;
+  animation: orbit 3.2s linear infinite;
+  z-index:-1;
+}
+
+/* o círculo em si */
+.pf-av-circle {
+  position:relative;
+  width:80px; height:80px; border-radius:50%;
   background:var(--accent); color:#fff;
   display:flex; align-items:center; justify-content:center;
-  font-size:20px; font-weight:700; flex-shrink:0;
-  letter-spacing:.04em;
+  font-size:22px; font-weight:700; letter-spacing:.04em;
+  overflow:hidden; z-index:1;
+  transition:filter .2s;
+  background-size:cover; background-position:center;
 }
-.pf-name-display {
-  font-size:15px; font-weight:600; color:var(--text);
-  line-height:1.3;
+.pf-av-circle.has-foto span { display:none; }
+.pf-av-wrap:hover .pf-av-circle { filter:brightness(.72); }
+
+/* botão câmera — overlay no hover */
+.pf-av-edit-btn {
+  position:absolute; inset:0; border-radius:50%;
+  background:none; border:none; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  z-index:2; opacity:0; transition:opacity .2s;
+  color:#fff;
 }
-.pf-email-display {
-  font-size:13px; color:var(--text-muted); margin-top:2px;
+.pf-av-edit-btn .ic { width:24px; height:24px; }
+.pf-av-wrap:hover .pf-av-edit-btn { opacity:1; }
+
+.pf-av-identity { text-align:center; }
+.pf-name-display { font-size:15px; font-weight:600; color:var(--text); }
+.pf-email-display { font-size:13px; color:var(--text-muted); margin-top:3px; }
+
+/* === reposicionamento === */
+.pf-reposition {
+  display:flex; flex-direction:column; align-items:center;
+  gap:12px; padding:8px 0 4px;
 }
-.pf-form { display:flex; flex-direction:column; gap:16px; }
-.pf-note {
+.pf-repo-stage {
+  position:relative;
+  width:180px; height:180px; border-radius:50%;
+  overflow:hidden; cursor:grab;
+  border:2px solid var(--border);
+  background:var(--surface-2);
+  flex-shrink:0;
+}
+.pf-repo-stage.dragging { cursor:grabbing; }
+.pf-repo-stage img {
+  position:absolute; user-select:none; pointer-events:none;
+}
+.pf-repo-mask {
+  position:absolute; inset:0; border-radius:50%;
+  box-shadow: 0 0 0 200px var(--surface);  /* vinheta fora do círculo */
+  pointer-events:none; z-index:1;
+}
+.pf-repo-hint {
   font-size:12px; color:var(--text-muted);
-  margin:0; line-height:1.5;
+  margin:0; text-align:center;
 }
+.pf-repo-zoom {
+  width:140px; accent-color:var(--accent);
+}
+.pf-repo-actions {
+  display:flex; gap:8px;
+}
+
+/* === divisor === */
+.pf-divider {
+  height:1px; background:var(--border);
+  margin:12px 0;
+}
+
+/* === campos do formulário === */
+.pf-form { display:flex; flex-direction:column; gap:14px; }
+.pf-field {
+  display:flex; flex-direction:column; gap:6px;
+}
+.pf-field label {
+  font-size:12.5px; font-weight:600;
+  color:var(--text-muted); letter-spacing:.02em;
+  text-transform:uppercase;
+}
+.pf-field input {
+  background:var(--surface-2);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:11px 14px;
+  color:var(--text);
+  font-size:14px; font-family:inherit;
+  transition:border-color .15s, box-shadow .15s;
+  outline:none;
+  width:100%; box-sizing:border-box;
+}
+.pf-field input:focus {
+  border-color:var(--accent);
+  box-shadow:0 0 0 3px rgba(47,127,242,.16);
+}
+.pf-field input::placeholder { color:var(--text-faint); }
+
 .pf-actions {
   display:flex; align-items:center; justify-content:space-between;
-  gap:12px; padding-top:4px;
+  gap:12px; padding-top:6px;
 }
-.pf-actions .btn.primary { min-width:100px; }
+.pf-actions .btn.primary { min-width:120px; }
+
+/* spinner inline (botão salvar) */
 .spinner-sm {
   display:inline-block; width:14px; height:14px;
   border:2px solid rgba(255,255,255,.3);

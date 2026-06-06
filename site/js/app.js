@@ -1,7 +1,7 @@
 /* ============================================================
    APP — ícones (traçado), dados de exemplo e render da Início
    ============================================================ */
-const BUILD = 'spa81';
+const BUILD = 'spa82';
 try { console.log('%cPartnerZone • build ' + BUILD, 'background:#2f7ff2;color:#fff;padding:2px 8px;border-radius:4px;font-weight:700'); } catch (_) {}
 
 /* ---- MODO CLIENTE × ADMIN ----------------------------------------------
@@ -1206,10 +1206,21 @@ async function initUserBtn() {
     if (Portal.configured() && Portal.session()) {
       const cli = Portal.client();
       if (cli) {
-        const nome = (cli.nome || cli.email || 'Cliente').trim();
+        const email = (cli.email || '').toLowerCase();
+        const nome  = (cli.nome || cli.email || 'Cliente').trim();
         const initials = (nome.split(/\s+/).slice(0,2).map(w=>w[0]||'').join('') || 'CL').toUpperCase();
-        if (avEl) avEl.textContent = initials;
-        if (nmEl) nmEl.textContent = nome.split(' ')[0]; // só primeiro nome
+        // foto ou iniciais
+        const foto = localStorage.getItem(pfFotoKey(email));
+        if (foto && avEl) {
+          avEl.textContent = '';
+          avEl.style.backgroundImage   = 'url(' + foto + ')';
+          avEl.style.backgroundSize    = 'cover';
+          avEl.style.backgroundPosition= 'center';
+        } else if (avEl) {
+          avEl.textContent = initials;
+          avEl.style.backgroundImage = '';
+        }
+        if (nmEl) nmEl.textContent = nome.split(' ')[0];
       }
     }
   } catch (_) {}
@@ -1226,67 +1237,244 @@ async function initUserBtn() {
 }
 window.initUserBtn = initUserBtn;
 
+/* chave localStorage para foto de perfil */
+function pfFotoKey(email) { return 'cl-pf-foto-' + (email||'').toLowerCase(); }
+
+/* aplica foto no elemento de avatar (div com bg) */
+function applyFotoEl(el, email) {
+  if (!el) return;
+  const foto = localStorage.getItem(pfFotoKey(email));
+  if (foto) {
+    el.style.backgroundImage = 'url(' + foto + ')';
+    el.style.backgroundSize  = 'cover';
+    el.style.backgroundPosition = 'center';
+    el.textContent = '';
+  } else {
+    el.style.backgroundImage = '';
+    el.style.backgroundSize  = '';
+    el.style.backgroundPosition = '';
+  }
+}
+
 async function openPerfilModal(cli, sess) {
   const body = document.getElementById('modal-perfil-body');
   if (!body) return;
 
-  const email   = (cli && cli.email) || (sess && sess.user && sess.user.email) || '';
-  const nome    = (cli && cli.nome)    || '';
-  const tel     = (cli && cli.telefone) || '';
-  const cidade  = (cli && cli.cidade)   || '';
+  const email    = (cli && cli.email) || (sess && sess.user && sess.user.email) || '';
+  const nome     = (cli && cli.nome)     || '';
+  const tel      = (cli && cli.telefone) || '';
+  const cidade   = (cli && cli.cidade)   || '';
   const initials = ((nome||email).trim().split(/\s+/).slice(0,2).map(w=>w[0]||'').join('') || 'CL').toUpperCase();
+  const hasFoto  = !!localStorage.getItem(pfFotoKey(email));
 
   body.innerHTML = `
-    <div class="pf-head">
-      <div class="pf-av">${escHtml(initials)}</div>
-      <div>
+    <!-- avatar + upload -->
+    <div class="pf-av-section">
+      <div class="pf-av-wrap" id="pf-av-wrap">
+        <div class="pf-av-ring"></div>
+        <div class="pf-av-circle ${hasFoto ? 'has-foto' : ''}" id="pf-av-circle">
+          <span id="pf-av-initials">${hasFoto ? '' : escHtml(initials)}</span>
+        </div>
+        <button class="pf-av-edit-btn" id="pf-av-edit-btn" type="button" title="Alterar foto de perfil">
+          ${svgIcon('camera','ic ic-sm')}
+        </button>
+      </div>
+      <input type="file" id="pf-foto-input" accept="image/*" style="display:none">
+      <div class="pf-av-identity">
         <div class="pf-name-display">${escHtml(nome || email)}</div>
         <div class="pf-email-display">${escHtml(email)}</div>
       </div>
     </div>
+
+    <!-- reposicionamento de foto (oculto até ter imagem) -->
+    <div class="pf-reposition" id="pf-reposition" hidden>
+      <div class="pf-repo-stage" id="pf-repo-stage">
+        <img id="pf-repo-img" src="" alt="" draggable="false">
+        <div class="pf-repo-mask"></div>
+      </div>
+      <p class="pf-repo-hint">Arraste para posicionar · Scroll = zoom</p>
+      <input class="pf-repo-zoom" id="pf-repo-zoom" type="range" min="0.5" max="3" step="0.01" value="1">
+      <div class="pf-repo-actions">
+        <button type="button" class="btn ghost btn-sm" id="pf-repo-cancel">Cancelar</button>
+        <button type="button" class="btn btn-sm" id="pf-repo-ok">${svgIcon('check','ic ic-sm')} Usar esta foto</button>
+      </div>
+    </div>
+
+    <!-- campos editáveis -->
+    <div class="pf-divider"></div>
     <form class="pf-form" id="pf-form" autocomplete="off">
-      <div class="acf-row">
-        <label class="acf-label" for="pf-nome">Nome completo</label>
-        <input class="acf-input" id="pf-nome" type="text" value="${escHtml(nome)}" placeholder="Seu nome" maxlength="80">
+      <div class="pf-field">
+        <label for="pf-nome">Nome completo</label>
+        <input id="pf-nome" type="text" value="${escHtml(nome)}" placeholder="Seu nome completo" maxlength="80">
       </div>
-      <div class="acf-row">
-        <label class="acf-label" for="pf-tel">Telefone / WhatsApp</label>
-        <input class="acf-input" id="pf-tel" type="tel" value="${escHtml(tel)}" placeholder="(11) 9xxxx-xxxx" maxlength="20">
+      <div class="pf-field">
+        <label for="pf-tel">Telefone / WhatsApp</label>
+        <input id="pf-tel" type="tel" value="${escHtml(tel)}" placeholder="(11) 9xxxx-xxxx" maxlength="20">
       </div>
-      <div class="acf-row">
-        <label class="acf-label" for="pf-cidade">Cidade</label>
-        <input class="acf-input" id="pf-cidade" type="text" value="${escHtml(cidade)}" placeholder="Ex: São Paulo" maxlength="60">
+      <div class="pf-field">
+        <label for="pf-cidade">Cidade</label>
+        <input id="pf-cidade" type="text" value="${escHtml(cidade)}" placeholder="Ex: São Paulo" maxlength="60">
       </div>
-      <p class="pf-note">As alterações ficam visíveis para a equipe da Contourline.</p>
       <div id="pf-err" class="acf-err" hidden></div>
       <div class="pf-actions">
         <button type="button" class="btn ghost btn-sm" id="pf-logout">Sair da conta</button>
-        <button type="submit" class="btn primary" id="pf-save">Salvar</button>
+        <button type="submit" class="btn primary" id="pf-save">Salvar alterações</button>
       </div>
     </form>`;
 
   UI.openModal('modal-perfil');
 
-  const form   = document.getElementById('pf-form');
-  const errEl  = document.getElementById('pf-err');
-  const saveBtn= document.getElementById('pf-save');
+  // aplica foto salva no avatar do modal
+  const avCircle = document.getElementById('pf-av-circle');
+  applyFotoEl(avCircle, email);
 
-  // botão sair
+  // ---- upload + reposicionamento ----
+  const fileInput  = document.getElementById('pf-foto-input');
+  const repoWrap   = document.getElementById('pf-reposition');
+  const repoStage  = document.getElementById('pf-repo-stage');
+  const repoImg    = document.getElementById('pf-repo-img');
+  const zoomSlider = document.getElementById('pf-repo-zoom');
+  const STAGE_SZ   = 180; // px — tamanho do quadrado de corte
+  let imgX = 0, imgY = 0, imgW = STAGE_SZ, imgH = STAGE_SZ;
+  let dragState = null;
+
+  function applyRepoPos() {
+    repoImg.style.width  = imgW + 'px';
+    repoImg.style.height = imgH + 'px';
+    repoImg.style.left   = imgX + 'px';
+    repoImg.style.top    = imgY + 'px';
+  }
+
+  document.getElementById('pf-av-edit-btn')?.addEventListener('click', () => fileInput.click());
+  document.getElementById('pf-av-circle')?.addEventListener('click',   () => fileInput.click());
+
+  fileInput?.addEventListener('change', () => {
+    const f = fileInput.files && fileInput.files[0]; if (!f) return;
+    const url = URL.createObjectURL(f);
+    repoImg.onload = () => {
+      URL.revokeObjectURL(url);
+      // cover-fit para STAGE_SZ×STAGE_SZ
+      const ratio = repoImg.naturalWidth / repoImg.naturalHeight;
+      if (ratio >= 1) { imgH = STAGE_SZ; imgW = STAGE_SZ * ratio; }
+      else             { imgW = STAGE_SZ; imgH = STAGE_SZ / ratio; }
+      imgX = (STAGE_SZ - imgW) / 2;
+      imgY = (STAGE_SZ - imgH) / 2;
+      zoomSlider.value = 1;
+      applyRepoPos();
+      repoWrap.hidden = false;
+      renderIcons(repoWrap);
+    };
+    repoImg.src = url;
+    fileInput.value = '';
+  });
+
+  // drag na stage
+  repoStage?.addEventListener('pointerdown', e => {
+    e.preventDefault();
+    dragState = { px: e.clientX, py: e.clientY, ox: imgX, oy: imgY };
+    repoStage.setPointerCapture && repoStage.setPointerCapture(e.pointerId);
+    repoStage.classList.add('dragging');
+  });
+  repoStage?.addEventListener('pointermove', e => {
+    if (!dragState) return;
+    imgX = dragState.ox + (e.clientX - dragState.px);
+    imgY = dragState.oy + (e.clientY - dragState.py);
+    applyRepoPos();
+  });
+  const endRepoDrag = () => { dragState = null; repoStage?.classList.remove('dragging'); };
+  repoStage?.addEventListener('pointerup',     endRepoDrag);
+  repoStage?.addEventListener('pointercancel', endRepoDrag);
+
+  // scroll = zoom
+  repoStage?.addEventListener('wheel', e => {
+    e.preventDefault();
+    const factor = e.deltaY < 0 ? 1.07 : 0.935;
+    const baseW = repoImg.naturalWidth >= repoImg.naturalHeight
+      ? STAGE_SZ * (repoImg.naturalWidth/repoImg.naturalHeight)
+      : STAGE_SZ;
+    const baseH = repoImg.naturalWidth >= repoImg.naturalHeight
+      ? STAGE_SZ
+      : STAGE_SZ * (repoImg.naturalHeight/repoImg.naturalWidth);
+    const curScale = imgW / baseW;
+    const newScale = Math.min(3, Math.max(0.5, curScale * factor));
+    const cx = STAGE_SZ / 2, cy = STAGE_SZ / 2;
+    imgX = cx - (cx - imgX) * (newScale / curScale);
+    imgY = cy - (cy - imgY) * (newScale / curScale);
+    imgW = baseW * newScale;
+    imgH = baseH * newScale;
+    zoomSlider.value = newScale;
+    applyRepoPos();
+  }, { passive: false });
+
+  // slider de zoom
+  zoomSlider?.addEventListener('input', () => {
+    const newScale = +zoomSlider.value;
+    const baseW = repoImg.naturalWidth >= repoImg.naturalHeight
+      ? STAGE_SZ * (repoImg.naturalWidth/repoImg.naturalHeight)
+      : STAGE_SZ;
+    const baseH = repoImg.naturalWidth >= repoImg.naturalHeight
+      ? STAGE_SZ
+      : STAGE_SZ * (repoImg.naturalHeight/repoImg.naturalWidth);
+    const curScale = imgW / baseW;
+    const cx = STAGE_SZ / 2, cy = STAGE_SZ / 2;
+    imgX = cx - (cx - imgX) * (newScale / curScale);
+    imgY = cy - (cy - imgY) * (newScale / curScale);
+    imgW = baseW * newScale;
+    imgH = baseH * newScale;
+    applyRepoPos();
+  });
+
+  // cancelar repositionamento
+  document.getElementById('pf-repo-cancel')?.addEventListener('click', () => {
+    repoWrap.hidden = true;
+  });
+
+  // confirmar foto — gera canvas 128×128 com o corte
+  document.getElementById('pf-repo-ok')?.addEventListener('click', () => {
+    const size = 128;
+    const canvas = document.createElement('canvas');
+    canvas.width = canvas.height = size;
+    const ctx = canvas.getContext('2d');
+    const scX = repoImg.naturalWidth  / imgW;
+    const scY = repoImg.naturalHeight / imgH;
+    const sx  = -imgX * scX;
+    const sy  = -imgY * scY;
+    const sw  = STAGE_SZ * scX;
+    const sh  = STAGE_SZ * scY;
+    ctx.drawImage(repoImg, sx, sy, sw, sh, 0, 0, size, size);
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.88);
+    try { localStorage.setItem(pfFotoKey(email), dataUrl); } catch (_) {}
+    // aplica no avatar do modal
+    applyFotoEl(avCircle, email);
+    if (avCircle) { avCircle.classList.add('has-foto'); }
+    const initSpan = document.getElementById('pf-av-initials');
+    if (initSpan) initSpan.textContent = '';
+    // aplica no topbar
+    const topAv = document.getElementById('user-av');
+    applyFotoEl(topAv, email);
+    repoWrap.hidden = true;
+    Sound?.success?.();
+    Toast.success('Foto salva!');
+  });
+
+  // ---- sair da conta ----
   document.getElementById('pf-logout')?.addEventListener('click', async () => {
     UI.closeModal(document.getElementById('modal-perfil'));
     await Portal.logout();
-    // limpa topbar de volta ao padrão
     const avEl = document.getElementById('user-av');
     const nmEl = document.getElementById('user-name');
-    if (avEl) avEl.textContent = 'CL';
+    if (avEl) { avEl.textContent = 'CL'; avEl.style.backgroundImage = ''; }
     if (nmEl) nmEl.textContent = 'Entrar';
-    // redireciona para a home
     location.hash = '#/';
     if (window.__route) window.__route();
   });
 
-  // salvar
-  form.addEventListener('submit', async e => {
+  // ---- salvar campos ----
+  const form    = document.getElementById('pf-form');
+  const errEl   = document.getElementById('pf-err');
+  const saveBtn = document.getElementById('pf-save');
+
+  form?.addEventListener('submit', async e => {
     e.preventDefault();
     errEl.hidden = true;
     const novoNome   = document.getElementById('pf-nome').value.trim();
@@ -1303,14 +1491,12 @@ async function openPerfilModal(cli, sess) {
       const { error } = await sb.from('clientes')
         .update({ nome: novoNome, telefone: novoTel, cidade: novaCidade })
         .eq('email', email.toLowerCase());
-
       if (error) throw error;
 
-      // atualiza topbar imediatamente
       const initNew = (novoNome.split(/\s+/).slice(0,2).map(w=>w[0]||'').join('') || 'CL').toUpperCase();
       const avEl = document.getElementById('user-av');
       const nmEl = document.getElementById('user-name');
-      if (avEl) avEl.textContent = initNew;
+      if (avEl && !localStorage.getItem(pfFotoKey(email))) avEl.textContent = initNew;
       if (nmEl) nmEl.textContent = novoNome.split(' ')[0];
 
       Sound && Sound.success && Sound.success();

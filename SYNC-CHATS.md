@@ -40,6 +40,22 @@
 
 ## Log (mais recente no topo)
 
+### 2026-06-06 · 🟦 SOLICITAÇÕES — pedidos de material construído no PartnerZone (spa79) 📋
+**Feito (🟦):** página privada `#/solicitacoes` no ar.
+- Formulário inline "Nova solicitação": tipo (Apresentação/Vídeo/Design/Foto/Redes Sociais/
+  Material Impresso/Outro), equipamento relacionado (opcional), título/objetivo, briefing
+  completo, prazo desejado (opcional).
+- Lista com status chip: Recebida → Em análise → Em produção → Entregue / Cancelada.
+- Accordion: clica na seta para expandir o briefing dentro do card (sem trocar de rota).
+- Quando status = entregue + campo `arquivo_url` preenchido: botão "Baixar material" aparece.
+- Reutiliza 100% dos padrões de auth/blank-state do Suporte (zero código duplicado).
+**⏳ PENDENTE DO 🟧 (Central criar no Supabase):**
+  1. Tabela `solicitacoes(id UUID PK, cliente_email TEXT, tipo_material TEXT, titulo TEXT,
+     equipamento TEXT, briefing TEXT, prazo TEXT, status TEXT DEFAULT 'recebida',
+     arquivo_url TEXT, criado_em TIMESTAMPTZ DEFAULT now(), atualizado_em TIMESTAMPTZ DEFAULT now())`
+  2. RLS: SELECT + INSERT onde `lower(auth.jwt()->>'email') = lower(cliente_email)`
+  3. UPDATE permitido apenas por service_role (a equipe atualiza status e `arquivo_url`)
+
 ### 2026-06-06 · 🟦 SUPORTE — lista + chat bidirecional construído no PartnerZone (spa78) 💬
 **Feito (🟦):** página privada `#/suporte` (lista de chamados) + `#/suporte/:id` (chat do chamado) no ar.
 - **Lista**: mostra todos os chamados do cliente com status chip (Aberto / Em atendimento /

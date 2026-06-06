@@ -40,6 +40,15 @@
 
 ## Log (mais recente no topo)
 
+### 2026-06-03 · 🟦→🟧 BOLETOS (financeiro) — Fase A na Central
+**Dono:** quer organizar os boletos "de um jeito fácil". Hoje o financeiro joga no Drive solto.
+**Decisão:** boleto é **PRIVADO por cliente** → NÃO entra no `catalog.json` público. Plano em
+`PLANO-BOLETOS.md`. **Fase A** (só financeiro, sem login) = 🟧 monta tabela `boletos` + telinha
+"Financeiro › Boletos" na Central (escolhe cliente + arrasta PDF → `00.ORGANIZADO\FINANCEIRO\
+BOLETOS\<cliente>\<YYYY-MM>.pdf`). Começar do zero. **Fase B** (cliente loga e vê os dele) = 🟦
+PartnerZone + login/Supabase (depois). Relayei pro 🟧.
+
+
 ### 2026-06-03 · 🟦 ÁUDIO consertado (Drive não toca no browser) + filtros
 **Bug:** o áudio não tocava — TODOS os formatos de URL do Drive (uc-download/uc-view/lh3/usercontent)
 dão "Format error" no `<audio>` (Drive bloqueia hotlink; curl/servidor baixam OK).

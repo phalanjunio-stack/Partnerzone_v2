@@ -40,6 +40,20 @@
 
 ## Log (mais recente no topo)
 
+### 2026-06-06 · 🟦 MEUS EQUIPAMENTOS construído no PartnerZone (spa77) 🔧
+**Feito (🟦):** página privada `#/meus-equipamentos` no ar.
+- RLS `eq_entitled` na tabela `equipamentos` do Supabase filtra server-side — o SELECT devolve
+  só os modelos que o cliente tem direito (sem filtrar no front).
+- Cross-referência com o array local `EQUIPMENT` (catalog.json) para foto, descrição e contagem
+  de materiais. Slug do Supabase casa com o `codigo` do catálogo (case-insensitive).
+- Cada card: foto 16:9, badge "Seu equipamento", botão "Ver materiais" (→ catálogo público),
+  botão "Suporte" (abre modal de solicitação pré-preenchido com o nome do equipamento).
+- Footer discreto: "Nº série, garantia e manutenção — em breve" (quando Central adicionar campos
+  a `cliente_equipamentos`).
+- Estado vazio amigável + em-configuração/login reutilizados (zero duplicação).
+**⏳ PENDENTE DO 🟧:** popular `cliente_equipamentos` no Supabase com
+  `(cliente_id, equipamento_slug)` para cada cliente real.
+
 ### 2026-06-06 · 🟦 BOLETOS + CONTRATO construídos no PartnerZone (spa76) 🧾
 **Feito (🟦):** duas novas áreas privadas prontas no site público:
 - **`#/boletos`** — lista agrupada por competência (mês), resumo 3 cards (total em aberto R$,

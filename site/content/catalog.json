@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-06-06T15:12:28.331Z",
+  "generatedAt": "2026-06-06T21:30:04.093Z",
   "source": "equipamentos: catalogo.db (completo) · materials: liberados (manifests + audio-metadata)",
   "marcas": [
     {
@@ -215,7 +215,7 @@
       "marca": "body-health",
       "marcaNome": "Body Health",
       "segmento": null,
-      "folder": "",
+      "folder": "2. BODY HEALTH/2. SUPREMEPRO",
       "cover": "",
       "materialCount": 0,
       "pastas": []
@@ -645,6 +645,26 @@
       "tamanho": "",
       "novo": true,
       "atualizadoEm": "2026-06-06T15:10:03.090Z"
+    },
+    {
+      "id": "13tZPbelvialTvKq8LV1DimUFT9ehs65w",
+      "titulo": "Bruma Sobre o Mar",
+      "equipamento": null,
+      "marca": "unyquepro",
+      "tipo": "audio",
+      "formato": "mp3",
+      "pasta": "Áudio",
+      "categoria": "Músicas",
+      "linha": null,
+      "tags": [],
+      "flags": [
+        "audio"
+      ],
+      "url": "content/media/13tZPbelvialTvKq8LV1DimUFT9ehs65w.mp3",
+      "thumb": "https://lh3.googleusercontent.com/d/13tZPbelvialTvKq8LV1DimUFT9ehs65w",
+      "tamanho": "",
+      "novo": true,
+      "atualizadoEm": "2026-06-06T21:30:04.093Z"
     }
   ],
   "categorias": [

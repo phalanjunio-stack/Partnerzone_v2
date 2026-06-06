@@ -40,6 +40,28 @@
 
 ## Log (mais recente no topo)
 
+### 2026-06-06 · 🟦 SUPORTE — lista + chat bidirecional construído no PartnerZone (spa78) 💬
+**Feito (🟦):** página privada `#/suporte` (lista de chamados) + `#/suporte/:id` (chat do chamado) no ar.
+- **Lista**: mostra todos os chamados do cliente com status chip (Aberto / Em atendimento /
+  Resolvido / Cancelado), categoria, prioridade Urgente em destaque e data.
+- **Formulário "Abrir chamado"** inline (sem modal): campos título, categoria (Técnico/Comercial/
+  Financeiro/Outro), prioridade e mensagem inicial. Cria `chamados` + primeira `chamado_mensagens`
+  no Supabase com `cliente_email = auth.email()`, depois navega para o detalhe do novo chamado.
+- **Detalhe / chat**: thread de mensagens com cliente (direita, azul) vs equipe (esquerda, cinza),
+  caixa de resposta, Ctrl+Enter para enviar, polling automático a cada 15 s (auto-limpeza ao sair).
+- Chamado encerrado (Resolvido/Cancelado) bloqueia o input e convida abrir novo.
+- Polling usa `clearInterval` via `window.clearSuportePoll` — seguro trocar de rota.
+- Minha Conta e Meus Equipamentos: botão "Suporte" agora aponta para `#/suporte` (não mais modal).
+- NAV Suporte agora tem `route:'#/suporte'` e fica destacado ao visitar a área.
+**⏳ PENDENTE DO 🟧 (Central criar no Supabase):**
+  1. Tabela `chamados(id UUID PK, cliente_email TEXT, titulo TEXT, categoria TEXT, prioridade TEXT,
+     status TEXT DEFAULT 'aberto', criado_em TIMESTAMPTZ DEFAULT now(), atualizado_em TIMESTAMPTZ)`
+  2. Tabela `chamado_mensagens(id UUID PK, chamado_id UUID FK→chamados, autor TEXT, texto TEXT,
+     criado_em TIMESTAMPTZ DEFAULT now())`
+  3. RLS em `chamados`: SELECT + INSERT onde `lower(auth.jwt()->>'email') = lower(cliente_email)`
+  4. RLS em `chamado_mensagens`: SELECT via join a chamados; INSERT onde o chamado pertence ao cliente
+  5. Trigger opcional: atualizar `chamados.atualizado_em` a cada nova mensagem
+
 ### 2026-06-06 · 🟦 MEUS EQUIPAMENTOS construído no PartnerZone (spa77) 🔧
 **Feito (🟦):** página privada `#/meus-equipamentos` no ar.
 - RLS `eq_entitled` na tabela `equipamentos` do Supabase filtra server-side — o SELECT devolve

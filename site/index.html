@@ -8,19 +8,19 @@
   <title>PartnerZone — Contourline</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/theme.css?v=spa79">
-  <link rel="stylesheet" href="css/app.css?v=spa79">
-  <link rel="stylesheet" href="css/effects.css?v=spa79">
-  <link rel="stylesheet" href="css/categoria.css?v=spa79">
-  <link rel="stylesheet" href="css/pasta.css?v=spa79">
-  <link rel="stylesheet" href="css/material.css?v=spa79">
-  <link rel="stylesheet" href="css/buscar.css?v=spa79">
-  <link rel="stylesheet" href="css/upload.css?v=spa79">
-  <link rel="stylesheet" href="css/sql.css?v=spa79">
-  <link rel="stylesheet" href="css/marca.css?v=spa79">
-  <link rel="stylesheet" href="css/splash.css?v=spa79">
+  <link rel="stylesheet" href="css/theme.css?v=spa80">
+  <link rel="stylesheet" href="css/app.css?v=spa80">
+  <link rel="stylesheet" href="css/effects.css?v=spa80">
+  <link rel="stylesheet" href="css/categoria.css?v=spa80">
+  <link rel="stylesheet" href="css/pasta.css?v=spa80">
+  <link rel="stylesheet" href="css/material.css?v=spa80">
+  <link rel="stylesheet" href="css/buscar.css?v=spa80">
+  <link rel="stylesheet" href="css/upload.css?v=spa80">
+  <link rel="stylesheet" href="css/sql.css?v=spa80">
+  <link rel="stylesheet" href="css/marca.css?v=spa80">
+  <link rel="stylesheet" href="css/splash.css?v=spa80">
   <script>document.documentElement.setAttribute('data-theme', localStorage.getItem('cl-theme') || 'dark');</script>
-  <script src="js/core/splash.js?v=spa79"></script>
+  <script src="js/core/splash.js?v=spa80"></script>
 </head>
 <body>
 
@@ -55,7 +55,7 @@
         <div class="theme-wrap" id="theme-switcher"></div>
         <button class="iconbtn" id="sound-btn"><i data-icon="volume"></i></button>
         <button class="iconbtn"><i data-icon="bell"></i><span class="badge">3</span></button>
-        <button class="user"><div class="avatar">AM</div><b>Ana Martins</b><i data-icon="chevD" data-cls="ic ic-sm"></i></button>
+        <button class="user" id="user-btn"><div class="avatar" id="user-av">AM</div><b id="user-name">Ana Martins</b><i data-icon="chevD" data-cls="ic ic-sm"></i></button>
       </header>
 
       <!-- CONTEÚDO trocado pelo roteador (SPA) -->
@@ -419,13 +419,28 @@
     </div>
   </div>
 
-  <script src="js/core/sound.js?v=spa79"></script>
-  <script src="js/core/theme.js?v=spa79"></script>
-  <script src="js/components/ui.js?v=spa79"></script>
-  <script src="js/app.js?v=spa79"></script>
-  <script src="js/core/catalog.js?v=spa79"></script>
-  <script src="js/core/portal.js?v=spa79"></script>
-  <script src="js/core/db.js?v=spa79"></script>
-  <script src="js/views.js?v=spa79"></script>
+  <!-- modal: editar perfil -->
+  <div class="modal-bd" id="modal-perfil">
+    <div class="modal modal-sm">
+      <div class="modal-inner">
+        <div class="modal-head">
+          <div><h2>Meu perfil</h2><p>Atualize suas informações de contato</p></div>
+          <button class="x" data-close-modal><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+        </div>
+        <div class="modal-body" id="modal-perfil-body">
+          <!-- preenchido por openPerfilModal() -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/core/sound.js?v=spa80"></script>
+  <script src="js/core/theme.js?v=spa80"></script>
+  <script src="js/components/ui.js?v=spa80"></script>
+  <script src="js/app.js?v=spa80"></script>
+  <script src="js/core/catalog.js?v=spa80"></script>
+  <script src="js/core/portal.js?v=spa80"></script>
+  <script src="js/core/db.js?v=spa80"></script>
+  <script src="js/views.js?v=spa80"></script>
 </body>
 </html>

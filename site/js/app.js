@@ -1,7 +1,7 @@
 /* ============================================================
    APP — ícones (traçado), dados de exemplo e render da Início
    ============================================================ */
-const BUILD = 'spa79';
+const BUILD = 'spa80';
 try { console.log('%cPartnerZone • build ' + BUILD, 'background:#2f7ff2;color:#fff;padding:2px 8px;border-radius:4px;font-weight:700'); } catch (_) {}
 
 /* ---- MODO CLIENTE × ADMIN ----------------------------------------------
@@ -535,6 +535,7 @@ function initShell() {
   Player.init();
   initPlaylistModal();
   initEquipEditor();
+  initUserBtn();
 }
 
 /* ============================================================
@@ -1187,7 +1188,140 @@ function renderLogin(root, titulo, sub, onSuccess) {
       return;
     }
     Sound && Sound.success && Sound.success();
+    window.initUserBtn?.();   // atualiza topbar com dados reais do cliente
     cb();   // sucesso → recarrega a área que chamou o login
+  });
+}
+
+/* ============================================================
+   TOPBAR: botão do usuário + modal de perfil  (spa80)
+   ============================================================ */
+async function initUserBtn() {
+  const btn  = document.getElementById('user-btn'); if (!btn) return;
+  const avEl = document.getElementById('user-av');
+  const nmEl = document.getElementById('user-name');
+
+  // preenche topbar com dados do Portal (se logado)
+  try {
+    if (Portal.configured() && Portal.session()) {
+      const cli = Portal.client();
+      if (cli) {
+        const nome = (cli.nome || cli.email || 'Cliente').trim();
+        const initials = (nome.split(/\s+/).slice(0,2).map(w=>w[0]||'').join('') || 'CL').toUpperCase();
+        if (avEl) avEl.textContent = initials;
+        if (nmEl) nmEl.textContent = nome.split(' ')[0]; // só primeiro nome
+      }
+    }
+  } catch (_) {}
+
+  // evita duplo-bind
+  btn.removeEventListener('click', btn._pfHandler);
+  btn._pfHandler = async () => {
+    if (!Portal.configured()) return;
+    const sess = Portal.session(); if (!sess) return;
+    const cli  = Portal.client();
+    await openPerfilModal(cli, sess);
+  };
+  btn.addEventListener('click', btn._pfHandler);
+}
+window.initUserBtn = initUserBtn;
+
+async function openPerfilModal(cli, sess) {
+  const body = document.getElementById('modal-perfil-body');
+  if (!body) return;
+
+  const email   = (cli && cli.email) || (sess && sess.user && sess.user.email) || '';
+  const nome    = (cli && cli.nome)    || '';
+  const tel     = (cli && cli.telefone) || '';
+  const cidade  = (cli && cli.cidade)   || '';
+  const initials = ((nome||email).trim().split(/\s+/).slice(0,2).map(w=>w[0]||'').join('') || 'CL').toUpperCase();
+
+  body.innerHTML = `
+    <div class="pf-head">
+      <div class="pf-av">${escHtml(initials)}</div>
+      <div>
+        <div class="pf-name-display">${escHtml(nome || email)}</div>
+        <div class="pf-email-display">${escHtml(email)}</div>
+      </div>
+    </div>
+    <form class="pf-form" id="pf-form" autocomplete="off">
+      <div class="acf-row">
+        <label class="acf-label" for="pf-nome">Nome completo</label>
+        <input class="acf-input" id="pf-nome" type="text" value="${escHtml(nome)}" placeholder="Seu nome" maxlength="80">
+      </div>
+      <div class="acf-row">
+        <label class="acf-label" for="pf-tel">Telefone / WhatsApp</label>
+        <input class="acf-input" id="pf-tel" type="tel" value="${escHtml(tel)}" placeholder="(11) 9xxxx-xxxx" maxlength="20">
+      </div>
+      <div class="acf-row">
+        <label class="acf-label" for="pf-cidade">Cidade</label>
+        <input class="acf-input" id="pf-cidade" type="text" value="${escHtml(cidade)}" placeholder="Ex: São Paulo" maxlength="60">
+      </div>
+      <p class="pf-note">As alterações ficam visíveis para a equipe da Contourline.</p>
+      <div id="pf-err" class="acf-err" hidden></div>
+      <div class="pf-actions">
+        <button type="button" class="btn ghost btn-sm" id="pf-logout">Sair da conta</button>
+        <button type="submit" class="btn primary" id="pf-save">Salvar</button>
+      </div>
+    </form>`;
+
+  UI.openModal('modal-perfil');
+
+  const form   = document.getElementById('pf-form');
+  const errEl  = document.getElementById('pf-err');
+  const saveBtn= document.getElementById('pf-save');
+
+  // botão sair
+  document.getElementById('pf-logout')?.addEventListener('click', async () => {
+    UI.closeModal(document.getElementById('modal-perfil'));
+    await Portal.logout();
+    // limpa topbar de volta ao padrão
+    const avEl = document.getElementById('user-av');
+    const nmEl = document.getElementById('user-name');
+    if (avEl) avEl.textContent = 'CL';
+    if (nmEl) nmEl.textContent = 'Entrar';
+    // redireciona para a home
+    location.hash = '#/';
+    if (window.__route) window.__route();
+  });
+
+  // salvar
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    errEl.hidden = true;
+    const novoNome   = document.getElementById('pf-nome').value.trim();
+    const novoTel    = document.getElementById('pf-tel').value.trim();
+    const novaCidade = document.getElementById('pf-cidade').value.trim();
+    if (!novoNome) { errEl.textContent = 'O nome não pode ficar em branco.'; errEl.hidden = false; return; }
+
+    const old = saveBtn.innerHTML;
+    saveBtn.disabled = true;
+    saveBtn.innerHTML = '<span class="spinner-sm"></span> Salvando…';
+
+    try {
+      const sb = Portal.db();
+      const { error } = await sb.from('clientes')
+        .update({ nome: novoNome, telefone: novoTel, cidade: novaCidade })
+        .eq('email', email.toLowerCase());
+
+      if (error) throw error;
+
+      // atualiza topbar imediatamente
+      const initNew = (novoNome.split(/\s+/).slice(0,2).map(w=>w[0]||'').join('') || 'CL').toUpperCase();
+      const avEl = document.getElementById('user-av');
+      const nmEl = document.getElementById('user-name');
+      if (avEl) avEl.textContent = initNew;
+      if (nmEl) nmEl.textContent = novoNome.split(' ')[0];
+
+      Sound && Sound.success && Sound.success();
+      Toast.success('Perfil atualizado!');
+      UI.closeModal(document.getElementById('modal-perfil'));
+    } catch (err) {
+      errEl.textContent = 'Erro ao salvar: ' + (err.message || 'tente novamente.');
+      errEl.hidden = false;
+      saveBtn.disabled = false;
+      saveBtn.innerHTML = old;
+    }
   });
 }
 

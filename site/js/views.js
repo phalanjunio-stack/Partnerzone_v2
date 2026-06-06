@@ -425,6 +425,19 @@
       };
     },
 
+    /* ---------- MEUS EQUIPAMENTOS (área privada · RLS entitlement por cliente) ---------- */
+    meusEquipamentos() {
+      return {
+        title: 'Meus Equipamentos',
+        crumbs: `<i data-icon="wrench" data-cls="ic ic-sm"></i><a href="#/">PartnerZone</a><span>›</span><span class="here">Meus Equipamentos</span>`,
+        html: `
+        <div class="conta-wrap" data-enter>
+          <div id="meuseq-page"><div class="pf-loading">Carregando…</div></div>
+        </div>`,
+        init: () => { window.initMeusEquipamentos && window.initMeusEquipamentos(); },
+      };
+    },
+
     /* ---------- BOLETOS (área privada · login Supabase · RLS por cliente) ---------- */
     boletos() {
       return {
@@ -698,6 +711,7 @@
     if (p[0] === 'buscar')              return Views.buscar();
     if (p[0] === 'sql')                 return Views.sql();
     if (p[0] === 'favoritos')           return Views.favoritos();
+    if (p[0] === 'meus-equipamentos')   return Views.meusEquipamentos();
     if (p[0] === 'boletos')             return Views.boletos();
     if (p[0] === 'contrato')            return Views.contrato();
     if (p[0] === 'minha-conta')         return Views.minhaConta();

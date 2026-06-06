@@ -1073,3 +1073,71 @@ input[readonly], .lib-search, .topsearch { cursor: pointer; }
 .conta-status.st-vigente { background: var(--success-bg); color: var(--success); }
 .conta-status.st-a_vencer { background: var(--warning-bg); color: var(--warning); }
 .conta-status.st-encerrado, .conta-status.st-cancelado { background: rgba(239,68,68,.14); color: #f87171; }
+
+/* ============================================================
+   MEUS EQUIPAMENTOS — cards privados (área do cliente)
+   ============================================================ */
+.meuseq-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
+.meuseq-title  { font-size:22px; font-weight:800; margin:0 0 4px; }
+.meuseq-sub    { font-size:13.5px; color:var(--text-muted); margin:0; }
+
+.meuseq-grid {
+  display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:16px;
+}
+.meuseq-card {
+  display:flex; flex-direction:column;
+  background:var(--surface-grad); border:1px solid var(--border);
+  border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow);
+  transition:box-shadow .18s, border-color .18s;
+}
+.meuseq-card:hover { box-shadow:var(--shadow-lg); border-color:var(--accent-border); }
+
+.meuseq-thumb {
+  display:block; position:relative; aspect-ratio:16/9; overflow:hidden;
+  background:var(--bg); text-decoration:none;
+}
+.meuseq-thumb img { width:100%; height:100%; object-fit:cover; transition:transform .3s; }
+.meuseq-card:hover .meuseq-thumb img { transform:scale(1.04); }
+.meuseq-thumb .eq-ph2 {
+  position:absolute; inset:0; display:grid; place-items:center;
+  background:var(--accent-grad);
+}
+.meuseq-thumb .eq-ph2 b { font-size:38px; color:#fff; letter-spacing:-.02em; }
+
+.meuseq-badge-eq {
+  position:absolute; bottom:8px; left:8px;
+  display:inline-flex; align-items:center; gap:5px;
+  background:rgba(0,0,0,.55); backdrop-filter:blur(6px);
+  color:#fff; font-size:11px; font-weight:700;
+  padding:4px 9px; border-radius:999px; letter-spacing:.01em;
+}
+.meuseq-badge-eq .ic { width:12px; height:12px; color:var(--accent); }
+
+.meuseq-body   { display:flex; flex-direction:column; gap:10px; padding:14px 16px; flex:1; }
+.meuseq-info h3 { font-size:16px; font-weight:800; margin:0 0 3px; }
+.meuseq-info p  { font-size:12.5px; color:var(--text-muted); margin:0; }
+.meuseq-marca   { font-size:11.5px; color:var(--text-soft); font-weight:600; margin-top:2px; display:block; }
+
+.meuseq-actions {
+  display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+}
+.meuseq-count {
+  display:inline-flex; align-items:center; gap:5px;
+  font-size:12px; color:var(--text-muted); margin-right:auto;
+}
+.meuseq-count .ic { width:13px; height:13px; color:var(--text-soft); }
+
+.meuseq-privado {
+  display:flex; align-items:center; gap:7px;
+  font-size:12px; color:var(--text-faint); padding-top:8px;
+  border-top:1px solid var(--border); margin-top:auto;
+}
+.meuseq-privado .ic { width:13px; height:13px; flex:0 0 auto; }
+
+.meuseq-blank {
+  max-width:420px; margin:40px auto; text-align:center;
+  display:flex; flex-direction:column; align-items:center; gap:10px;
+}
+.meuseq-blank .ic { width:48px; height:48px; color:var(--text-faint); margin-bottom:4px; }
+.meuseq-blank b  { font-size:17px; font-weight:700; }
+.meuseq-blank p  { font-size:13.5px; color:var(--text-muted); line-height:1.5; }

@@ -1,7 +1,7 @@
 /* ============================================================
    APP — ícones (traçado), dados de exemplo e render da Início
    ============================================================ */
-const BUILD = 'spa76';
+const BUILD = 'spa77';
 try { console.log('%cPartnerZone • build ' + BUILD, 'background:#2f7ff2;color:#fff;padding:2px 8px;border-radius:4px;font-weight:700'); } catch (_) {}
 
 /* ---- MODO CLIENTE × ADMIN ----------------------------------------------
@@ -119,7 +119,7 @@ const NAV = [
     { icon:'user', text:'Minha Conta', route:'#/minha-conta' },
     { icon:'signature', text:'Contrato', route:'#/contrato' },
     { icon:'receipt', text:'Boletos', route:'#/boletos' },
-    { icon:'wrench', text:'Meus Equipamentos' },
+    { icon:'wrench', text:'Meus Equipamentos', route:'#/meus-equipamentos' },
     { icon:'buoy', text:'Suporte' },
   ]},
   { label:'Administração', admin:true, items:[
@@ -1263,6 +1263,116 @@ function statusBoletoReal(b) {
   if ((b.status||'') === 'pago') return 'pago';
   const dias = diasParaVencer(b.vencimento);
   return dias < 0 ? 'vencido' : 'em_aberto';
+}
+
+/* ============================================================
+   MEUS EQUIPAMENTOS — área privada do cliente (RLS Supabase)
+   A tabela Supabase 'equipamentos' tem a policy eq_entitled:
+   o SELECT já devolve só os modelos que este cliente tem direito.
+   Cross-referência com o array local EQUIPMENT (catalog.json)
+   para foto, descrição e contagem de materiais.
+   Campos privados (nº série, garantia) ficam como "em breve"
+   até a Central adicionar à tabela cliente_equipamentos.
+   ============================================================ */
+async function initMeusEquipamentos() {
+  const root = document.getElementById('meuseq-page'); if (!root) return;
+  root.innerHTML = `<div class="pf-loading">Carregando…</div>`;
+  let ok = false;
+  try { ok = await Portal.configured(); } catch (_) {}
+  if (!ok) { contaNotConfigured(root, 'Meus Equipamentos'); return; }
+  let sess = null;
+  try { sess = await Portal.session(); } catch (_) {}
+  if (!sess) { renderLogin(root, 'Meus Equipamentos', 'Veja os equipamentos vinculados à sua conta e acesse os materiais exclusivos.', initMeusEquipamentos); return; }
+  let equips = [];
+  try {
+    const sb = await Portal.db();
+    if (sb) {
+      const { data, error } = await sb.from('equipamentos').select('slug,name,marca_nome,segmento,cover');
+      if (!error && data) equips = data;
+    }
+  } catch (_) {}
+  renderMeusEquipamentos(root, equips);
+}
+window.initMeusEquipamentos = initMeusEquipamentos;
+
+/* localiza o equipamento no array global EQUIPMENT por slug ou nome (case-insensitive) */
+function eqBySlug(slug) {
+  const s = (slug||'').toLowerCase();
+  return EQUIPMENT.find(e =>
+    (e.codigo||'').toLowerCase() === s ||
+    (e.name||'').toLowerCase() === s ||
+    (e.name||'').toLowerCase().replace(/\s+/g,'') === s.replace(/\s+/g,'')
+  ) || null;
+}
+
+function renderMeusEquipamentos(root, equips) {
+  if (!equips.length) {
+    root.innerHTML = `
+      <div class="meuseq-blank">
+        ${svgIcon('wrench','ic')}
+        <b>Nenhum equipamento vinculado</b>
+        <p>Seus equipamentos aparecem aqui assim que forem cadastrados pela equipe Contourline. Se você já tem um equipamento e não está vendo, fale com a gente.</p>
+        <button class="btn ghost" data-open-modal="modal-solicitar">${svgIcon('buoy','ic ic-sm')} Falar com o suporte</button>
+      </div>`;
+    renderIcons(root); return;
+  }
+
+  root.innerHTML = `
+    <div class="meuseq-header">
+      <div>
+        <h1 class="meuseq-title">Meus Equipamentos</h1>
+        <p class="meuseq-sub">${equips.length} equipamento${equips.length!==1?'s':''} vinculado${equips.length!==1?'s':''} à sua conta</p>
+      </div>
+    </div>
+    <div class="meuseq-grid" id="meuseq-grid"></div>
+    <div class="conta-note" style="margin-top:18px">${svgIcon('shield','ic ic-sm')} Você vê apenas os equipamentos vinculados ao seu contrato.</div>`;
+
+  const grid = root.querySelector('#meuseq-grid');
+  grid.innerHTML = equips.map(eq => {
+    const local = eqBySlug(eq.slug);
+    const name  = eq.name || (local && local.name) || eq.slug;
+    const tag   = eq.segmento || (local && local.tag) || '';
+    const marca = eq.marca_nome || (local && local.marca) || '';
+    const count = (local && local.count) || '';
+    const img   = (local && eqCover(local.name, local.img)) || eq.cover || '';
+    const href  = local ? `#/categoria/${encodeURIComponent(local.name)}` : '#/equipamentos';
+    return `
+      <div class="meuseq-card">
+        <a class="meuseq-thumb" href="${href}">
+          ${img
+            ? `<img src="${escHtml(img)}" alt="${escHtml(name)}" loading="lazy">`
+            : `<span class="eq-ph2"><b>${escHtml((name.replace(/[^A-Za-zÀ-ÿ0-9 ]/g,'').split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0]).join('')||'EQ').toUpperCase())}</b></span>`
+          }
+          <span class="meuseq-badge-eq">${svgIcon('lock','ic ic-sm')} Seu equipamento</span>
+        </a>
+        <div class="meuseq-body">
+          <div class="meuseq-info">
+            <h3>${escHtml(name)}</h3>
+            <p>${escHtml(tag)}</p>
+            ${marca ? `<small class="meuseq-marca">${escHtml(marca)}</small>` : ''}
+          </div>
+          <div class="meuseq-actions">
+            ${count ? `<span class="meuseq-count">${svgIcon('folder','ic ic-sm')} ${count} materiais</span>` : ''}
+            <a class="btn ghost btn-sm" href="${href}">${svgIcon('folder','ic ic-sm')} Ver materiais</a>
+            <button class="btn ghost btn-sm meuseq-chamado" data-eq="${escHtml(name)}" data-open-modal="modal-solicitar">${svgIcon('buoy','ic ic-sm')} Suporte</button>
+          </div>
+          <div class="meuseq-privado">
+            ${svgIcon('wrench','ic ic-sm')} <span>Nº série, garantia e manutenção — <b>em breve</b></span>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+
+  renderIcons(root);
+
+  // preenche o campo "Equipamento" no modal de solicitação ao clicar "Suporte"
+  root.querySelectorAll('.meuseq-chamado').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const eq = btn.dataset.eq || '';
+      const inp = document.getElementById('modal-solicitar')?.querySelector('input[placeholder*="HIPRO"]');
+      if (inp) inp.value = eq;
+    });
+  });
 }
 
 /* ============================================================

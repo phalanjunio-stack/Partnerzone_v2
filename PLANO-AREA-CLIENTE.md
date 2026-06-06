@@ -10,6 +10,11 @@ Hoje o PartnerZone é uma **vitrine pública** (qualquer um vê o catálogo de e
 
 ---
 
+> 🚧 **STATUS (2026-06-06):** o **login** (🟦 lado do site) e a **Minha Conta** já estão
+> **construídos** no PartnerZone (build spa75 · `js/core/portal.js` + rota `#/minha-conta`).
+> Falta **1 coisa pra ligar de verdade:** o 🟧 publicar `site/content/portal-config.json`
+> com `{ url, anonKey }` (SÓ a chave ANON). Enquanto não chega, a tela mostra "em configuração".
+
 ## 2. A FUNDAÇÃO: o login (pré-requisito de TUDO)
 
 Nenhuma área privada funciona sem o cliente provar quem é. Por isso o **login vem primeiro** — ele é o alicerce, e todas as áreas se apoiam nele.

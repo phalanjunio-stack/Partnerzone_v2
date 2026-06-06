@@ -412,6 +412,19 @@
       };
     },
 
+    /* ---------- MINHA CONTA (área privada do cliente · login Supabase) ---------- */
+    minhaConta() {
+      return {
+        title: 'Minha Conta',
+        crumbs: `<i data-icon="user" data-cls="ic ic-sm"></i><a href="#/">PartnerZone</a><span>›</span><span class="here">Minha Conta</span>`,
+        html: `
+        <div class="conta-wrap" data-enter>
+          <div id="conta-page"><div class="pf-loading">Carregando…</div></div>
+        </div>`,
+        init: () => { window.initMinhaConta && window.initMinhaConta(); },
+      };
+    },
+
     /* ---------- ÁUDIOS & MÚSICAS (acervo + playlists) ---------- */
     musica() {
       return {
@@ -659,6 +672,7 @@
     if (p[0] === 'buscar')              return Views.buscar();
     if (p[0] === 'sql')                 return Views.sql();
     if (p[0] === 'favoritos')           return Views.favoritos();
+    if (p[0] === 'minha-conta')         return Views.minhaConta();
     if (p[0] === 'audio')               return Views.musica();
     if (p[0] === 'marca')               return p[2] === 'logos' ? Views.marcaLogos(p[1]) : Views.marca(p[1]);
     if (p[0] === 'cadastro')            return Views.cadastro();

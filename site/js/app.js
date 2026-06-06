@@ -1,7 +1,7 @@
 /* ============================================================
    APP — ícones (traçado), dados de exemplo e render da Início
    ============================================================ */
-const BUILD = 'spa74';
+const BUILD = 'spa75';
 try { console.log('%cPartnerZone • build ' + BUILD, 'background:#2f7ff2;color:#fff;padding:2px 8px;border-radius:4px;font-weight:700'); } catch (_) {}
 
 /* ---- MODO CLIENTE × ADMIN ----------------------------------------------
@@ -113,7 +113,7 @@ const NAV = [
     { icon:'building', text:'Institucional', dynamic:'marcas' },
   ]},
   { label:'Área do Cliente', items:[
-    { icon:'user', text:'Minha Conta' },
+    { icon:'user', text:'Minha Conta', route:'#/minha-conta' },
     { icon:'signature', text:'Contrato' },
     { icon:'receipt', text:'Boletos' },
     { icon:'wrench', text:'Meus Equipamentos' },
@@ -1090,6 +1090,149 @@ async function initBrandLogos(brand, samples) {
 }
 
 /* ---- FAVORITOS (página: coleções do usuário) ---- */
+/* ============================================================
+   MINHA CONTA — área privada do cliente (login Supabase + perfil).
+   A vitrine (catálogo) é pública; ESTA área exige login. A RLS do Supabase
+   garante que cada cliente só enxerga a própria linha (segurança server-side).
+   ============================================================ */
+function escHtml(s){ return String(s==null?'':s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+async function initMinhaConta() {
+  const root = document.getElementById('conta-page'); if (!root) return;
+  root.innerHTML = `<div class="pf-loading">Carregando…</div>`;
+  let ok = false;
+  try { ok = await Portal.configured(); } catch (_) { ok = false; }
+  if (!ok) return contaNotConfigured(root);
+  let sess = null;
+  try { sess = await Portal.session(); } catch (_) {}
+  if (!sess) return renderLogin(root);
+  let cli = null;
+  try { cli = await Portal.client(); } catch (_) {}
+  renderConta(root, cli, sess);
+}
+window.initMinhaConta = initMinhaConta;
+
+function contaNotConfigured(root) {
+  root.innerHTML = `
+    <div class="login-card">
+      <div class="login-logo"><span class="foot-burst">C</span></div>
+      <h1 class="login-title">Área do Cliente</h1>
+      <p class="login-sub">Esta área está sendo preparada e ficará disponível em breve. Em caso de dúvida, fale com a equipe Contourline.</p>
+      <div class="conta-note">${svgIcon('lock','ic ic-sm')} Acesso exclusivo para parceiros autorizados.</div>
+    </div>`;
+  renderIcons(root);
+}
+
+function loginErroPT(msg) {
+  const m = (msg||'').toLowerCase();
+  if (m.includes('invalid login') || m.includes('credentials')) return 'E-mail ou senha incorretos.';
+  if (m.includes('email not confirmed')) return 'E-mail ainda não confirmado. Fale com a equipe.';
+  if (m.includes('configurada')) return msg;
+  if (m.includes('network') || m.includes('fetch') || m.includes('failed')) return 'Falha de conexão. Verifique sua internet e tente de novo.';
+  if (m.includes('rate') || m.includes('many')) return 'Muitas tentativas. Aguarde um instante e tente de novo.';
+  return msg || 'Não foi possível entrar. Tente de novo.';
+}
+
+function renderLogin(root) {
+  root.innerHTML = `
+    <div class="login-card">
+      <div class="login-logo"><span class="foot-burst">C</span></div>
+      <h1 class="login-title">Área do Cliente</h1>
+      <p class="login-sub">Entre com seu e-mail e senha para acessar sua conta, contrato, boletos e equipamentos.</p>
+      <form class="login-form" id="login-form" autocomplete="on">
+        <div class="field"><label>E-mail</label>
+          <div class="input"><i data-icon="mail" data-cls="ic ic-sm"></i><input id="login-email" type="email" placeholder="seu@email.com" autocomplete="username" required></div></div>
+        <div class="field"><label>Senha</label>
+          <div class="input"><i data-icon="lock" data-cls="ic ic-sm"></i>
+            <input id="login-pass" type="password" placeholder="Sua senha" autocomplete="current-password" required>
+            <button type="button" class="login-eye" id="login-eye" title="Mostrar/ocultar senha"><i data-icon="eye" data-cls="ic ic-sm"></i></button>
+          </div></div>
+        <div class="login-err" id="login-err" hidden></div>
+        <button class="btn login-btn" id="login-go" type="submit"><i data-icon="logout" data-cls="ic ic-sm"></i> Entrar</button>
+      </form>
+      <div class="conta-note">${svgIcon('shield','ic ic-sm')} Seus dados são protegidos. Cada cliente vê apenas as próprias informações.</div>
+    </div>`;
+  renderIcons(root);
+
+  const form = document.getElementById('login-form');
+  const errEl = document.getElementById('login-err');
+  const btn = document.getElementById('login-go');
+  const passEl = document.getElementById('login-pass');
+  document.getElementById('login-eye')?.addEventListener('click', () => {
+    passEl.type = passEl.type === 'password' ? 'text' : 'password';
+  });
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('login-email').value;
+    const pass = passEl.value;
+    errEl.hidden = true; btn.disabled = true;
+    const old = btn.innerHTML; btn.innerHTML = 'Entrando…';
+    let res;
+    try { res = await Portal.login(email, pass); }
+    catch (ex) { res = { error: { message: 'network' } }; }
+    if (res && res.error) {
+      errEl.textContent = loginErroPT(res.error.message);
+      errEl.hidden = false; btn.disabled = false; btn.innerHTML = old; renderIcons(btn);
+      Sound && Sound.error && Sound.error();
+      return;
+    }
+    Sound && Sound.success && Sound.success();
+    initMinhaConta();   // sucesso → recarrega (agora com sessão)
+  });
+}
+
+function renderConta(root, cli, sess) {
+  const email = (cli && cli.email) || (sess && sess.user && sess.user.email) || '';
+  const nome  = (cli && cli.nome) || (email.split('@')[0] || 'Cliente');
+  const initials = (nome.trim().split(/\s+/).slice(0,2).map(w=>w[0]||'').join('') || 'CL').toUpperCase();
+  const statusMap = { active:'Ativo', ativo:'Ativo', inactive:'Inativo', inativo:'Inativo', pending:'Pendente', pendente:'Pendente' };
+  const status = (cli && cli.status) || '';
+  const stTxt = statusMap[(status||'').toLowerCase()] || (status || '—');
+  const fields = [
+    { ic:'user',      lab:'Nome',     val: cli && cli.nome },
+    { ic:'mail',      lab:'E-mail',   val: email },
+    { ic:'briefcase', lab:'Tipo',     val: cli && cli.tipo },
+    { ic:'grad',      lab:'Segmento', val: cli && cli.segmento },
+    { ic:'building',  lab:'Cidade',   val: cli && cli.cidade },
+  ].filter(f => f.val);
+
+  root.innerHTML = `
+    <div class="conta-head">
+      <div class="conta-avatar">${escHtml(initials)}</div>
+      <div class="conta-id">
+        <h1>${escHtml(nome)}</h1>
+        <span class="conta-email">${escHtml(email)}</span>
+      </div>
+      ${status ? `<span class="conta-status st-${escHtml((status||'').toLowerCase())}">${escHtml(stTxt)}</span>` : ''}
+    </div>
+    <div class="conta-grid">
+      <section class="conta-card">
+        <div class="conta-card-head">${svgIcon('user','ic ic-sm')} <b>Meus dados</b></div>
+        <div class="conta-fields">
+          ${fields.map(f => `<div class="conta-f"><span class="cf-lab">${svgIcon(f.ic,'ic ic-sm')} ${f.lab}</span><span class="cf-val">${escHtml(f.val)}</span></div>`).join('')}
+        </div>
+      </section>
+      <section class="conta-card">
+        <div class="conta-card-head">${svgIcon('folder','ic ic-sm')} <b>Minhas áreas</b></div>
+        <div class="conta-links">
+          <a class="conta-link soon"><span>${svgIcon('signature','ic ic-sm')} Contrato</span><small>em breve</small></a>
+          <a class="conta-link soon"><span>${svgIcon('receipt','ic ic-sm')} Boletos</span><small>em breve</small></a>
+          <a class="conta-link soon"><span>${svgIcon('wrench','ic ic-sm')} Meus Equipamentos</span><small>em breve</small></a>
+          <a class="conta-link" data-open-modal="modal-solicitar"><span>${svgIcon('buoy','ic ic-sm')} Suporte</span>${svgIcon('chevR','ic ic-sm')}</a>
+        </div>
+      </section>
+    </div>
+    <div class="conta-foot">
+      <button class="btn ghost" id="conta-sair">${svgIcon('logout','ic ic-sm')} Sair da conta</button>
+    </div>`;
+  renderIcons(root);
+  document.getElementById('conta-sair')?.addEventListener('click', async () => {
+    try { await Portal.logout(); } catch (_) {}
+    Sound && Sound.click && Sound.click();
+    initMinhaConta();
+  });
+}
+
 async function initFavoritos() {
   const root = document.getElementById('fav-page'); if (!root) return;
   let urls = [];

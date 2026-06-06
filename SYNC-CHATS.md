@@ -40,6 +40,29 @@
 
 ## Log (mais recente no topo)
 
+### 2026-06-06 · 🟦 LOGIN + MINHA CONTA construídos no PartnerZone (Fase 2 começou) 🔐
+**Feito (🟦):** construí a **Área do Cliente** no site público (build **spa75**):
+- `site/js/core/portal.js` — módulo de auth Supabase. Carrega o `@supabase/supabase-js@2` **sob
+  demanda** (não pesa pra quem só vê a vitrine), lê a config de `content/portal-config.json`,
+  expõe `login/logout/session/client/db`. `client()` faz `from('clientes').select('*')` (a RLS
+  devolve só a linha do logado).
+- Tela de **login** (`#/minha-conta`): e-mail+senha, olho de mostrar senha, erros em PT
+  ("E-mail ou senha incorretos", "Falha de conexão"…), estado **"em configuração"** enquanto a
+  config não chega (degrada elegante, não quebra).
+- **Minha Conta** (perfil): avatar c/ iniciais, nome, e-mail, status (Ativo/Pendente/Inativo
+  colorido), campos (tipo/segmento/cidade), atalhos (Contrato/Boletos/Equipamentos = "em breve",
+  Suporte), botão **Sair**.
+- Rota `#/minha-conta` + item de menu ligados. CSS em `app.css` (`.login-*`, `.conta-*`).
+**Verificado (DOM, local :4399):** login renderiza, olho alterna, erro amigável aparece, perfil
+monta com dados fake (iniciais "CE", status verde). Sem config → card "em configuração". ✅
+**⏳ PENDENTE DO 🟧 (1 coisa só, destrava o login real):** publicar
+**`site/content/portal-config.json`** = `{ "url": "...", "anonKey": "..." }` no repo do PartnerZone
+(via auto-publicação ou commit direto). ⚠️ **SÓ a chave ANON** (public-safe, a RLS protege) —
+**NUNCA o service_role**. Formato documentado em `content/portal-config.example.json`.
+**Confirmar do 🟧:** tabela `clientes(id,nome,tipo,segmento,email,cidade,status)` é o que mostro?
+RLS `cli_self` já deixa o logado ler a própria linha? (vi no schema, parece que sim).
+**🟦 próximo:** quando a config cair, testo login real ponta a ponta; depois Contrato/Boletos (Fase B).
+
 ### 2026-06-03 · 🟦 PLANO da Área do Cliente (login + 6 áreas) — descoberta: login já existe!
 Planejamento (5 agentes) → `PLANO-AREA-CLIENTE.md`. **Descoberta:** o LOGIN do cliente JÁ EXISTE na
 Central (e-mail+senha via Supabase: `src/clientes.js` botão "criar login" + senha automática,

@@ -1,0 +1,5 @@
+{
+  "_comment": "EXEMPLO. A Central publica o arquivo REAL como content/portal-config.json (sem o sufixo .example). Coloque SOMENTE a chave ANON (public, segura — a RLS protege). NUNCA o service_role.",
+  "url": "https://SEU-PROJETO.supabase.co",
+  "anonKey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9....(chave ANON publica)"
+}

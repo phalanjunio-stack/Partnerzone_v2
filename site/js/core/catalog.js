@@ -105,6 +105,7 @@ window.Catalog = (() => {
           id:    m.id || m.titulo,
           title: m.titulo || "",
           tag:   (m.tags && m.tags[0]) || m.pasta || "Áudio",
+          cat:   m.categoria || m.mood || m.pasta || "",   // categoria p/ filtro (Músicas/Trilhas/Jingles quando a Central mandar)
           eq:    eqNameA[m.equipamento] || m.equipamento || "",
           src:   m.url || "",
         })));

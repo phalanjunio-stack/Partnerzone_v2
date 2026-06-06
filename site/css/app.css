@@ -75,6 +75,16 @@ body.has-player .selbar { bottom: 88px; }   /* não encostar no player */
 .audio-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
 .audio-head h2 { font-size: 20px; font-weight: 800; display: flex; align-items: center; gap: 10px; }
 .audio-count { font-size: 12px; font-weight: 700; color: var(--accent); background: var(--accent-soft); border: 1px solid var(--accent-border); padding: 2px 10px; border-radius: 999px; }
+/* filtros do acervo de áudio (por categoria) */
+.aud-filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+.aud-chip { display: inline-flex; align-items: center; gap: 7px; height: 34px; padding: 0 14px; border-radius: 999px;
+  font-size: 12.5px; font-weight: 600; color: var(--text-soft); cursor: pointer;
+  background: var(--surface); border: 1px solid var(--border); transition: all .15s; }
+.aud-chip b { font-weight: 800; font-size: 11px; color: var(--text-faint); }
+.aud-chip:hover { border-color: var(--accent-border); color: var(--text); }
+.aud-chip.on { background: var(--accent-grad); color: #fff; border-color: transparent; box-shadow: 0 8px 18px -10px var(--accent); }
+.aud-chip.on b { color: rgba(255,255,255,.85); }
+
 .track-list { display: flex; flex-direction: column; gap: 8px; }
 .track-row { display: flex; align-items: center; gap: 14px; padding: 10px 14px; border-radius: 14px; background: var(--surface); border: 1px solid var(--border); transition: border-color .15s, background .15s; }
 .track-row:hover { border-color: var(--accent-border); }

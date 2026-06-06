@@ -1,7 +1,7 @@
 /* ============================================================
    APP — ícones (traçado), dados de exemplo e render da Início
    ============================================================ */
-const BUILD = 'spa73';
+const BUILD = 'spa74';
 try { console.log('%cPartnerZone • build ' + BUILD, 'background:#2f7ff2;color:#fff;padding:2px 8px;border-radius:4px;font-weight:700'); } catch (_) {}
 
 /* ---- MODO CLIENTE × ADMIN ----------------------------------------------
@@ -1597,7 +1597,8 @@ function initPlaylistModal() {
 async function initMusica() {
   const root = document.getElementById('audio-page'); if (!root) return;
   await loadAudioTracks();
-  let selGrad = 0;
+  let selGrad = 0, audCat = 'todos';
+  const catOf = t => (t.cat || t.tag || '').trim();   // categoria do áudio (p/ filtro)
   const trackRow = t => {
     const playing = Player.isPlaying(t.id);
     return `<div class="track-row${playing ? ' playing' : ''}" data-id="${t.id}">
@@ -1620,12 +1621,19 @@ async function initMusica() {
     </div>`;
   };
   function render() {
-    const list = allTracks(), pls = Playlists.read(), names = Object.keys(pls);
+    const all = allTracks(), pls = Playlists.read(), names = Object.keys(pls);
+    const cats = [...new Set(all.map(catOf).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
+    if (audCat !== 'todos' && !cats.includes(audCat)) audCat = 'todos';
+    const list = audCat === 'todos' ? all : all.filter(t => catOf(t) === audCat);
     root.innerHTML = `
       <section class="audio-sec">
-        <div class="audio-head"><h2>Acervo de áudios <span class="audio-count">${list.length}</span></h2>
+        <div class="audio-head"><h2>Acervo de áudios <span class="audio-count">${all.length}</span></h2>
           <button class="bh-genbtn" id="audio-add"><i data-icon="upload" data-cls="ic ic-sm"></i> Adicionar áudio</button></div>
-        <div class="track-list">${list.map(trackRow).join('') || '<div class="pf-loading">Nenhum áudio ainda.</div>'}</div>
+        ${cats.length > 1 ? `<div class="aud-filters" id="aud-filters">
+          <button class="aud-chip${audCat === 'todos' ? ' on' : ''}" data-cat="todos">Todos <b>${all.length}</b></button>
+          ${cats.map(c => `<button class="aud-chip${audCat === c ? ' on' : ''}" data-cat="${c}">${c} <b>${all.filter(t => catOf(t) === c).length}</b></button>`).join('')}
+        </div>` : ''}
+        <div class="track-list">${list.map(trackRow).join('') || '<div class="pf-loading">Nenhum áudio nessa categoria.</div>'}</div>
       </section>
       <section class="audio-sec">
         <div class="audio-head"><h2>Minhas playlists</h2></div>
@@ -1648,6 +1656,8 @@ async function initMusica() {
   }
   root.addEventListener('keydown', e => { if (e.target.id === 'pl-new-name' && e.key === 'Enter') doCreate(); });
   root.addEventListener('click', async e => {
+    const chip = e.target.closest('.aud-chip');
+    if (chip) { audCat = chip.dataset.cat; Sound.click && Sound.click(); render(); return; }
     const sw = e.target.closest('.grad-sw');
     if (sw) { selGrad = +sw.dataset.g; root.querySelectorAll('.grad-sw').forEach(s => s.classList.toggle('on', s === sw)); return; }
     if (e.target.closest('#audio-add')) { addAudio(); return; }

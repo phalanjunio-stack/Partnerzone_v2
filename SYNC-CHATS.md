@@ -40,6 +40,15 @@
 
 ## Log (mais recente no topo)
 
+### 2026-06-03 · 🟦 PLANO da Área do Cliente (login + 6 áreas) — descoberta: login já existe!
+Planejamento (5 agentes) → `PLANO-AREA-CLIENTE.md`. **Descoberta:** o LOGIN do cliente JÁ EXISTE na
+Central (e-mail+senha via Supabase: `src/clientes.js` botão "criar login" + senha automática,
+`portal.html`, RLS em `scripts/supabase-schema.sql`). Falta só **ligar no site público** (seguro,
+RLS é server-side). **Ordem:** Login → Minha Conta → Contrato → Boletos → Meus Equipamentos →
+Suporte → Solicitações. **Padrão:** 🟧 guarda/protege o dado, 🟦 mostra a tela; cada área = nova RLS.
+**Destrava tudo:** o dono decidir o **e-mail oficial de cada cliente** (a segurança casa pelo e-mail).
+
+
 ### 2026-06-03 · 🟦→🟧 BOLETOS (financeiro) — Fase A na Central
 **Dono:** quer organizar os boletos "de um jeito fácil". Hoje o financeiro joga no Drive solto.
 **Decisão:** boleto é **PRIVADO por cliente** → NÃO entra no `catalog.json` público. Plano em

@@ -451,6 +451,30 @@
       };
     },
 
+    /* ---------- ACESSO — formulário público de solicitação ---------- */
+    acesso() {
+      return {
+        title: 'Solicitar acesso',
+        crumbs: `<i data-icon="user" data-cls="ic ic-sm"></i><a href="#/">PartnerZone</a><span>›</span><span class="here">Solicitar acesso</span>`,
+        html: `<div class="conta-wrap" data-enter><div id="acesso-page"></div></div>`,
+        init: () => { window.initAcesso && window.initAcesso(); },
+      };
+    },
+
+    /* ---------- ADMIN — painel de gestão interno ---------- */
+    admin(section) {
+      const labels = { cadastros: 'Cadastros', clientes: 'Clientes', usuarios: 'Usuários' };
+      const lab = labels[section] || 'Painel admin';
+      return {
+        title: lab,
+        crumbs: section
+          ? `<i data-icon="shield" data-cls="ic ic-sm"></i><a href="#/admin">Admin</a><span>›</span><span class="here">${lab}</span>`
+          : `<i data-icon="shield" data-cls="ic ic-sm"></i><span class="here">Admin</span>`,
+        html: `<div class="conta-wrap" data-enter><div id="admin-page"></div></div>`,
+        init: () => { window.initAdmin && window.initAdmin(section); },
+      };
+    },
+
     /* ---------- SOLICITAÇÕES (área privada · pedir materiais personalizados) ---------- */
     solicitacoes() {
       return {
@@ -743,6 +767,8 @@
     if (p[0] === 'boletos')             return Views.boletos();
     if (p[0] === 'contrato')            return Views.contrato();
     if (p[0] === 'minha-conta')         return Views.minhaConta();
+    if (p[0] === 'acesso')              return Views.acesso();
+    if (p[0] === 'admin')               return Views.admin(p[1]);
     if (p[0] === 'suporte')             return Views.suporte(p[1]);
     if (p[0] === 'solicitacoes')        return Views.solicitacoes();
     if (p[0] === 'audio')               return Views.musica();

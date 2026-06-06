@@ -1,7 +1,7 @@
 /* ============================================================
    APP — ícones (traçado), dados de exemplo e render da Início
    ============================================================ */
-const BUILD = 'spa82';
+const BUILD = 'spa83';
 try { console.log('%cPartnerZone • build ' + BUILD, 'background:#2f7ff2;color:#fff;padding:2px 8px;border-radius:4px;font-weight:700'); } catch (_) {}
 
 /* ---- MODO CLIENTE × ADMIN ----------------------------------------------
@@ -1225,6 +1225,28 @@ async function initUserBtn() {
     }
   } catch (_) {}
 
+  // checa se é staff (usuarios table) e adiciona link admin na nav
+  try {
+    if (Portal.configured() && Portal.session()) {
+      const sbU = Portal.db();
+      const uEmail = (Portal.session()?.user?.email || '').toLowerCase();
+      if (uEmail) {
+        const { data: uRow } = await sbU.from('usuarios').select('cargo,ativo').eq('email', uEmail).maybeSingle();
+        if (uRow && uRow.ativo) {
+          window.__staffCargo = uRow.cargo;
+          // injeta pill "Admin" no topbar perto do botão user
+          if (!document.getElementById('adm-pill')) {
+            const pill = document.createElement('a');
+            pill.id = 'adm-pill'; pill.href = '#/admin'; pill.className = 'adm-topbar-pill';
+            pill.innerHTML = svgIcon('shield','ic ic-xs') + ' Admin';
+            btn.parentElement.insertBefore(pill, btn);
+            renderIcons(pill);
+          }
+        }
+      }
+    }
+  } catch (_) {}
+
   // evita duplo-bind
   btn.removeEventListener('click', btn._pfHandler);
   btn._pfHandler = async () => {
@@ -1509,6 +1531,433 @@ async function openPerfilModal(cli, sess) {
       saveBtn.innerHTML = old;
     }
   });
+}
+
+/* ============================================================
+   #/ACESSO — formulário público de solicitação de acesso  (spa83)
+   ============================================================ */
+async function initAcesso() {
+  const root = document.getElementById('acesso-page'); if (!root) return;
+
+  let sb = null;
+  try { if (await Portal.configured()) sb = Portal.db(); } catch (_) {}
+
+  root.innerHTML = `
+    <div class="acesso-wrap">
+      <div class="acesso-hero">
+        ${svgIcon('user','ic')}
+        <h1 class="acesso-title">Solicitar acesso ao portal</h1>
+        <p class="acesso-sub">Preencha o formulário abaixo. A equipe Contourline irá analisar sua solicitação e entrar em contato.</p>
+      </div>
+      <div class="acesso-card">
+        <form id="acesso-form" autocomplete="off">
+          <div class="pf-field">
+            <label for="ac-nome">Nome completo <span class="acf-req">*</span></label>
+            <input id="ac-nome" type="text" placeholder="Seu nome" maxlength="80" required>
+          </div>
+          <div class="pf-field">
+            <label for="ac-email">E-mail <span class="acf-req">*</span></label>
+            <input id="ac-email" type="email" placeholder="seu@email.com" maxlength="120" required>
+          </div>
+          <div class="pf-field">
+            <label for="ac-tel">Telefone / WhatsApp</label>
+            <input id="ac-tel" type="tel" placeholder="(11) 9xxxx-xxxx" maxlength="20">
+          </div>
+          <div class="pf-field">
+            <label for="ac-empresa">Empresa / Nome do negócio</label>
+            <input id="ac-empresa" type="text" placeholder="Sua empresa" maxlength="80">
+          </div>
+          <div class="pf-field">
+            <label for="ac-msg">Mensagem (opcional)</label>
+            <textarea id="ac-msg" rows="3" placeholder="Descreva brevemente para que precisa do acesso…" maxlength="400"></textarea>
+          </div>
+          <div id="ac-err" class="acf-err" hidden></div>
+          <button type="submit" class="btn primary acesso-submit" id="ac-submit">
+            ${svgIcon('send','ic ic-sm')} Enviar solicitação
+          </button>
+        </form>
+        <div id="acesso-ok" class="acesso-ok" hidden>
+          ${svgIcon('check','ic')}
+          <h2>Solicitação enviada!</h2>
+          <p>Recebemos seu pedido. Nossa equipe vai entrar em contato pelo e-mail <span id="ac-ok-email"></span> em breve.</p>
+          <a class="btn ghost" href="#/">Voltar ao início</a>
+        </div>
+      </div>
+    </div>`;
+
+  renderIcons(root);
+
+  const form = document.getElementById('acesso-form');
+  form?.addEventListener('submit', async e => {
+    e.preventDefault();
+    const nome    = document.getElementById('ac-nome').value.trim();
+    const email   = document.getElementById('ac-email').value.trim().toLowerCase();
+    const tel     = document.getElementById('ac-tel').value.trim();
+    const empresa = document.getElementById('ac-empresa').value.trim();
+    const msg     = document.getElementById('ac-msg').value.trim();
+    const errEl   = document.getElementById('ac-err');
+    const btn     = document.getElementById('ac-submit');
+    if (!nome || !email) return;
+    errEl.hidden = true;
+    const old = btn.innerHTML; btn.disabled = true; btn.innerHTML = '<span class="spinner-sm"></span> Enviando…';
+    try {
+      if (!sb) throw new Error('Portal não configurado. Tente mais tarde.');
+      const { error } = await sb.from('cadastros').insert({ nome, email, telefone: tel, empresa, mensagem: msg });
+      if (error) throw error;
+      form.hidden = true;
+      const okEl = document.getElementById('acesso-ok');
+      const okEmail = document.getElementById('ac-ok-email');
+      if (okEmail) okEmail.textContent = email;
+      if (okEl) okEl.hidden = false;
+      renderIcons(okEl);
+      Sound?.success?.();
+    } catch (err) {
+      errEl.textContent = err.message?.includes('duplicate') ? 'Este e-mail já enviou uma solicitação.' : (err.message || 'Erro ao enviar. Tente novamente.');
+      errEl.hidden = false;
+      btn.disabled = false; btn.innerHTML = old; renderIcons(btn);
+    }
+  });
+}
+window.initAcesso = initAcesso;
+
+/* ============================================================
+   #/ADMIN — painel de gestão interno  (spa83)
+   ============================================================ */
+async function initAdmin(section) {
+  const root = document.getElementById('admin-page'); if (!root) return;
+  root.innerHTML = '<div class="pf-loading">Verificando acesso…</div>';
+
+  let ok = false;
+  try { ok = await Portal.configured(); } catch (_) {}
+  if (!ok) { contaNotConfigured(root, 'Admin'); return; }
+
+  let sess = null;
+  try { sess = await Portal.session(); } catch (_) {}
+  if (!sess) {
+    renderLogin(root, 'Painel de gestão', 'Acesso exclusivo para a equipe Contourline.', () => initAdmin(section));
+    return;
+  }
+
+  const sb = Portal.db();
+  let usuario = null;
+  try {
+    const { data } = await sb.from('usuarios').select('nome,cargo,ativo')
+      .eq('email', (sess.user.email||'').toLowerCase()).maybeSingle();
+    usuario = data;
+  } catch (_) {}
+
+  if (!usuario || !usuario.ativo) {
+    root.innerHTML = `<div class="suporte-blank">
+      ${svgIcon('shield','ic')}
+      <b>Acesso não autorizado</b>
+      <p>Sua conta não tem permissão de gestão. Fale com um administrador.</p>
+      <a class="btn ghost" href="#/">Voltar ao portal</a>
+    </div>`;
+    renderIcons(root); return;
+  }
+
+  if (section === 'cadastros') await renderAdminCadastros(root, sb, sess, usuario);
+  else                          await renderAdminHome(root, sb, sess, usuario);
+}
+window.initAdmin = initAdmin;
+
+/* ---- Admin: home / dashboard ---- */
+async function renderAdminHome(root, sb, sess, usuario) {
+  let nPendentes = 0, nChamados = 0, nClientes = 0;
+  try {
+    const [r1, r2, r3] = await Promise.all([
+      sb.from('cadastros').select('id', { count:'exact', head:true }).eq('status','pendente'),
+      sb.from('chamados').select('id',  { count:'exact', head:true }).eq('status','aberto'),
+      sb.from('clientes').select('id',  { count:'exact', head:true }),
+    ]);
+    nPendentes = r1.count || 0;
+    nChamados  = r2.count || 0;
+    nClientes  = r3.count || 0;
+  } catch (_) {}
+
+  const cargos = { admin:'Admin', editor:'Editor', suporte:'Suporte' };
+  const cLab   = cargos[usuario.cargo] || usuario.cargo || 'Staff';
+
+  root.innerHTML = `
+    <div class="adm-page">
+      <div class="adm-header">
+        <div>
+          <h1 class="adm-title">Painel de gestão</h1>
+          <p class="adm-sub">Olá, <b>${escHtml(usuario.nome || sess.user.email)}</b> · <span class="adm-cargo adm-cargo-${escHtml(usuario.cargo)}">${escHtml(cLab)}</span></p>
+        </div>
+      </div>
+      <div class="adm-stats">
+        <a class="adm-stat ${nPendentes > 0 ? 'adm-stat-alert' : ''}" href="#/admin/cadastros">
+          ${svgIcon('user','ic')}
+          <div class="adm-stat-n">${nPendentes}</div>
+          <div class="adm-stat-lab">Aguardando aprovação</div>
+        </a>
+        <div class="adm-stat">
+          ${svgIcon('buoy','ic')}
+          <div class="adm-stat-n">${nChamados}</div>
+          <div class="adm-stat-lab">Chamados abertos</div>
+        </div>
+        <div class="adm-stat">
+          ${svgIcon('shield','ic')}
+          <div class="adm-stat-n">${nClientes}</div>
+          <div class="adm-stat-lab">Clientes ativos</div>
+        </div>
+      </div>
+      <div class="adm-nav">
+        <a class="adm-nav-item" href="#/admin/cadastros">
+          <div class="adm-nav-ic">${svgIcon('user','ic ic-sm')}</div>
+          <div class="adm-nav-txt">
+            <b>Solicitações de acesso</b>
+            <span>Aprovar cadastros, criar clientes manualmente</span>
+          </div>
+          ${svgIcon('chevR','ic ic-sm')}
+        </a>
+        <a class="adm-nav-item adm-nav-wip" href="#/acesso" target="_blank">
+          <div class="adm-nav-ic">${svgIcon('send','ic ic-sm')}</div>
+          <div class="adm-nav-txt">
+            <b>Link público de acesso</b>
+            <span>Página que o cliente preenche para solicitar acesso → #/acesso</span>
+          </div>
+          ${svgIcon('chevR','ic ic-sm')}
+        </a>
+      </div>
+    </div>`;
+  renderIcons(root);
+}
+
+/* ---- Admin: cadastros / registrations queue ---- */
+async function renderAdminCadastros(root, sb, sess, usuario) {
+  root.innerHTML = '<div class="pf-loading">Carregando solicitações…</div>';
+
+  let cadastros = [];
+  try {
+    const { data, error } = await sb.from('cadastros').select('*').order('criado_em', { ascending: false });
+    if (error) throw error;
+    cadastros = data || [];
+  } catch (err) {
+    root.innerHTML = `<div class="suporte-blank">
+      ${svgIcon('alert','ic')}
+      <b>Tabela não encontrada</b>
+      <p>Execute o SQL de setup no Supabase Studio antes de usar esta seção.</p>
+      <a class="btn ghost" href="#/admin">Voltar</a>
+    </div>`;
+    renderIcons(root); return;
+  }
+
+  let filtro = 'pendente';
+
+  /* utilitário: cria e abre um modal dinâmico */
+  function criarModal(id, titulo, sub, bodyHtml) {
+    document.getElementById(id)?.remove();
+    const mod = document.createElement('div');
+    mod.className = 'modal-bd'; mod.id = id;
+    mod.innerHTML = `<div class="modal modal-sm"><div class="modal-inner">
+      <div class="modal-head">
+        <div><h2>${titulo}</h2>${sub ? `<p>${sub}</p>` : ''}</div>
+        <button class="x" data-close-modal><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+      <div class="modal-body">${bodyHtml}</div>
+    </div></div>`;
+    document.body.appendChild(mod);
+    UI.openModal(id);
+    renderIcons(mod);
+    return mod;
+  }
+
+  /* aprovação com criação do cliente */
+  async function abrirAprovar(cadId) {
+    const c = cadastros.find(x => x.id === cadId); if (!c) return;
+    const mod = criarModal('adm-aprovar-modal', 'Aprovar e criar cliente',
+      escHtml(c.email),
+      `<form id="adp-form" autocomplete="off">
+        <div class="pf-field"><label>Nome completo *</label>
+          <input id="adp-nome" type="text" value="${escHtml(c.nome||'')}" maxlength="80" required></div>
+        <div class="pf-field"><label>E-mail *</label>
+          <input id="adp-email" type="email" value="${escHtml(c.email||'')}" maxlength="120" required></div>
+        <div class="pf-field"><label>Telefone</label>
+          <input id="adp-tel" type="tel" value="${escHtml(c.telefone||'')}" maxlength="20"></div>
+        <div class="pf-field"><label>Cidade</label>
+          <input id="adp-cidade" type="text" value="" maxlength="60" placeholder="Ex: São Paulo"></div>
+        <label class="adm-check-lbl"><input type="checkbox" id="adp-send" checked>
+          <span>Enviar link de acesso para o cliente por e-mail</span></label>
+        <div id="adp-err" class="acf-err" hidden></div>
+        <div class="pf-actions" style="margin-top:18px">
+          <button type="button" class="btn ghost btn-sm" data-close-modal>Cancelar</button>
+          <button type="submit" class="btn primary" id="adp-save">${svgIcon('check','ic ic-sm')} Criar cliente</button>
+        </div>
+      </form>`);
+
+    mod.querySelector('#adp-form')?.addEventListener('submit', async e => {
+      e.preventDefault();
+      const nome   = mod.querySelector('#adp-nome').value.trim();
+      const email  = mod.querySelector('#adp-email').value.trim().toLowerCase();
+      const tel    = mod.querySelector('#adp-tel').value.trim();
+      const cidade = mod.querySelector('#adp-cidade').value.trim();
+      const send   = mod.querySelector('#adp-send').checked;
+      const errEl  = mod.querySelector('#adp-err');
+      const saveBtn= mod.querySelector('#adp-save');
+      if (!nome || !email) return;
+      errEl.hidden = true;
+      const old = saveBtn.innerHTML; saveBtn.disabled = true; saveBtn.innerHTML = 'Criando…';
+      try {
+        const { error: e1 } = await sb.from('clientes')
+          .insert({ nome, email, telefone: tel, cidade, status: 'ativo' });
+        if (e1) throw e1;
+        await sb.from('cadastros')
+          .update({ status: 'aprovado', aprovado_por: sess.user.email }).eq('id', cadId);
+        if (send) {
+          try { await sb.auth.signInWithOtp({ email, options: { shouldCreateUser: true } }); } catch (_) {}
+        }
+        cadastros = cadastros.map(c => c.id === cadId ? { ...c, status: 'aprovado' } : c);
+        UI.closeModal(mod); setTimeout(() => mod.remove(), 400);
+        renderLista();
+        Sound?.success?.();
+        Toast.success(`Cliente ${nome} criado!${send ? ' Link enviado.' : ''}`);
+      } catch (err) {
+        errEl.textContent = (err.message||'').includes('duplicate') ? 'E-mail já cadastrado.' : (err.message || 'Erro ao criar.');
+        errEl.hidden = false; saveBtn.disabled = false; saveBtn.innerHTML = old;
+      }
+    });
+  }
+
+  /* cliente manual (sem cadastro prévio) */
+  function abrirNovoCliente() {
+    const mod = criarModal('adm-novo-modal', 'Novo cliente', 'Cria direto na tabela de clientes',
+      `<form id="anv-form" autocomplete="off">
+        <div class="pf-field"><label>Nome completo *</label>
+          <input id="anv-nome" type="text" placeholder="Nome completo" maxlength="80" required></div>
+        <div class="pf-field"><label>E-mail *</label>
+          <input id="anv-email" type="email" placeholder="email@empresa.com" maxlength="120" required></div>
+        <div class="pf-field"><label>Telefone</label>
+          <input id="anv-tel" type="tel" placeholder="(11) 9xxxx-xxxx" maxlength="20"></div>
+        <div class="pf-field"><label>Cidade</label>
+          <input id="anv-cidade" type="text" placeholder="Ex: São Paulo" maxlength="60"></div>
+        <div class="pf-field"><label>Status</label>
+          <select id="anv-status" class="select-native">
+            <option value="ativo">Ativo</option>
+            <option value="inactive">Inativo</option>
+            <option value="pending">Pendente</option>
+          </select></div>
+        <label class="adm-check-lbl"><input type="checkbox" id="anv-send" checked>
+          <span>Enviar link de acesso por e-mail</span></label>
+        <div id="anv-err" class="acf-err" hidden></div>
+        <div class="pf-actions" style="margin-top:18px">
+          <button type="button" class="btn ghost btn-sm" data-close-modal>Cancelar</button>
+          <button type="submit" class="btn primary" id="anv-save">${svgIcon('user','ic ic-sm')} Criar cliente</button>
+        </div>
+      </form>`);
+
+    mod.querySelector('#anv-form')?.addEventListener('submit', async e => {
+      e.preventDefault();
+      const nome   = mod.querySelector('#anv-nome').value.trim();
+      const email  = mod.querySelector('#anv-email').value.trim().toLowerCase();
+      const tel    = mod.querySelector('#anv-tel').value.trim();
+      const cidade = mod.querySelector('#anv-cidade').value.trim();
+      const status = mod.querySelector('#anv-status').value;
+      const send   = mod.querySelector('#anv-send').checked;
+      const errEl  = mod.querySelector('#anv-err');
+      const saveBtn= mod.querySelector('#anv-save');
+      if (!nome || !email) return;
+      errEl.hidden = true;
+      const old = saveBtn.innerHTML; saveBtn.disabled = true; saveBtn.innerHTML = 'Criando…';
+      try {
+        const { error } = await sb.from('clientes').insert({ nome, email, telefone: tel, cidade, status });
+        if (error) throw error;
+        if (send) {
+          try { await sb.auth.signInWithOtp({ email, options: { shouldCreateUser: true } }); } catch (_) {}
+        }
+        UI.closeModal(mod); setTimeout(() => mod.remove(), 400);
+        Sound?.success?.();
+        Toast.success(`Cliente ${nome} criado!${send ? ' Link de acesso enviado.' : ''}`);
+      } catch (err) {
+        errEl.textContent = (err.message||'').includes('duplicate') ? 'E-mail já cadastrado em clientes.' : (err.message || 'Erro ao criar.');
+        errEl.hidden = false; saveBtn.disabled = false; saveBtn.innerHTML = old;
+      }
+    });
+  }
+
+  /* renderiza lista de acordo com filtro ativo */
+  function renderLista() {
+    const lista = document.getElementById('adm-cad-list'); if (!lista) return;
+    const items = filtro === 'todos' ? cadastros : cadastros.filter(c => c.status === filtro);
+
+    if (!items.length) {
+      lista.innerHTML = `<div class="adm-blank">
+        ${svgIcon('check','ic')}
+        <p>${filtro === 'pendente' ? 'Nenhuma solicitação pendente' : 'Nenhum resultado'}</p>
+      </div>`;
+      renderIcons(lista); return;
+    }
+
+    const stMap = { pendente:'Pendente', aprovado:'Aprovado', rejeitado:'Rejeitado' };
+    lista.innerHTML = items.map(c => `
+      <div class="adm-cad-item">
+        <div class="adm-cad-main">
+          <div class="adm-cad-av">${escHtml((c.nome||'?')[0].toUpperCase())}</div>
+          <div class="adm-cad-info">
+            <b class="adm-cad-nome">${escHtml(c.nome||'—')}</b>
+            <span class="adm-cad-email">${escHtml(c.email||'')}</span>
+            ${c.empresa  ? `<span class="adm-cad-meta">${svgIcon('package','ic ic-xs')} ${escHtml(c.empresa)}</span>` : ''}
+            ${c.telefone ? `<span class="adm-cad-meta">${svgIcon('phone','ic ic-xs')} ${escHtml(c.telefone)}</span>` : ''}
+            ${c.mensagem ? `<p class="adm-cad-msg">"${escHtml(c.mensagem)}"</p>` : ''}
+            <span class="adm-cad-data">${dataBR(c.criado_em)}</span>
+          </div>
+        </div>
+        <div class="adm-cad-right">
+          <span class="adm-st adm-st-${escHtml(c.status)}">${escHtml(stMap[c.status]||c.status)}</span>
+          ${c.status === 'pendente' ? `
+            <button class="btn btn-sm adm-aprovar" data-id="${escHtml(c.id)}">${svgIcon('check','ic ic-sm')} Aprovar</button>
+            <button class="btn ghost btn-sm adm-rejeitar" data-id="${escHtml(c.id)}">${svgIcon('x','ic ic-sm')} Rejeitar</button>
+          ` : ''}
+        </div>
+      </div>`).join('');
+    renderIcons(lista);
+
+    lista.querySelectorAll('.adm-aprovar').forEach(b =>
+      b.addEventListener('click', () => abrirAprovar(b.dataset.id)));
+    lista.querySelectorAll('.adm-rejeitar').forEach(b =>
+      b.addEventListener('click', async () => {
+        if (!confirm('Rejeitar esta solicitação?')) return;
+        try {
+          await sb.from('cadastros').update({ status:'rejeitado', aprovado_por: sess.user.email }).eq('id', b.dataset.id);
+          cadastros = cadastros.map(c => c.id === b.dataset.id ? { ...c, status:'rejeitado' } : c);
+          renderLista(); Toast.success('Solicitação rejeitada.');
+        } catch (_) { Toast.error('Erro ao rejeitar.'); }
+      }));
+  }
+
+  /* === renderiza shell === */
+  const nPend = cadastros.filter(c => c.status === 'pendente').length;
+  root.innerHTML = `
+    <div class="adm-page">
+      <div class="adm-header">
+        <a class="cd-back" href="#/admin">${svgIcon('chevL','ic ic-sm')} Admin</a>
+        <div>
+          <h1 class="adm-title">Solicitações de acesso</h1>
+          <p class="adm-sub">${cadastros.length} solicitação${cadastros.length!==1?'ões':''} no total</p>
+        </div>
+        <button class="btn btn-sm" id="adm-novo-btn">${svgIcon('plus','ic ic-sm')} Cliente manual</button>
+      </div>
+      <div class="adm-tabs">
+        <button class="adm-tab on" data-f="pendente">Pendentes <span class="adm-tab-n">${nPend}</span></button>
+        <button class="adm-tab" data-f="aprovado">Aprovados</button>
+        <button class="adm-tab" data-f="rejeitado">Rejeitados</button>
+        <button class="adm-tab" data-f="todos">Todos</button>
+      </div>
+      <div id="adm-cad-list"></div>
+    </div>`;
+  renderIcons(root);
+  renderLista();
+
+  root.querySelectorAll('.adm-tab').forEach(t =>
+    t.addEventListener('click', () => {
+      root.querySelectorAll('.adm-tab').forEach(x => x.classList.remove('on'));
+      t.classList.add('on');
+      filtro = t.dataset.f;
+      renderLista();
+    }));
+
+  root.querySelector('#adm-novo-btn')?.addEventListener('click', abrirNovoCliente);
 }
 
 function renderConta(root, cli, sess) {

@@ -1579,3 +1579,192 @@ input[readonly], .lib-search, .topsearch { cursor: pointer; }
   font-size:12px; color:var(--text-muted);
   white-space:nowrap;
 }
+
+/* ============================================================
+   #/ACESSO — formulário público de solicitação  (spa83)
+   ============================================================ */
+.acesso-wrap {
+  max-width:520px; margin:0 auto; padding:16px 0 40px;
+  display:flex; flex-direction:column; gap:24px;
+}
+.acesso-hero {
+  text-align:center; padding:8px 0;
+  display:flex; flex-direction:column; align-items:center; gap:10px;
+}
+.acesso-hero .ic { width:40px; height:40px; color:var(--accent); }
+.acesso-title { font-size:22px; font-weight:800; color:var(--text); margin:0; }
+.acesso-sub { font-size:14px; color:var(--text-muted); margin:0; line-height:1.6; }
+.acesso-card {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:20px; padding:28px 28px 24px;
+  display:flex; flex-direction:column; gap:0;
+}
+.acesso-card form { display:flex; flex-direction:column; gap:14px; }
+.acesso-card textarea {
+  background:var(--surface-2); border:1px solid var(--border);
+  border-radius:10px; padding:11px 14px;
+  color:var(--text); font-size:14px; font-family:inherit;
+  resize:vertical; outline:none; width:100%; box-sizing:border-box;
+  transition:border-color .15s, box-shadow .15s;
+}
+.acesso-card textarea:focus {
+  border-color:var(--accent);
+  box-shadow:0 0 0 3px rgba(47,127,242,.16);
+}
+.acesso-submit { width:100%; justify-content:center; margin-top:4px; }
+.acesso-ok {
+  display:flex; flex-direction:column; align-items:center;
+  gap:12px; text-align:center; padding:16px 0;
+}
+.acesso-ok .ic { width:48px; height:48px; color:var(--success); }
+.acesso-ok h2 { font-size:20px; font-weight:700; color:var(--text); margin:0; }
+.acesso-ok p  { font-size:14px; color:var(--text-muted); margin:0; line-height:1.6; }
+.acesso-ok span { color:var(--accent); font-weight:600; }
+
+/* ============================================================
+   #/ADMIN — painel de gestão interno  (spa83)
+   ============================================================ */
+/* topbar pill para staff */
+.adm-topbar-pill {
+  display:inline-flex; align-items:center; gap:5px;
+  padding:4px 10px; border-radius:20px;
+  background:rgba(47,127,242,.14); color:var(--accent);
+  font-size:12px; font-weight:600; text-decoration:none;
+  border:1px solid rgba(47,127,242,.25);
+  transition:background .15s;
+}
+.adm-topbar-pill:hover { background:rgba(47,127,242,.22); }
+.adm-topbar-pill .ic { width:12px; height:12px; }
+
+.adm-page {
+  display:flex; flex-direction:column; gap:20px;
+  padding-bottom:40px;
+}
+.adm-header {
+  display:flex; align-items:flex-start; gap:12px;
+  flex-wrap:wrap;
+}
+.adm-header > div { flex:1; }
+.adm-header .cd-back { flex-shrink:0; margin-top:4px; }
+.adm-header > .btn  { flex-shrink:0; }
+.adm-title { font-size:22px; font-weight:800; color:var(--text); margin:0; }
+.adm-sub   { font-size:13.5px; color:var(--text-muted); margin:4px 0 0; }
+.adm-cargo {
+  display:inline-block; padding:2px 8px; border-radius:20px;
+  font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.05em;
+}
+.adm-cargo-admin   { background:rgba(122,87,255,.18); color:#a78bfa; }
+.adm-cargo-editor  { background:rgba(47,127,242,.14); color:var(--accent); }
+.adm-cargo-suporte { background:rgba(52,211,153,.14); color:var(--success); }
+
+/* dashboard: stat cards */
+.adm-stats {
+  display:grid; grid-template-columns:repeat(3,1fr); gap:12px;
+}
+.adm-stat {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:16px; padding:18px 16px;
+  display:flex; flex-direction:column; align-items:flex-start; gap:8px;
+  text-decoration:none; color:inherit; transition:border-color .15s, background .15s;
+}
+.adm-stat:hover { border-color:var(--accent); background:var(--surface-hover); }
+.adm-stat .ic   { width:24px; height:24px; color:var(--text-muted); }
+.adm-stat-n     { font-size:28px; font-weight:800; color:var(--text); line-height:1; }
+.adm-stat-lab   { font-size:12.5px; color:var(--text-muted); }
+.adm-stat.adm-stat-alert { border-color:rgba(251,191,36,.5); }
+.adm-stat.adm-stat-alert .adm-stat-n { color:#fbbf24; }
+
+/* nav list */
+.adm-nav { display:flex; flex-direction:column; gap:2px; }
+.adm-nav-item {
+  display:flex; align-items:center; gap:14px;
+  padding:14px 16px; border-radius:14px;
+  background:var(--surface); border:1px solid var(--border);
+  text-decoration:none; color:inherit; transition:border-color .15s, background .15s;
+}
+.adm-nav-item:hover { border-color:var(--accent); background:var(--surface-hover); }
+.adm-nav-ic { width:36px; height:36px; border-radius:10px;
+  background:var(--surface-2); display:flex; align-items:center; justify-content:center;
+  flex-shrink:0; }
+.adm-nav-ic .ic { width:18px; height:18px; color:var(--accent); }
+.adm-nav-txt { flex:1; }
+.adm-nav-txt b  { display:block; font-size:14px; font-weight:600; color:var(--text); }
+.adm-nav-txt span { font-size:12.5px; color:var(--text-muted); }
+.adm-nav-item .ic { width:16px; height:16px; color:var(--text-faint); flex-shrink:0; }
+.adm-nav-wip { opacity:.6; }
+
+/* tabs */
+.adm-tabs {
+  display:flex; gap:4px; flex-wrap:wrap;
+}
+.adm-tab {
+  display:flex; align-items:center; gap:6px;
+  padding:7px 14px; border-radius:20px;
+  background:none; border:1px solid transparent;
+  font-size:13px; font-weight:500; color:var(--text-muted);
+  cursor:pointer; transition:all .15s;
+}
+.adm-tab:hover { color:var(--text); background:var(--surface-hover); }
+.adm-tab.on    { background:var(--surface); border-color:var(--border); color:var(--text); font-weight:600; }
+.adm-tab-n {
+  background:var(--accent); color:#fff;
+  font-size:11px; font-weight:700;
+  padding:1px 6px; border-radius:20px; min-width:18px; text-align:center;
+}
+
+/* cadastro items */
+.adm-cad-item {
+  display:flex; align-items:flex-start; justify-content:space-between;
+  gap:16px; padding:16px; margin-bottom:8px;
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:14px;
+}
+.adm-cad-main  { display:flex; gap:12px; flex:1; min-width:0; }
+.adm-cad-av    {
+  width:40px; height:40px; border-radius:50%; flex-shrink:0;
+  background:var(--accent); color:#fff;
+  display:flex; align-items:center; justify-content:center;
+  font-size:16px; font-weight:700;
+}
+.adm-cad-info  { display:flex; flex-direction:column; gap:3px; min-width:0; }
+.adm-cad-nome  { font-size:14px; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.adm-cad-email { font-size:12.5px; color:var(--accent); }
+.adm-cad-meta  { display:inline-flex; align-items:center; gap:4px; font-size:12px; color:var(--text-muted); }
+.adm-cad-meta .ic { width:11px; height:11px; }
+.adm-cad-msg   { font-size:12.5px; color:var(--text-muted); font-style:italic; margin:2px 0 0; }
+.adm-cad-data  { font-size:11.5px; color:var(--text-faint); margin-top:2px; }
+.adm-cad-right {
+  display:flex; flex-direction:column; align-items:flex-end;
+  gap:8px; flex-shrink:0;
+}
+/* status badges */
+.adm-st {
+  display:inline-flex; padding:3px 10px; border-radius:20px;
+  font-size:11.5px; font-weight:600; text-transform:uppercase; letter-spacing:.04em;
+}
+.adm-st-pendente  { background:rgba(251,191,36,.15); color:#fbbf24; }
+.adm-st-aprovado  { background:rgba(52,211,153,.15);  color:var(--success); }
+.adm-st-rejeitado { background:rgba(239,68,68,.14);   color:#f87171; }
+
+/* blank state */
+.adm-blank {
+  display:flex; flex-direction:column; align-items:center;
+  gap:8px; padding:48px 0; text-align:center;
+  color:var(--text-muted);
+}
+.adm-blank .ic { width:40px; height:40px; }
+.adm-blank p { font-size:14px; margin:0; }
+
+/* checkbox label */
+.adm-check-lbl {
+  display:flex; align-items:center; gap:8px;
+  font-size:13px; color:var(--text-muted);
+  cursor:pointer; margin-top:10px;
+}
+.adm-check-lbl input[type=checkbox] { accent-color:var(--accent); width:15px; height:15px; }
+
+@media (max-width:600px) {
+  .adm-stats { grid-template-columns:1fr 1fr; }
+  .adm-cad-item { flex-direction:column; }
+  .adm-cad-right { flex-direction:row; align-items:center; flex-wrap:wrap; }
+}

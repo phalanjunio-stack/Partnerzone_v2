@@ -1,7 +1,7 @@
 /* ============================================================
    APP — ícones (traçado), dados de exemplo e render da Início
    ============================================================ */
-const BUILD = 'spa86';
+const BUILD = 'spa87';
 try { console.log('%cPartnerZone • build ' + BUILD, 'background:#2f7ff2;color:#fff;padding:2px 8px;border-radius:4px;font-weight:700'); } catch (_) {}
 
 /* ---- MODO CLIENTE × ADMIN ----------------------------------------------
@@ -1185,7 +1185,7 @@ function renderLogin(root, titulo, sub, onSuccess) {
     try {
       const sb = await Portal.db();
       if (!sb) throw new Error('portal não configurado');
-      const { error } = await sb.auth.signInWithOtp({ email, options: { shouldCreateUser: false } });
+      const { error } = await sb.auth.signInWithOtp({ email, options: { shouldCreateUser: true } });
       if (error) throw error;
       errEl.style.color = 'var(--success)';
       errEl.textContent = '✓ Link enviado para ' + email + ' — verifique seu e-mail.';

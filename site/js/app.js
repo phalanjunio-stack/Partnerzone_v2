@@ -1,7 +1,7 @@
 /* ============================================================
    APP — ícones (traçado), dados de exemplo e render da Início
    ============================================================ */
-const BUILD = 'spa90';
+const BUILD = 'spa91';
 try { console.log('%cPartnerZone • build ' + BUILD, 'background:#2f7ff2;color:#fff;padding:2px 8px;border-radius:4px;font-weight:700'); } catch (_) {}
 
 /* ---- MODO CLIENTE × ADMIN ----------------------------------------------
@@ -2942,7 +2942,7 @@ async function renderSuporteLista(root, sb, sess) {
 
   const stLabels = { aberto:'Aberto', em_atendimento:'Em atendimento', resolvido:'Resolvido', cancelado:'Cancelado' };
   const stIcons  = { aberto:'clock', em_atendimento:'users', resolvido:'check', cancelado:'alert' };
-  const catMap   = { tecnico:'Técnico', comercial:'Comercial', financeiro:'Financeiro', outro:'Outro' };
+  const catMap   = { tecnico:'Técnico', comercial:'Comercial', financeiro:'Financeiro', marketing:'Marketing', outro:'Outro' };
 
   const listaHTML = chamados.length ? `
     <div class="suporte-list">
@@ -2995,6 +2995,7 @@ async function renderSuporteLista(root, sb, sess) {
                 <option value="tecnico">Técnico</option>
                 <option value="comercial">Comercial</option>
                 <option value="financeiro">Financeiro</option>
+                <option value="marketing">Marketing</option>
                 <option value="outro">Outro</option>
               </select></div>
             <div class="field"><label>Prioridade</label>
@@ -3119,7 +3120,7 @@ async function renderSuporteDetalhe(root, sb, sess, chamadoId) {
   }
 
   const stLabels = { aberto:'Aberto', em_atendimento:'Em atendimento', resolvido:'Resolvido', cancelado:'Cancelado' };
-  const catMap   = { tecnico:'Técnico', comercial:'Comercial', financeiro:'Financeiro', outro:'Outro' };
+  const catMap   = { tecnico:'Técnico', comercial:'Comercial', financeiro:'Financeiro', marketing:'Marketing', outro:'Outro' };
   const isEncerrado = ['resolvido','cancelado'].includes((chamado.status||'').toLowerCase());
   const stTxt = stLabels[chamado.status] || chamado.status || '—';
   const cat   = catMap[(chamado.categoria||'').toLowerCase()] || chamado.categoria || '';

@@ -1,7 +1,7 @@
 /* ============================================================
    APP — ícones (traçado), dados de exemplo e render da Início
    ============================================================ */
-const BUILD = 'spa83';
+const BUILD = 'spa84';
 try { console.log('%cPartnerZone • build ' + BUILD, 'background:#2f7ff2;color:#fff;padding:2px 8px;border-radius:4px;font-weight:700'); } catch (_) {}
 
 /* ---- MODO CLIENTE × ADMIN ----------------------------------------------
@@ -1160,23 +1160,51 @@ function renderLogin(root, titulo, sub, onSuccess) {
           </div></div>
         <div class="login-err" id="login-err" hidden></div>
         <button class="btn login-btn" id="login-go" type="submit"><i data-icon="logout" data-cls="ic ic-sm"></i> Entrar</button>
+        <button class="btn ghost login-btn" id="login-link-btn" type="button">${svgIcon('mail','ic ic-sm')} Receber link por e-mail</button>
       </form>
       <div class="conta-note">${svgIcon('shield','ic ic-sm')} Seus dados são protegidos. Cada cliente vê apenas as próprias informações.</div>
     </div>`;
   renderIcons(root);
 
-  const form = document.getElementById('login-form');
+  const form  = document.getElementById('login-form');
   const errEl = document.getElementById('login-err');
-  const btn = document.getElementById('login-go');
-  const passEl = document.getElementById('login-pass');
+  const btn   = document.getElementById('login-go');
+  const passEl= document.getElementById('login-pass');
+  const linkBtn = document.getElementById('login-link-btn');
+
   document.getElementById('login-eye')?.addEventListener('click', () => {
     passEl.type = passEl.type === 'password' ? 'text' : 'password';
   });
+
+  // enviar magic link (para contas sem senha — ex: admin criado via OTP)
+  linkBtn?.addEventListener('click', async () => {
+    const email = (document.getElementById('login-email').value || '').trim();
+    if (!email) { errEl.textContent = 'Digite seu e-mail para receber o link.'; errEl.hidden = false; return; }
+    errEl.hidden = true;
+    const old = linkBtn.innerHTML; linkBtn.disabled = true; linkBtn.innerHTML = 'Enviando…';
+    try {
+      const sb = await Portal.db();
+      if (!sb) throw new Error('portal não configurado');
+      const { error } = await sb.auth.signInWithOtp({ email, options: { shouldCreateUser: false } });
+      if (error) throw error;
+      errEl.style.color = 'var(--success)';
+      errEl.textContent = '✓ Link enviado para ' + email + ' — verifique seu e-mail.';
+      errEl.hidden = false;
+      Sound && Sound.success && Sound.success();
+    } catch (err) {
+      errEl.style.color = '';
+      errEl.textContent = err.message || 'Erro ao enviar link.';
+      errEl.hidden = false;
+      Sound && Sound.error && Sound.error();
+    }
+    linkBtn.disabled = false; linkBtn.innerHTML = old;
+  });
+
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const email = document.getElementById('login-email').value;
-    const pass = passEl.value;
-    errEl.hidden = true; btn.disabled = true;
+    const pass  = passEl.value;
+    errEl.style.color = ''; errEl.hidden = true; btn.disabled = true;
     const old = btn.innerHTML; btn.innerHTML = 'Entrando…';
     let res;
     try { res = await Portal.login(email, pass); }
@@ -1188,8 +1216,8 @@ function renderLogin(root, titulo, sub, onSuccess) {
       return;
     }
     Sound && Sound.success && Sound.success();
-    window.initUserBtn?.();   // atualiza topbar com dados reais do cliente
-    cb();   // sucesso → recarrega a área que chamou o login
+    window.initUserBtn?.();
+    cb();
   });
 }
 
@@ -1201,40 +1229,35 @@ async function initUserBtn() {
   const avEl = document.getElementById('user-av');
   const nmEl = document.getElementById('user-name');
 
-  // preenche topbar com dados do Portal (se logado)
+  // todas as funções do Portal são async — precisa await
   try {
-    if (Portal.configured() && Portal.session()) {
-      const cli = Portal.client();
-      if (cli) {
-        const email = (cli.email || '').toLowerCase();
-        const nome  = (cli.nome || cli.email || 'Cliente').trim();
-        const initials = (nome.split(/\s+/).slice(0,2).map(w=>w[0]||'').join('') || 'CL').toUpperCase();
-        // foto ou iniciais
-        const foto = localStorage.getItem(pfFotoKey(email));
-        if (foto && avEl) {
-          avEl.textContent = '';
-          avEl.style.backgroundImage   = 'url(' + foto + ')';
-          avEl.style.backgroundSize    = 'cover';
-          avEl.style.backgroundPosition= 'center';
-        } else if (avEl) {
-          avEl.textContent = initials;
-          avEl.style.backgroundImage = '';
-        }
-        if (nmEl) nmEl.textContent = nome.split(' ')[0];
-      }
-    }
-  } catch (_) {}
+    const ok = await Portal.configured(); if (!ok) return;
+    const sess = await Portal.session();  if (!sess) return;
+    const cli  = await Portal.client();
 
-  // checa se é staff (usuarios table) e adiciona link admin na nav
-  try {
-    if (Portal.configured() && Portal.session()) {
-      const sbU = Portal.db();
-      const uEmail = (Portal.session()?.user?.email || '').toLowerCase();
-      if (uEmail) {
-        const { data: uRow } = await sbU.from('usuarios').select('cargo,ativo').eq('email', uEmail).maybeSingle();
+    if (cli || sess) {
+      const email = ((cli && cli.email) || (sess.user && sess.user.email) || '').toLowerCase();
+      const nome  = ((cli && cli.nome) || email || 'Cliente').trim();
+      const inits = (nome.split(/\s+/).slice(0,2).map(w=>w[0]||'').join('') || 'CL').toUpperCase();
+      const foto  = localStorage.getItem(pfFotoKey(email));
+      if (foto && avEl) {
+        avEl.textContent = '';
+        avEl.style.backgroundImage    = 'url(' + foto + ')';
+        avEl.style.backgroundSize     = 'cover';
+        avEl.style.backgroundPosition = 'center';
+      } else if (avEl) {
+        avEl.textContent = inits;
+        avEl.style.backgroundImage = '';
+      }
+      if (nmEl) nmEl.textContent = nome.split(' ')[0];
+
+      // checa se é staff e adiciona pill Admin no topbar
+      try {
+        const sb = await Portal.db();
+        const { data: uRow } = await sb.from('usuarios')
+          .select('cargo,ativo').eq('email', email).maybeSingle();
         if (uRow && uRow.ativo) {
           window.__staffCargo = uRow.cargo;
-          // injeta pill "Admin" no topbar perto do botão user
           if (!document.getElementById('adm-pill')) {
             const pill = document.createElement('a');
             pill.id = 'adm-pill'; pill.href = '#/admin'; pill.className = 'adm-topbar-pill';
@@ -1243,16 +1266,16 @@ async function initUserBtn() {
             renderIcons(pill);
           }
         }
-      }
+      } catch (_) {}
     }
   } catch (_) {}
 
   // evita duplo-bind
   btn.removeEventListener('click', btn._pfHandler);
   btn._pfHandler = async () => {
-    if (!Portal.configured()) return;
-    const sess = Portal.session(); if (!sess) return;
-    const cli  = Portal.client();
+    const ok = await Portal.configured(); if (!ok) return;
+    const sess = await Portal.session();  if (!sess) return;
+    const cli  = await Portal.client();
     await openPerfilModal(cli, sess);
   };
   btn.addEventListener('click', btn._pfHandler);
@@ -1482,13 +1505,18 @@ async function openPerfilModal(cli, sess) {
   // ---- sair da conta ----
   document.getElementById('pf-logout')?.addEventListener('click', async () => {
     UI.closeModal(document.getElementById('modal-perfil'));
-    await Portal.logout();
+    try { await Portal.logout(); } catch (_) {}
+    // limpa topbar
     const avEl = document.getElementById('user-av');
     const nmEl = document.getElementById('user-name');
     if (avEl) { avEl.textContent = 'CL'; avEl.style.backgroundImage = ''; }
     if (nmEl) nmEl.textContent = 'Entrar';
-    location.hash = '#/';
-    if (window.__route) window.__route();
+    // remove pill admin se existir
+    document.getElementById('adm-pill')?.remove();
+    window.__staffCargo = null;
+    // reload limpo — garante que o estado Supabase foi zerado
+    location.href = location.href.split('#')[0] + '#/';
+    location.reload();
   });
 
   // ---- salvar campos ----
@@ -1685,6 +1713,7 @@ async function renderAdminHome(root, sb, sess, usuario) {
           <h1 class="adm-title">Painel de gestão</h1>
           <p class="adm-sub">Olá, <b>${escHtml(usuario.nome || sess.user.email)}</b> · <span class="adm-cargo adm-cargo-${escHtml(usuario.cargo)}">${escHtml(cLab)}</span></p>
         </div>
+        <button class="btn ghost btn-sm" id="adm-logout">${svgIcon('logout','ic ic-sm')} Sair</button>
       </div>
       <div class="adm-stats">
         <a class="adm-stat ${nPendentes > 0 ? 'adm-stat-alert' : ''}" href="#/admin/cadastros">
@@ -1723,6 +1752,18 @@ async function renderAdminHome(root, sb, sess, usuario) {
       </div>
     </div>`;
   renderIcons(root);
+
+  document.getElementById('adm-logout')?.addEventListener('click', async () => {
+    try { await Portal.logout(); } catch (_) {}
+    document.getElementById('adm-pill')?.remove();
+    window.__staffCargo = null;
+    const avEl = document.getElementById('user-av');
+    const nmEl = document.getElementById('user-name');
+    if (avEl) { avEl.textContent = 'CL'; avEl.style.backgroundImage = ''; }
+    if (nmEl) nmEl.textContent = 'Entrar';
+    location.href = location.href.split('#')[0] + '#/';
+    location.reload();
+  });
 }
 
 /* ---- Admin: cadastros / registrations queue ---- */

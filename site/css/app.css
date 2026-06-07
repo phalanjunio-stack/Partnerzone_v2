@@ -1768,3 +1768,82 @@ input[readonly], .lib-search, .topsearch { cursor: pointer; }
   .adm-cad-item { flex-direction:column; }
   .adm-cad-right { flex-direction:row; align-items:center; flex-wrap:wrap; }
 }
+
+/* ============================================================
+   MODAL MÉDIO  (admin / clientes)
+   ============================================================ */
+.modal.modal-md { width: min(640px, 100%); }
+
+/* ============================================================
+   ADMIN / CLIENTES — gerenciamento por cliente  (spa85)
+   ============================================================ */
+
+/* --- lista pesquisável de clientes --- */
+.adm-cad-list { display:flex; flex-direction:column; gap:8px; }
+
+/* --- tabs do modal de gerenciamento --- */
+.cg-tabs {
+  display:flex; flex-wrap:wrap; gap:4px;
+  margin-bottom:16px; padding-bottom:14px;
+  border-bottom:1px solid var(--border);
+}
+.cg-tab {
+  display:inline-flex; align-items:center; gap:6px;
+  padding:6px 12px; border-radius:8px;
+  font-size:13px; font-weight:500;
+  color:var(--text-muted); background:none; border:none;
+  cursor:pointer; transition:all .15s;
+}
+.cg-tab:hover  { background:rgba(255,255,255,.06); color:var(--text); }
+.cg-tab.on     { background:rgba(47,127,242,.14); color:var(--accent); }
+.cg-tab .ic    { width:14px; height:14px; }
+.cg-n {
+  background:rgba(255,255,255,.1); color:var(--text-muted);
+  font-size:11px; padding:1px 6px; border-radius:10px; font-weight:600;
+}
+.cg-tab.on .cg-n { background:rgba(47,127,242,.22); color:var(--accent); }
+
+/* --- corpo das tabs --- */
+.cg-body { display:flex; flex-direction:column; gap:8px; max-height:420px; overflow-y:auto; }
+.cg-item {
+  display:flex; align-items:center; gap:10px;
+  padding:10px 12px; border-radius:10px;
+  background:rgba(255,255,255,.04); border:1px solid var(--border);
+}
+.cg-item-main { flex:1; display:flex; flex-direction:column; gap:2px; font-size:13.5px; }
+.cg-sub       { font-size:12px; color:var(--text-muted); }
+.cg-empty     { padding:18px 0; text-align:center; font-size:13px; color:var(--text-muted); }
+
+/* --- seção "adicionar" dentro da tab --- */
+.cg-add-section {
+  margin-top:14px; padding-top:14px; border-top:1px solid var(--border);
+}
+.cg-add-section h4 { font-size:12px; text-transform:uppercase; letter-spacing:.05em; color:var(--text-muted); margin:0 0 10px; }
+.cg-form { display:flex; flex-direction:column; gap:10px; }
+
+/* --- tab acesso --- */
+.cg-access-info {
+  display:flex; align-items:flex-start; gap:14px;
+  padding:14px; border-radius:10px;
+  background:rgba(255,255,255,.04); border:1px solid var(--border);
+}
+.cg-access-info .ic { width:28px; height:28px; flex-shrink:0; color:var(--accent); }
+.cg-access-info p   { font-size:13.5px; margin:0; }
+
+/* --- select nativo (reutilizado nos forms) --- */
+.select-native {
+  width:100%; padding:10px 12px;
+  background:var(--input-bg,rgba(255,255,255,.06));
+  border:1.5px solid var(--border); border-radius:10px;
+  color:var(--text); font-size:14px; cursor:pointer;
+  appearance:auto;
+}
+.select-native:focus { border-color:var(--accent); outline:none; }
+
+/* --- btn extra-pequeno --- */
+.btn-xs { font-size:12px; padding:4px 8px; min-height:28px; }
+
+@media (max-width:500px) {
+  .cg-tabs { gap:2px; }
+  .cg-tab  { padding:5px 9px; font-size:12px; }
+}

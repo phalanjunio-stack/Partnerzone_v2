@@ -1,7 +1,7 @@
 /* ============================================================
    APP — ícones (traçado), dados de exemplo e render da Início
    ============================================================ */
-const BUILD = 'spa84';
+const BUILD = 'spa85';
 try { console.log('%cPartnerZone • build ' + BUILD, 'background:#2f7ff2;color:#fff;padding:2px 8px;border-radius:4px;font-weight:700'); } catch (_) {}
 
 /* ---- MODO CLIENTE × ADMIN ----------------------------------------------
@@ -1229,7 +1229,23 @@ async function initUserBtn() {
   const avEl = document.getElementById('user-av');
   const nmEl = document.getElementById('user-name');
 
-  // todas as funções do Portal são async — precisa await
+  // Registra o click ANTES de qualquer checagem de sessão — sem isso, user não logado não consegue clicar
+  btn.removeEventListener('click', btn._pfHandler);
+  btn._pfHandler = async () => {
+    const ok = await Portal.configured().catch(() => false);
+    if (!ok) return;
+    const sess = await Portal.session().catch(() => null);
+    if (!sess) {
+      // não logado → vai pra Minha Conta (que mostra o formulário de login)
+      location.hash = '#/minha-conta';
+      return;
+    }
+    const cli = await Portal.client().catch(() => null);
+    await openPerfilModal(cli, sess);
+  };
+  btn.addEventListener('click', btn._pfHandler);
+
+  // atualiza display com dados reais (assíncrono)
   try {
     const ok = await Portal.configured(); if (!ok) return;
     const sess = await Portal.session();  if (!sess) return;
@@ -1269,16 +1285,6 @@ async function initUserBtn() {
       } catch (_) {}
     }
   } catch (_) {}
-
-  // evita duplo-bind
-  btn.removeEventListener('click', btn._pfHandler);
-  btn._pfHandler = async () => {
-    const ok = await Portal.configured(); if (!ok) return;
-    const sess = await Portal.session();  if (!sess) return;
-    const cli  = await Portal.client();
-    await openPerfilModal(cli, sess);
-  };
-  btn.addEventListener('click', btn._pfHandler);
 }
 window.initUserBtn = initUserBtn;
 
@@ -1666,7 +1672,7 @@ async function initAdmin(section) {
     return;
   }
 
-  const sb = Portal.db();
+  const sb = await Portal.db();   // era: Portal.db() sem await — sb era uma Promise, quebrava tudo
   let usuario = null;
   try {
     const { data } = await sb.from('usuarios').select('nome,cargo,ativo')
@@ -1685,6 +1691,7 @@ async function initAdmin(section) {
   }
 
   if (section === 'cadastros') await renderAdminCadastros(root, sb, sess, usuario);
+  else if (section === 'clientes') await renderAdminClientes(root, sb, sess, usuario);
   else                          await renderAdminHome(root, sb, sess, usuario);
 }
 window.initAdmin = initAdmin;
@@ -1738,6 +1745,14 @@ async function renderAdminHome(root, sb, sess, usuario) {
           <div class="adm-nav-txt">
             <b>Solicitações de acesso</b>
             <span>Aprovar cadastros, criar clientes manualmente</span>
+          </div>
+          ${svgIcon('chevR','ic ic-sm')}
+        </a>
+        <a class="adm-nav-item" href="#/admin/clientes">
+          <div class="adm-nav-ic">${svgIcon('user','ic ic-sm')}</div>
+          <div class="adm-nav-txt">
+            <b>Clientes</b>
+            <span>Gerencie equipamentos, boletos e contratos de cada cliente</span>
           </div>
           ${svgIcon('chevR','ic ic-sm')}
         </a>
@@ -2001,6 +2016,380 @@ async function renderAdminCadastros(root, sb, sess, usuario) {
   root.querySelector('#adm-novo-btn')?.addEventListener('click', abrirNovoCliente);
 }
 
+/* ============================================================
+   ADMIN: CLIENTES — gerenciar equipamentos / boletos / contrato  (spa85)
+   ============================================================ */
+async function renderAdminClientes(root, sb, sess, usuario) {
+  root.innerHTML = '<div class="pf-loading">Carregando clientes…</div>';
+
+  let clientes = [];
+  try {
+    const { data, error } = await sb.from('clientes').select('*').order('nome');
+    if (error) throw error;
+    clientes = data || [];
+  } catch (err) {
+    root.innerHTML = `<div class="suporte-blank">
+      ${svgIcon('alert','ic')}
+      <b>Erro ao carregar clientes</b>
+      <p>${escHtml(err.message || 'Verifique o Supabase Studio.')}</p>
+      <a class="btn ghost" href="#/admin">Voltar</a>
+    </div>`;
+    renderIcons(root); return;
+  }
+
+  /* ---- utilitário modal (mesma lógica de renderAdminCadastros) ---- */
+  function criarModal(id, titulo, sub, bodyHtml) {
+    document.getElementById(id)?.remove();
+    const mod = document.createElement('div');
+    mod.className = 'modal-bd'; mod.id = id;
+    mod.innerHTML = `<div class="modal modal-md"><div class="modal-inner">
+      <div class="modal-head">
+        <div><h2>${titulo}</h2>${sub ? `<p>${sub}</p>` : ''}</div>
+        <button class="x" data-close-modal><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+      <div class="modal-body">${bodyHtml}</div>
+    </div></div>`;
+    document.body.appendChild(mod);
+    UI.openModal(id);
+    renderIcons(mod);
+    return mod;
+  }
+
+  const q = { value: '' };
+
+  function renderLista() {
+    const listEl = root.querySelector('#cl-list'); if (!listEl) return;
+    const termo = q.value.toLowerCase().trim();
+    const filtrado = termo ? clientes.filter(c =>
+      (c.nome||'').toLowerCase().includes(termo) ||
+      (c.email||'').toLowerCase().includes(termo)
+    ) : clientes;
+
+    if (!filtrado.length) {
+      listEl.innerHTML = `<div class="adm-blank">${svgIcon('user','ic')}<b>${termo ? 'Nenhum resultado' : 'Nenhum cliente cadastrado'}</b><p>${termo ? 'Tente outro termo.' : 'Use a seção de cadastros para criar clientes.'}</p></div>`;
+      renderIcons(listEl); return;
+    }
+
+    listEl.innerHTML = filtrado.map(cli => {
+      const inits = ((cli.nome||cli.email||'?').trim().split(/\s+/).slice(0,2).map(w=>w[0]||'').join('') || '?').toUpperCase();
+      const stMap = { ativo:'adm-st-aprovado', active:'adm-st-aprovado', inactive:'adm-st-rejeitado', inativo:'adm-st-rejeitado', pending:'adm-st-pendente', pendente:'adm-st-pendente' };
+      const stCls = stMap[(cli.status||'').toLowerCase()] || 'adm-st-aprovado';
+      const stTxt = { ativo:'Ativo', active:'Ativo', inactive:'Inativo', inativo:'Inativo', pending:'Pendente', pendente:'Pendente' }[(cli.status||'').toLowerCase()] || (cli.status || 'Ativo');
+      return `<div class="adm-cad-item">
+        <div class="adm-cad-av">${escHtml(inits)}</div>
+        <div class="adm-cad-info">
+          <b>${escHtml(cli.nome || '—')}</b>
+          <span>${escHtml(cli.email || '')}</span>
+          ${cli.cidade ? `<span style="font-size:12px;color:var(--text-muted)">${escHtml(cli.cidade)}</span>` : ''}
+        </div>
+        <div class="adm-cad-right">
+          <span class="adm-st ${stCls}">${escHtml(stTxt)}</span>
+          <button class="btn ghost btn-sm cli-gerenciar" data-email="${escHtml(cli.email||'')}" data-nome="${escHtml(cli.nome||'')}">${svgIcon('settings','ic ic-sm')} Gerenciar</button>
+        </div>
+      </div>`;
+    }).join('');
+
+    listEl.querySelectorAll('.cli-gerenciar').forEach(btn => {
+      btn.addEventListener('click', () => abrirGerenciar(btn.dataset.email, btn.dataset.nome));
+    });
+    renderIcons(listEl);
+  }
+
+  root.innerHTML = `
+    <div class="adm-page">
+      <div class="adm-header">
+        <div>
+          <a class="btn ghost btn-sm" href="#/admin" style="margin-bottom:8px">${svgIcon('chevL','ic ic-sm')} Painel admin</a>
+          <h1 class="adm-title">Clientes <span style="font-size:16px;font-weight:400;color:var(--text-muted)">(${clientes.length})</span></h1>
+          <p class="adm-sub">Vincule equipamentos, boletos e contratos a cada cliente</p>
+        </div>
+      </div>
+      <div style="margin-bottom:16px">
+        <label class="lib-search" style="max-width:460px;display:flex">
+          <i data-icon="search"></i>
+          <input id="cl-search" type="search" placeholder="Buscar por nome ou e-mail…" autocomplete="off">
+        </label>
+      </div>
+      <div id="cl-list" class="adm-cad-list"></div>
+    </div>`;
+  renderIcons(root);
+  renderLista();
+  root.querySelector('#cl-search')?.addEventListener('input', e => { q.value = e.target.value; renderLista(); });
+
+  /* ----------------------------------------------------------------
+     MODAL: gerenciar cliente — tabs Equipamentos / Boletos / Contrato / Acesso
+  ---------------------------------------------------------------- */
+  async function abrirGerenciar(email, nome) {
+    if (!email) return;
+
+    // busca dados dos 3 módulos em paralelo (tabelas podem não existir ainda → silencia erro)
+    const [eqRes, boRes, ctRes] = await Promise.all([
+      sb.from('equipamentos').select('*').eq('cliente_email', email).order('created_at', {ascending:false}).catch(() => ({data:[]})),
+      sb.from('boletos').select('*').eq('cliente_email', email).order('vencimento', {ascending:false}).catch(() => ({data:[]})),
+      sb.from('contratos').select('*').eq('cliente_email', email).order('created_at', {ascending:false}).catch(() => ({data:[]})),
+    ]);
+    const equips   = eqRes.data   || [];
+    const boletos  = boRes.data   || [];
+    const contratos= ctRes.data   || [];
+
+    // catálogo de equipamentos para o picker
+    const catalog = (typeof EQUIPMENT !== 'undefined' ? EQUIPMENT : []).filter(e => e.name);
+    const eqOpts  = catalog.map(e =>
+      `<option value="${escHtml(e.name)}" data-marca="${escHtml(e.marca||'')}" data-seg="${escHtml(e.tag||e.linha||'')}">${escHtml(e.name)}</option>`
+    ).join('');
+
+    const rowDel = (table, id) =>
+      `<button class="btn ghost btn-xs cg-del" data-table="${table}" data-id="${escHtml(String(id))}">${svgIcon('trash','ic ic-xs')}</button>`;
+
+    const eqHtml = `
+      ${equips.length ? equips.map(eq => `
+        <div class="cg-item">
+          <div class="cg-item-main">
+            <b>${escHtml(eq.name||eq.slug)}</b>
+            ${eq.marca_nome ? `<span class="cg-sub">${escHtml(eq.marca_nome)}</span>` : ''}
+            ${eq.numero_serie ? `<span class="cg-sub">S/N: ${escHtml(eq.numero_serie)}</span>` : ''}
+            ${eq.data_compra  ? `<span class="cg-sub">Compra: ${dataBR(eq.data_compra)}</span>` : ''}
+          </div>
+          ${rowDel('equipamentos', eq.id)}
+        </div>`).join('') : '<div class="cg-empty">Nenhum equipamento vinculado.</div>'}
+      <div class="cg-add-section">
+        <h4>Vincular equipamento</h4>
+        <form id="cg-eq-form" class="cg-form">
+          <div class="pf-field"><label>Equipamento *</label>
+            <select id="cg-eq-sel" class="select-native" required>
+              <option value="">Selecione do catálogo…</option>${eqOpts}
+            </select></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div class="pf-field"><label>Nº série</label><input id="cg-eq-sn" type="text" placeholder="Opcional" maxlength="60"></div>
+            <div class="pf-field"><label>Data de compra</label><input id="cg-eq-dt" type="date"></div>
+          </div>
+          <div id="cg-eq-err" class="acf-err" hidden></div>
+          <button type="submit" class="btn primary btn-sm"${!eqOpts.length?' disabled':''}>${svgIcon('plus','ic ic-sm')} Vincular</button>
+        </form>
+      </div>`;
+
+    const boHtml = `
+      ${boletos.length ? boletos.map(b => {
+        const stLab = {em_aberto:'Em aberto',pago:'Pago',vencido:'Vencido'}[b.status]||b.status;
+        const stCls = {em_aberto:'adm-st-pendente',pago:'adm-st-aprovado',vencido:'adm-st-rejeitado'}[b.status]||'adm-st-pendente';
+        return `<div class="cg-item">
+          <div class="cg-item-main">
+            <b>${brl(b.valor)}</b>
+            <span class="cg-sub">Vence: ${dataBR(b.vencimento)}</span>
+            ${b.descricao ? `<span class="cg-sub">${escHtml(b.descricao)}</span>` : ''}
+          </div>
+          <span class="adm-st ${stCls}">${escHtml(stLab)}</span>
+          ${rowDel('boletos', b.id)}
+        </div>`;
+      }).join('') : '<div class="cg-empty">Nenhum boleto cadastrado.</div>'}
+      <div class="cg-add-section">
+        <h4>Novo boleto</h4>
+        <form id="cg-bo-form" class="cg-form">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div class="pf-field"><label>Valor (R$) *</label><input id="cg-bo-val" type="number" step="0.01" min="0" placeholder="0,00" required></div>
+            <div class="pf-field"><label>Vencimento *</label><input id="cg-bo-venc" type="date" required></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div class="pf-field"><label>Competência</label><input id="cg-bo-comp" type="month"></div>
+            <div class="pf-field"><label>Status</label>
+              <select id="cg-bo-st" class="select-native">
+                <option value="em_aberto">Em aberto</option>
+                <option value="pago">Pago</option>
+              </select>
+            </div>
+          </div>
+          <div class="pf-field"><label>Descrição</label><input id="cg-bo-desc" type="text" placeholder="Ex: Mensalidade Junho/2026" maxlength="120"></div>
+          <div id="cg-bo-err" class="acf-err" hidden></div>
+          <button type="submit" class="btn primary btn-sm">${svgIcon('plus','ic ic-sm')} Adicionar boleto</button>
+        </form>
+      </div>`;
+
+    const ctHtml = `
+      ${contratos.length ? contratos.map(ct => {
+        const stCls2 = {vigente:'adm-st-aprovado',encerrado:'adm-st-rejeitado',cancelado:'adm-st-rejeitado',a_vencer:'adm-st-pendente'}[ct.status]||'adm-st-aprovado';
+        return `<div class="cg-item">
+          <div class="cg-item-main">
+            <b>${escHtml(ct.tipo||'Contrato')}</b>
+            <span class="cg-sub">Início: ${dataBR(ct.vigencia_inicio)} · Fim: ${dataBR(ct.vigencia_fim)}</span>
+            ${ct.descricao ? `<span class="cg-sub">${escHtml(ct.descricao)}</span>` : ''}
+          </div>
+          <span class="adm-st ${stCls2}">${escHtml(ct.status||'vigente')}</span>
+          ${rowDel('contratos', ct.id)}
+        </div>`;
+      }).join('') : '<div class="cg-empty">Nenhum contrato cadastrado.</div>'}
+      <div class="cg-add-section">
+        <h4>Novo contrato</h4>
+        <form id="cg-ct-form" class="cg-form">
+          <div class="pf-field"><label>Tipo</label><input id="cg-ct-tipo" type="text" value="Parceria comercial" maxlength="80"></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div class="pf-field"><label>Início da vigência</label><input id="cg-ct-ini" type="date"></div>
+            <div class="pf-field"><label>Fim (opcional)</label><input id="cg-ct-fim" type="date"></div>
+          </div>
+          <div class="pf-field"><label>Descrição</label><input id="cg-ct-desc" type="text" placeholder="Detalhes do contrato" maxlength="200"></div>
+          <div id="cg-ct-err" class="acf-err" hidden></div>
+          <button type="submit" class="btn primary btn-sm">${svgIcon('plus','ic ic-sm')} Salvar contrato</button>
+        </form>
+      </div>`;
+
+    const mod = criarModal('cli-gerenciar-modal', escHtml(nome || email), escHtml(email), `
+      <div class="cg-tabs">
+        <button class="cg-tab on" data-tab="eq">${svgIcon('wrench','ic ic-sm')} Equipamentos <span class="cg-n">${equips.length}</span></button>
+        <button class="cg-tab" data-tab="bo">${svgIcon('receipt','ic ic-sm')} Boletos <span class="cg-n">${boletos.length}</span></button>
+        <button class="cg-tab" data-tab="ct">${svgIcon('signature','ic ic-sm')} Contrato <span class="cg-n">${contratos.length}</span></button>
+        <button class="cg-tab" data-tab="ac">${svgIcon('mail','ic ic-sm')} Acesso</button>
+      </div>
+      <div class="cg-body" id="cg-eq">${eqHtml}</div>
+      <div class="cg-body" id="cg-bo" hidden>${boHtml}</div>
+      <div class="cg-body" id="cg-ct" hidden>${ctHtml}</div>
+      <div class="cg-body" id="cg-ac" hidden>
+        <div class="cg-access-info">
+          ${svgIcon('mail','ic')}
+          <div>
+            <p>Envie um <b>link de login</b> para <b>${escHtml(email)}</b>. O cliente clica e entra direto na conta, sem precisar de senha.</p>
+            <label class="adm-check-lbl" style="margin-top:10px">
+              <input type="checkbox" id="cg-create-user"> <span>Criar conta se ainda não existir (primeira vez)</span>
+            </label>
+          </div>
+        </div>
+        <div id="cg-ac-msg" class="acf-err" hidden></div>
+        <button class="btn primary" id="cg-send-link" style="margin-top:14px">${svgIcon('send','ic ic-sm')} Enviar link de acesso</button>
+      </div>`);
+
+    /* tabs */
+    mod.querySelectorAll('.cg-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        mod.querySelectorAll('.cg-tab').forEach(t => t.classList.remove('on'));
+        mod.querySelectorAll('.cg-body').forEach(b => { b.hidden = true; });
+        tab.classList.add('on');
+        mod.querySelector(`#cg-${tab.dataset.tab}`).hidden = false;
+      });
+    });
+
+    /* deletar linha */
+    mod.querySelectorAll('.cg-del').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if (!confirm('Remover este item?')) return;
+        try {
+          const { error } = await sb.from(btn.dataset.table).delete().eq('id', btn.dataset.id);
+          if (error) throw error;
+          btn.closest('.cg-item')?.remove();
+          Sound?.success?.();
+        } catch (err) { alert('Erro: ' + (err.message||'')); }
+      });
+    });
+
+    /* vincular equipamento */
+    mod.querySelector('#cg-eq-form')?.addEventListener('submit', async e => {
+      e.preventDefault();
+      const sel = mod.querySelector('#cg-eq-sel');
+      const selName = sel.value; if (!selName) return;
+      const opt = sel.options[sel.selectedIndex];
+      const errEl = mod.querySelector('#cg-eq-err');
+      const sn = mod.querySelector('#cg-eq-sn').value.trim();
+      const dt = mod.querySelector('#cg-eq-dt').value;
+      const catalEq = catalog.find(eq => eq.name === selName) || {};
+      errEl.hidden = true;
+      const sb2 = e.target.querySelector('[type=submit]');
+      const old = sb2.innerHTML; sb2.disabled = true; sb2.innerHTML = 'Vinculando…';
+      try {
+        const { error } = await sb.from('equipamentos').insert({
+          cliente_email: email,
+          slug: selName.toLowerCase().replace(/\s+/g,'-'),
+          name: selName,
+          marca_nome: opt.dataset.marca || catalEq.marca || '',
+          segmento:   opt.dataset.seg   || catalEq.tag   || '',
+          numero_serie: sn || null,
+          data_compra:  dt || null,
+        });
+        if (error) throw error;
+        UI.closeModal(mod); setTimeout(() => { mod.remove(); abrirGerenciar(email, nome); }, 350);
+        Sound?.success?.();
+        Toast.success(`${selName} vinculado!`);
+      } catch (err) {
+        errEl.textContent = (err.message||'').includes('exist') ? 'Tabela não existe — execute o SQL no Supabase Studio primeiro.' : (err.message||'Erro.');
+        errEl.hidden = false; sb2.disabled = false; sb2.innerHTML = old; renderIcons(sb2);
+      }
+    });
+
+    /* novo boleto */
+    mod.querySelector('#cg-bo-form')?.addEventListener('submit', async e => {
+      e.preventDefault();
+      const valor = parseFloat(mod.querySelector('#cg-bo-val').value);
+      const venc  = mod.querySelector('#cg-bo-venc').value;
+      const comp  = mod.querySelector('#cg-bo-comp').value;
+      const st    = mod.querySelector('#cg-bo-st').value;
+      const desc  = mod.querySelector('#cg-bo-desc').value.trim();
+      const errEl = mod.querySelector('#cg-bo-err');
+      if (!valor || !venc) return;
+      errEl.hidden = true;
+      const saveBtn = e.target.querySelector('[type=submit]');
+      const old = saveBtn.innerHTML; saveBtn.disabled = true; saveBtn.innerHTML = 'Salvando…';
+      try {
+        const { error } = await sb.from('boletos').insert({
+          cliente_email: email, valor, vencimento: venc,
+          competencia: comp || venc.slice(0,7), status: st, descricao: desc || null,
+        });
+        if (error) throw error;
+        UI.closeModal(mod); setTimeout(() => { mod.remove(); abrirGerenciar(email, nome); }, 350);
+        Sound?.success?.();
+        Toast.success('Boleto adicionado!');
+      } catch (err) {
+        errEl.textContent = (err.message||'').includes('exist') ? 'Tabela não existe — execute o SQL no Supabase Studio primeiro.' : (err.message||'Erro.');
+        errEl.hidden = false; saveBtn.disabled = false; saveBtn.innerHTML = old; renderIcons(saveBtn);
+      }
+    });
+
+    /* novo contrato */
+    mod.querySelector('#cg-ct-form')?.addEventListener('submit', async e => {
+      e.preventDefault();
+      const tipo = mod.querySelector('#cg-ct-tipo').value.trim() || 'Parceria comercial';
+      const ini  = mod.querySelector('#cg-ct-ini').value;
+      const fim  = mod.querySelector('#cg-ct-fim').value;
+      const desc = mod.querySelector('#cg-ct-desc').value.trim();
+      const errEl= mod.querySelector('#cg-ct-err');
+      errEl.hidden = true;
+      const saveBtn = e.target.querySelector('[type=submit]');
+      const old = saveBtn.innerHTML; saveBtn.disabled = true; saveBtn.innerHTML = 'Salvando…';
+      try {
+        const { error } = await sb.from('contratos').insert({
+          cliente_email: email, tipo,
+          vigencia_inicio: ini || null, vigencia_fim: fim || null,
+          descricao: desc || null, status: 'vigente',
+        });
+        if (error) throw error;
+        UI.closeModal(mod); setTimeout(() => { mod.remove(); abrirGerenciar(email, nome); }, 350);
+        Sound?.success?.();
+        Toast.success('Contrato salvo!');
+      } catch (err) {
+        errEl.textContent = (err.message||'').includes('exist') ? 'Tabela não existe — execute o SQL no Supabase Studio primeiro.' : (err.message||'Erro.');
+        errEl.hidden = false; saveBtn.disabled = false; saveBtn.innerHTML = old; renderIcons(saveBtn);
+      }
+    });
+
+    /* enviar link de acesso */
+    mod.querySelector('#cg-send-link')?.addEventListener('click', async () => {
+      const msgEl = mod.querySelector('#cg-ac-msg');
+      const createUser = mod.querySelector('#cg-create-user')?.checked;
+      const btn = mod.querySelector('#cg-send-link');
+      const old = btn.innerHTML; btn.disabled = true; btn.innerHTML = 'Enviando…';
+      msgEl.style.color = '';
+      try {
+        const { error } = await sb.auth.signInWithOtp({ email, options: { shouldCreateUser: !!createUser } });
+        if (error) throw error;
+        msgEl.style.color = 'var(--success)';
+        msgEl.textContent = '✓ Link enviado para ' + email + ' — cliente recebe em instantes.';
+        msgEl.hidden = false;
+        Sound?.success?.();
+      } catch (err) {
+        msgEl.textContent = err.message || 'Erro ao enviar.';
+        msgEl.hidden = false;
+        Sound?.error?.();
+      }
+      btn.disabled = false; btn.innerHTML = old; renderIcons(btn);
+    });
+  }
+}
+
 function renderConta(root, cli, sess) {
   const email = (cli && cli.email) || (sess && sess.user && sess.user.email) || '';
   const nome  = (cli && cli.nome) || (email.split('@')[0] || 'Cliente');
@@ -2035,9 +2424,9 @@ function renderConta(root, cli, sess) {
       <section class="conta-card">
         <div class="conta-card-head">${svgIcon('folder','ic ic-sm')} <b>Minhas áreas</b></div>
         <div class="conta-links">
-          <a class="conta-link soon"><span>${svgIcon('signature','ic ic-sm')} Contrato</span><small>em breve</small></a>
-          <a class="conta-link soon"><span>${svgIcon('receipt','ic ic-sm')} Boletos</span><small>em breve</small></a>
-          <a class="conta-link soon"><span>${svgIcon('wrench','ic ic-sm')} Meus Equipamentos</span><small>em breve</small></a>
+          <a class="conta-link" href="#/contrato"><span>${svgIcon('signature','ic ic-sm')} Contrato</span>${svgIcon('chevR','ic ic-sm')}</a>
+          <a class="conta-link" href="#/boletos"><span>${svgIcon('receipt','ic ic-sm')} Boletos</span>${svgIcon('chevR','ic ic-sm')}</a>
+          <a class="conta-link" href="#/meus-equipamentos"><span>${svgIcon('wrench','ic ic-sm')} Meus Equipamentos</span>${svgIcon('chevR','ic ic-sm')}</a>
           <a class="conta-link" href="#/suporte"><span>${svgIcon('buoy','ic ic-sm')} Suporte</span>${svgIcon('chevR','ic ic-sm')}</a>
         </div>
       </section>

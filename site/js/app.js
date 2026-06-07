@@ -1,7 +1,7 @@
 /* ============================================================
    APP — ícones (traçado), dados de exemplo e render da Início
    ============================================================ */
-const BUILD = 'spa89';
+const BUILD = 'spa90';
 try { console.log('%cPartnerZone • build ' + BUILD, 'background:#2f7ff2;color:#fff;padding:2px 8px;border-radius:4px;font-weight:700'); } catch (_) {}
 
 /* ---- MODO CLIENTE × ADMIN ----------------------------------------------
@@ -2122,22 +2122,11 @@ async function renderAdminClientes(root, sb, sess, usuario) {
   async function abrirGerenciar(email, nome) {
     if (!email) return;
 
-    // boletos e contratos usam cliente_id (clientes.id), não email — busca o id primeiro
-    let clienteId = null;
-    try {
-      const { data: cliRow } = await sb.from('clientes').select('id').eq('email', email).maybeSingle();
-      clienteId = cliRow?.id || null;
-    } catch (_) {}
-
-    // busca dados dos 3 módulos em paralelo
+    // boletos e contratos agora usam cliente_email (igual chamados) — sem busca de cliente_id
     const [eqRes, boRes, ctRes] = await Promise.all([
       sb.from('cliente_maquinas').select('*').eq('cliente_email', email).order('created_at', {ascending:false}).catch(() => ({data:[]})),
-      clienteId
-        ? sb.from('boletos').select('*').eq('cliente_id', clienteId).order('vencimento', {ascending:false}).catch(() => ({data:[]}))
-        : Promise.resolve({data:[]}),
-      clienteId
-        ? sb.from('contratos').select('*').eq('cliente_id', clienteId).order('vigencia_inicio', {ascending:false}).catch(() => ({data:[]}))
-        : Promise.resolve({data:[]}),
+      sb.from('boletos').select('*').eq('cliente_email', email).order('vencimento', {ascending:false}).catch(() => ({data:[]})),
+      sb.from('contratos').select('*').eq('cliente_email', email).order('vigencia_inicio', {ascending:false}).catch(() => ({data:[]})),
     ]);
     const equips   = eqRes.data   || [];
     const boletos  = boRes.data   || [];
@@ -2347,9 +2336,8 @@ async function renderAdminClientes(root, sb, sess, usuario) {
       const saveBtn = e.target.querySelector('[type=submit]');
       const old = saveBtn.innerHTML; saveBtn.disabled = true; saveBtn.innerHTML = 'Salvando…';
       try {
-        if (!clienteId) throw new Error('Cliente não encontrado na tabela clientes.');
         const { error } = await sb.from('boletos').insert({
-          cliente_id: clienteId, valor, vencimento: venc,
+          cliente_email: email, valor, vencimento: venc,
           competencia: comp || venc.slice(0,7), status: st, observacoes: desc || null,
         });
         if (error) throw error;
@@ -2375,9 +2363,8 @@ async function renderAdminClientes(root, sb, sess, usuario) {
       const saveBtn = e.target.querySelector('[type=submit]');
       const old = saveBtn.innerHTML; saveBtn.disabled = true; saveBtn.innerHTML = 'Salvando…';
       try {
-        if (!clienteId) throw new Error('Cliente não encontrado na tabela clientes.');
         const { error } = await sb.from('contratos').insert({
-          cliente_id: clienteId,
+          cliente_email: email,
           numero: num || null,
           periodicidade: per || null,
           vigencia_inicio: ini || null, vigencia_fim: fim || null,

@@ -1,7 +1,7 @@
 /* ============================================================
    APP — ícones (traçado), dados de exemplo e render da Início
    ============================================================ */
-const BUILD = 'spa93';
+const BUILD = 'spa94';
 try { console.log('%cPartnerZone • build ' + BUILD, 'background:#2f7ff2;color:#fff;padding:2px 8px;border-radius:4px;font-weight:700'); } catch (_) {}
 
 /* ---- MODO CLIENTE × ADMIN ----------------------------------------------
@@ -2565,97 +2565,117 @@ async function initMeusEquipamentos() {
   if (!ok) { contaNotConfigured(root, 'Meus Equipamentos'); return; }
   let sess = null;
   try { sess = await Portal.session(); } catch (_) {}
-  if (!sess) { renderLogin(root, 'Meus Equipamentos', 'Veja os equipamentos vinculados à sua conta e acesse os materiais exclusivos.', initMeusEquipamentos); return; }
-  let equips = [];
+  if (!sess) { renderLogin(root, 'Meus Equipamentos', 'Veja os equipamentos e materiais exclusivos vinculados à sua conta.', initMeusEquipamentos); return; }
+
+  let catalogo = { equipamentos: [], materiais: [], marcas: [] };
   try {
     const sb = await Portal.db();
     if (sb) {
-      const { data, error } = await sb.from('cliente_maquinas').select('slug,name,marca_nome,segmento,cover');
-      if (!error && data) equips = data;
+      const { data, error } = await sb.rpc('portal_meu_catalogo');
+      if (!error && data) catalogo = data;
     }
   } catch (_) {}
-  renderMeusEquipamentos(root, equips);
+
+  renderMeusEquipamentos(root, catalogo);
 }
 window.initMeusEquipamentos = initMeusEquipamentos;
 
-/* localiza o equipamento no array global EQUIPMENT por slug ou nome (case-insensitive) */
-function eqBySlug(slug) {
-  const s = (slug||'').toLowerCase();
-  return EQUIPMENT.find(e =>
-    (e.codigo||'').toLowerCase() === s ||
-    (e.name||'').toLowerCase() === s ||
-    (e.name||'').toLowerCase().replace(/\s+/g,'') === s.replace(/\s+/g,'')
-  ) || null;
-}
+const _tipoIcone = { video:'video', foto:'image', pdf:'file', apresentacao:'presentation', arte:'pencil', zip:'package', outro:'file' };
 
-function renderMeusEquipamentos(root, equips) {
-  if (!equips.length) {
+function renderMeusEquipamentos(root, { equipamentos = [], materiais = [], marcas = [] }) {
+  if (!equipamentos.length) {
     root.innerHTML = `
       <div class="meuseq-blank">
         ${svgIcon('wrench','ic')}
-        <b>Nenhum equipamento vinculado</b>
-        <p>Seus equipamentos aparecem aqui assim que forem cadastrados pela equipe Contourline. Se você já tem um equipamento e não está vendo, fale com a gente.</p>
-        <button class="btn ghost" data-open-modal="modal-solicitar">${svgIcon('buoy','ic ic-sm')} Falar com o suporte</button>
+        <b>Nenhum equipamento liberado</b>
+        <p>Quando a equipe Contourline liberar seus equipamentos, tudo aparece aqui — incluindo os materiais exclusivos para download.</p>
+        <a class="btn ghost" href="#/suporte">${svgIcon('buoy','ic ic-sm')} Falar com o suporte</a>
       </div>`;
     renderIcons(root); return;
   }
+
+  // índices para lookup rápido
+  const matPorEq = {};
+  materiais.forEach(m => {
+    if (!matPorEq[m.equipamento_slug]) matPorEq[m.equipamento_slug] = [];
+    matPorEq[m.equipamento_slug].push(m);
+  });
+  const marcaMap = {};
+  marcas.forEach(m => { marcaMap[m.slug] = m; });
+
+  // agrupa equipamentos por marca
+  const porMarca = {};
+  equipamentos.forEach(eq => {
+    const mk = eq.marca_slug || 'outros';
+    if (!porMarca[mk]) porMarca[mk] = [];
+    porMarca[mk].push(eq);
+  });
+
+  const totalMat = materiais.length;
 
   root.innerHTML = `
     <div class="meuseq-header">
       <div>
         <h1 class="meuseq-title">Meus Equipamentos</h1>
-        <p class="meuseq-sub">${equips.length} equipamento${equips.length!==1?'s':''} vinculado${equips.length!==1?'s':''} à sua conta</p>
+        <p class="meuseq-sub">${equipamentos.length} equipamento${equipamentos.length!==1?'s':''} · ${totalMat} material${totalMat!==1?'is':''} disponíve${totalMat!==1?'is':'l'}</p>
       </div>
     </div>
-    <div class="meuseq-grid" id="meuseq-grid"></div>
-    <div class="conta-note" style="margin-top:18px">${svgIcon('shield','ic ic-sm')} Você vê apenas os equipamentos vinculados ao seu contrato.</div>`;
+    <div class="meuseq-wrap" id="meuseq-wrap"></div>
+    <div class="conta-note" style="margin-top:18px">${svgIcon('shield','ic ic-sm')} Você vê apenas os equipamentos e materiais do seu contrato.</div>`;
 
-  const grid = root.querySelector('#meuseq-grid');
-  grid.innerHTML = equips.map(eq => {
-    const local = eqBySlug(eq.slug);
-    const name  = eq.name || (local && local.name) || eq.slug;
-    const tag   = eq.segmento || (local && local.tag) || '';
-    const marca = eq.marca_nome || (local && local.marca) || '';
-    const count = (local && local.count) || '';
-    const img   = (local && eqCover(local.name, local.img)) || eq.cover || '';
-    const href  = local ? `#/categoria/${encodeURIComponent(local.name)}` : '#/equipamentos';
-    return `
-      <div class="meuseq-card">
-        <a class="meuseq-thumb" href="${href}">
-          ${img
-            ? `<img src="${escHtml(img)}" alt="${escHtml(name)}" loading="lazy">`
-            : `<span class="eq-ph2"><b>${escHtml((name.replace(/[^A-Za-zÀ-ÿ0-9 ]/g,'').split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0]).join('')||'EQ').toUpperCase())}</b></span>`
-          }
-          <span class="meuseq-badge-eq">${svgIcon('lock','ic ic-sm')} Seu equipamento</span>
-        </a>
+  const wrap = root.querySelector('#meuseq-wrap');
+
+  Object.entries(porMarca).forEach(([marcaSlug, eqs]) => {
+    const marca = marcaMap[marcaSlug];
+    const marcaNome = marca?.name || marcaSlug;
+
+    const secHtml = eqs.map(eq => {
+      const mats = matPorEq[eq.slug] || [];
+      const ph = (eq.name||'EQ').replace(/[^A-Za-zÀ-ÿ0-9 ]/g,'').split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase() || 'EQ';
+      const matsHtml = mats.length ? `
+        <div class="meuseq-mats">
+          <div class="meuseq-mats-head">${svgIcon('folder','ic ic-sm')} ${mats.length} material${mats.length!==1?'is':''}</div>
+          <div class="meuseq-mats-list">
+            ${mats.map(m => {
+              const ico = _tipoIcone[(m.tipo||'').toLowerCase()] || 'file';
+              return `<a class="meuseq-mat-item" href="${escHtml(m.url)}" target="_blank" rel="noopener" download>
+                ${svgIcon(ico,'ic ic-sm')}
+                <span class="meuseq-mat-nome">${escHtml(m.titulo||m.id)}</span>
+                ${m.formato ? `<span class="meuseq-mat-fmt">${escHtml(m.formato.toUpperCase())}</span>` : ''}
+                ${svgIcon('download','ic ic-sm')}
+              </a>`;
+            }).join('')}
+          </div>
+        </div>` : `<div class="meuseq-mats-vazio">${svgIcon('folder','ic ic-sm')} Nenhum material disponível ainda.</div>`;
+
+      return `<div class="meuseq-card">
+        <div class="meuseq-thumb">
+          ${eq.cover
+            ? `<img src="${escHtml(eq.cover)}" alt="${escHtml(eq.name)}" loading="lazy">`
+            : `<span class="eq-ph2"><b>${escHtml(ph)}</b></span>`}
+          <span class="meuseq-badge-eq">${svgIcon('lock','ic ic-sm')} Exclusivo</span>
+        </div>
         <div class="meuseq-body">
           <div class="meuseq-info">
-            <h3>${escHtml(name)}</h3>
-            <p>${escHtml(tag)}</p>
-            ${marca ? `<small class="meuseq-marca">${escHtml(marca)}</small>` : ''}
+            <h3>${escHtml(eq.name||eq.slug)}</h3>
+            ${eq.segmento ? `<p>${escHtml(eq.segmento)}</p>` : ''}
           </div>
-          <div class="meuseq-actions">
-            ${count ? `<span class="meuseq-count">${svgIcon('folder','ic ic-sm')} ${count} materiais</span>` : ''}
-            <a class="btn ghost btn-sm" href="${href}">${svgIcon('folder','ic ic-sm')} Ver materiais</a>
+          ${matsHtml}
+          <div class="meuseq-actions" style="margin-top:10px">
             <a class="btn ghost btn-sm" href="#/suporte">${svgIcon('buoy','ic ic-sm')} Suporte</a>
-          </div>
-          <div class="meuseq-privado">
-            ${svgIcon('wrench','ic ic-sm')} <span>Nº série, garantia e manutenção — <b>em breve</b></span>
           </div>
         </div>
       </div>`;
-  }).join('');
+    }).join('');
+
+    wrap.insertAdjacentHTML('beforeend', `
+      <div class="meuseq-marca-sec">
+        <div class="meuseq-marca-label">${escHtml(marcaNome)}</div>
+        <div class="meuseq-grid">${secHtml}</div>
+      </div>`);
+  });
 
   renderIcons(root);
-
-  // preenche o campo "Equipamento" no modal de solicitação ao clicar "Suporte"
-  root.querySelectorAll('.meuseq-chamado').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const eq = btn.dataset.eq || '';
-      const inp = document.getElementById('modal-solicitar')?.querySelector('input[placeholder*="HIPRO"]');
-      if (inp) inp.value = eq;
-    });
-  });
 }
 
 /* ============================================================

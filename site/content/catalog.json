@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-06-06T21:30:04.093Z",
+  "generatedAt": "2026-06-07T20:02:17.906Z",
   "source": "equipamentos: catalogo.db (completo) · materials: liberados (manifests + audio-metadata)",
   "marcas": [
     {
@@ -627,7 +627,7 @@
       "atualizadoEm": "2026-06-03T20:38:02.836Z"
     },
     {
-      "id": "m_0002",
+      "id": "m_0004",
       "titulo": "Bruma Sobre o Mar",
       "equipamento": null,
       "marca": null,
@@ -640,7 +640,7 @@
       "flags": [
         "audio"
       ],
-      "url": "content/media/m_0002.mp3",
+      "url": "content/media/m_0004.mp3",
       "thumb": "https://lh3.googleusercontent.com/d/13tZPbelvialTvKq8LV1DimUFT9ehs65w",
       "tamanho": "",
       "novo": true,

@@ -1,7 +1,7 @@
 /* ============================================================
    APP — ícones (traçado), dados de exemplo e render da Início
    ============================================================ */
-const BUILD = 'spa88';
+const BUILD = 'spa89';
 try { console.log('%cPartnerZone • build ' + BUILD, 'background:#2f7ff2;color:#fff;padding:2px 8px;border-radius:4px;font-weight:700'); } catch (_) {}
 
 /* ---- MODO CLIENTE × ADMIN ----------------------------------------------
@@ -3065,7 +3065,7 @@ async function renderSuporteLista(root, sb, sess) {
 
       // mensagem automática com dados do cliente (a Central vê ao abrir o ticket)
       try {
-        const cli = Portal.client?.() || null;
+        const cli = await Portal.client().catch(() => null);
         let equips = [];
         try { const { data: eq } = await sb.from('equipamentos').select('name').limit(15); equips = eq || []; } catch (_) {}
         const linhas = [];
@@ -3084,8 +3084,9 @@ async function renderSuporteLista(root, sb, sess) {
       if (e2) throw e2;
       Sound?.success?.();
       location.hash = '#/suporte/' + ch.id;
-    } catch (_) {
-      errEl.textContent = 'Não consegui abrir o chamado. Verifique sua conexão e tente novamente.';
+    } catch (err) {
+      const msg = err?.message || err?.details || String(err) || 'erro desconhecido';
+      errEl.textContent = 'Erro: ' + msg;
       errEl.hidden = false;
       envBtn.disabled = false; envBtn.innerHTML = old; renderIcons(envBtn);
       Sound?.error?.();

@@ -1,7 +1,7 @@
 /* ============================================================
    APP — ícones (traçado), dados de exemplo e render da Início
    ============================================================ */
-const BUILD = 'spa92';
+const BUILD = 'spa93';
 try { console.log('%cPartnerZone • build ' + BUILD, 'background:#2f7ff2;color:#fff;padding:2px 8px;border-radius:4px;font-weight:700'); } catch (_) {}
 
 /* ---- MODO CLIENTE × ADMIN ----------------------------------------------
@@ -121,6 +121,7 @@ const NAV = [
     { icon:'receipt', text:'Boletos', route:'#/boletos' },
     { icon:'wrench', text:'Meus Equipamentos', route:'#/meus-equipamentos' },
     { icon:'buoy', text:'Suporte', route:'#/suporte' },
+    { icon:'download', text:'Entregas', route:'#/entregas' },
   ]},
   { label:'Administração', admin:true, items:[
     { icon:'package', text:'Catálogo (equip.)', route:'#/cadastro' },
@@ -2123,14 +2124,16 @@ async function renderAdminClientes(root, sb, sess, usuario) {
     if (!email) return;
 
     // boletos e contratos agora usam cliente_email (igual chamados) — sem busca de cliente_id
-    const [eqRes, boRes, ctRes] = await Promise.all([
+    const [eqRes, boRes, ctRes, entRes] = await Promise.all([
       sb.from('cliente_maquinas').select('*').eq('cliente_email', email).order('created_at', {ascending:false}).catch(() => ({data:[]})),
       sb.from('boletos').select('*').eq('cliente_email', email).order('vencimento', {ascending:false}).catch(() => ({data:[]})),
       sb.from('contratos').select('*').eq('cliente_email', email).order('vigencia_inicio', {ascending:false}).catch(() => ({data:[]})),
+      sb.from('entregas').select('*').eq('cliente_email', email).order('criado_em', {ascending:false}).catch(() => ({data:[]})),
     ]);
     const equips   = eqRes.data   || [];
     const boletos  = boRes.data   || [];
     const contratos= ctRes.data   || [];
+    const entregas = entRes.data  || [];
 
     // catálogo de equipamentos para o picker
     const catalog = (typeof EQUIPMENT !== 'undefined' ? EQUIPMENT : []).filter(e => e.name);
@@ -2248,10 +2251,42 @@ async function renderAdminClientes(root, sb, sess, usuario) {
         <button class="cg-tab" data-tab="bo">${svgIcon('receipt','ic ic-sm')} Boletos <span class="cg-n">${boletos.length}</span></button>
         <button class="cg-tab" data-tab="ct">${svgIcon('signature','ic ic-sm')} Contrato <span class="cg-n">${contratos.length}</span></button>
         <button class="cg-tab" data-tab="ac">${svgIcon('mail','ic ic-sm')} Acesso</button>
+        <button class="cg-tab" data-tab="ent">${svgIcon('download','ic ic-sm')} Entregas <span class="cg-n">${entregas.length}</span></button>
       </div>
       <div class="cg-body" id="cg-eq">${eqHtml}</div>
       <div class="cg-body" id="cg-bo" hidden>${boHtml}</div>
       <div class="cg-body" id="cg-ct" hidden>${ctHtml}</div>
+      <div class="cg-body" id="cg-ent" hidden>${(() => {
+        const agora = Date.now();
+        const entRows = entregas.map(en => {
+          const dias = en.expira_em ? Math.ceil((new Date(en.expira_em) - agora) / 86400000) : null;
+          const expirado = dias !== null && dias < 0;
+          const prazoTxt = expirado ? '⚠️ Expirado' : dias !== null ? `Disponível por mais ${dias} dia${dias!==1?'s':''}` : 'Sem prazo';
+          return `<div class="cg-item">
+            <div class="cg-item-main">
+              <b>${escHtml(en.titulo)}</b>
+              ${en.mensagem ? `<span class="cg-sub">${escHtml(en.mensagem)}</span>` : ''}
+              <span class="cg-sub">${prazoTxt}</span>
+            </div>
+            ${rowDel('entregas', en.id)}
+          </div>`;
+        }).join('');
+        return `${entRows || '<div class="cg-empty">Nenhuma entrega registrada.</div>'}
+        <div class="cg-add-section">
+          <h4>Nova entrega</h4>
+          <form id="cg-ent-form" class="cg-form">
+            <div class="pf-field"><label>Título *</label><input id="cg-ent-titulo" type="text" placeholder="Ex: Arte — HIPRO Agosto 2026" required maxlength="100"></div>
+            <div class="pf-field"><label>Link do Google Drive *</label><input id="cg-ent-url" type="url" placeholder="https://drive.google.com/..." required></div>
+            <div class="pf-field"><label>Mensagem (opcional)</label><input id="cg-ent-msg" type="text" placeholder="Ex: Sua arte está pronta!" maxlength="200"></div>
+            <div style="display:grid;grid-template-columns:1fr auto;gap:10px;align-items:end">
+              <div class="pf-field"><label>Dias disponíveis</label><input id="cg-ent-dias" type="number" min="1" max="365" placeholder="30" value="30"></div>
+              <label class="adm-check-lbl" style="padding-bottom:10px"><input type="checkbox" id="cg-ent-sem-prazo"> Sem prazo</label>
+            </div>
+            <div id="cg-ent-err" class="acf-err" hidden></div>
+            <button type="submit" class="btn primary btn-sm">${svgIcon('plus','ic ic-sm')} Criar entrega</button>
+          </form>
+        </div>`;
+      })()}</div>
       <div class="cg-body" id="cg-ac" hidden>
         <div class="cg-access-info">
           ${svgIcon('mail','ic')}
@@ -2400,6 +2435,41 @@ async function renderAdminClientes(root, sb, sess, usuario) {
         Sound?.error?.();
       }
       btn.disabled = false; btn.innerHTML = old; renderIcons(btn);
+    });
+
+    /* nova entrega */
+    mod.querySelector('#cg-ent-form')?.addEventListener('submit', async e => {
+      e.preventDefault();
+      const titulo   = mod.querySelector('#cg-ent-titulo').value.trim();
+      const url      = mod.querySelector('#cg-ent-url').value.trim();
+      const msg      = mod.querySelector('#cg-ent-msg').value.trim();
+      const semPrazo = mod.querySelector('#cg-ent-sem-prazo').checked;
+      const dias     = parseInt(mod.querySelector('#cg-ent-dias').value) || 30;
+      const errEl    = mod.querySelector('#cg-ent-err');
+      if (!titulo || !url) return;
+      errEl.hidden = true;
+      const saveBtn = e.target.querySelector('[type=submit]');
+      const old = saveBtn.innerHTML; saveBtn.disabled = true; saveBtn.innerHTML = 'Salvando…';
+      try {
+        const expira_em = semPrazo ? null : new Date(Date.now() + dias * 86400000).toISOString().slice(0,10);
+        const { error } = await sb.from('entregas').insert({
+          cliente_email: email, titulo, drive_url: url,
+          mensagem: msg || null, expira_em,
+        });
+        if (error) throw error;
+        UI.closeModal(mod); setTimeout(() => { mod.remove(); abrirGerenciar(email, nome); }, 350);
+        Sound?.success?.();
+        Toast.success('Entrega criada!');
+      } catch (err) {
+        errEl.textContent = err.message || 'Erro ao criar entrega.';
+        errEl.hidden = false; saveBtn.disabled = false; saveBtn.innerHTML = old; renderIcons(saveBtn);
+      }
+    });
+
+    /* toggle "sem prazo" desabilita campo de dias */
+    mod.querySelector('#cg-ent-sem-prazo')?.addEventListener('change', e => {
+      const diasInput = mod.querySelector('#cg-ent-dias');
+      if (diasInput) diasInput.disabled = e.target.checked;
     });
   }
 }
@@ -3348,6 +3418,78 @@ async function initSolicitacoes() {
   renderSolicitacoes(root, sb, sess, solic);
 }
 window.initSolicitacoes = initSolicitacoes;
+
+/* ============================================================
+   ENTREGAS — arquivos enviados pela equipe via Google Drive
+   Tabela: entregas(id, cliente_email, titulo, drive_url,
+                    mensagem, expira_em, criado_em)
+   ============================================================ */
+async function initEntregas() {
+  const root = document.getElementById('entregas-page'); if (!root) return;
+  root.innerHTML = `<div class="pf-loading">Carregando…</div>`;
+  let ok = false;
+  try { ok = await Portal.configured(); } catch (_) {}
+  if (!ok) { contaNotConfigured(root, 'Entregas'); return; }
+  let sess = null;
+  try { sess = await Portal.session(); } catch (_) {}
+  if (!sess) {
+    renderLogin(root, 'Entregas', 'Acesse os arquivos enviados pela equipe Contourline.', initEntregas);
+    return;
+  }
+  let sb = null;
+  try { sb = await Portal.db(); } catch (_) {}
+  if (!sb) { contaNotConfigured(root, 'Entregas'); return; }
+
+  let entregas = [];
+  try {
+    const { data } = await sb.from('entregas').select('*').order('criado_em', { ascending: false });
+    if (data) entregas = data;
+  } catch (_) {}
+
+  const agora = Date.now();
+  const ativas    = entregas.filter(e => !e.expira_em || new Date(e.expira_em).getTime() + 86400000 > agora);
+  const expiradas = entregas.filter(e =>  e.expira_em && new Date(e.expira_em).getTime() + 86400000 <= agora);
+
+  function cardHtml(e) {
+    const ms   = e.expira_em ? (new Date(e.expira_em).getTime() + 86400000 - agora) : null;
+    const dias  = ms !== null ? Math.ceil(ms / 86400000) : null;
+    const urgente = dias !== null && dias <= 3;
+    return `<div class="ent-card">
+      <div class="ent-card-ic">${svgIcon('download','ic')}</div>
+      <div class="ent-card-body">
+        <div class="ent-card-titulo">${escHtml(e.titulo)}</div>
+        ${e.mensagem ? `<div class="ent-card-msg">${escHtml(e.mensagem)}</div>` : ''}
+        <div class="ent-card-prazo${urgente?' ent-urgente':''}">
+          ${dias !== null
+            ? `${svgIcon('calendar','ic ic-sm')} Disponível por mais <b>${dias} dia${dias!==1?'s':''}</b>`
+            : `${svgIcon('check','ic ic-sm')} Sem prazo de expiração`}
+        </div>
+        <a class="btn" href="${escHtml(e.drive_url)}" target="_blank" rel="noopener noreferrer">
+          ${svgIcon('folder','ic ic-sm')} Acessar pasta
+        </a>
+      </div>
+    </div>`;
+  }
+
+  root.innerHTML = `
+    <div class="ent-page">
+      <div class="ent-header">
+        <h1 class="ent-title">${svgIcon('download','ic ic-sm')} Entregas</h1>
+        <p class="ent-sub">Arquivos disponibilizados pela equipe Contourline para você.</p>
+      </div>
+      ${ativas.length
+        ? `<div class="ent-list">${ativas.map(cardHtml).join('')}</div>`
+        : `<div class="suporte-blank">${svgIcon('download','ic')}<b>Nenhuma entrega disponível</b><p>Quando a equipe enviar arquivos para você, eles aparecerão aqui.</p></div>`
+      }
+      ${expiradas.length ? `
+        <details class="ent-expiradas">
+          <summary>${svgIcon('clock','ic ic-sm')} Expiradas (${expiradas.length})</summary>
+          ${expiradas.map(e => `<div class="ent-exp-item">${escHtml(e.titulo)} · Expirou em ${dataBR(e.expira_em)}</div>`).join('')}
+        </details>` : ''}
+    </div>`;
+  renderIcons(root);
+}
+window.initEntregas = initEntregas;
 
 function renderSolicitacoes(root, sb, sess, solic) {
   const tipoMap = {

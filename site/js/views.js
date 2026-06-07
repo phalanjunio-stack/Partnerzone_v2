@@ -476,6 +476,18 @@
     },
 
     /* ---------- SOLICITAÇÕES (área privada · pedir materiais personalizados) ---------- */
+    entregas() {
+      return {
+        title: 'Entregas',
+        crumbs: `<i data-icon="download" data-cls="ic ic-sm"></i><a href="#/">PartnerZone</a><span>›</span><span class="here">Entregas</span>`,
+        html: `
+        <div class="conta-wrap" data-enter>
+          <div id="entregas-page"><div class="pf-loading">Carregando…</div></div>
+        </div>`,
+        init: () => { window.initEntregas && window.initEntregas(); },
+      };
+    },
+
     solicitacoes() {
       return {
         title: 'Solicitações',
@@ -771,6 +783,7 @@
     if (p[0] === 'admin')               return Views.admin(p[1]);
     if (p[0] === 'suporte')             return Views.suporte(p[1]);
     if (p[0] === 'solicitacoes')        return Views.solicitacoes();
+    if (p[0] === 'entregas')            return Views.entregas();
     if (p[0] === 'audio')               return Views.musica();
     if (p[0] === 'marca')               return p[2] === 'logos' ? Views.marcaLogos(p[1]) : Views.marca(p[1]);
     if (p[0] === 'cadastro')            return Views.cadastro();

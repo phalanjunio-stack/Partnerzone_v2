@@ -1,7 +1,7 @@
 /* ============================================================
    APP — ícones (traçado), dados de exemplo e render da Início
    ============================================================ */
-const BUILD = 'spa85';
+const BUILD = 'spa86';
 try { console.log('%cPartnerZone • build ' + BUILD, 'background:#2f7ff2;color:#fff;padding:2px 8px;border-radius:4px;font-weight:700'); } catch (_) {}
 
 /* ---- MODO CLIENTE × ADMIN ----------------------------------------------
@@ -2122,11 +2122,22 @@ async function renderAdminClientes(root, sb, sess, usuario) {
   async function abrirGerenciar(email, nome) {
     if (!email) return;
 
-    // busca dados dos 3 módulos em paralelo (tabelas podem não existir ainda → silencia erro)
+    // boletos e contratos usam cliente_id (clientes.id), não email — busca o id primeiro
+    let clienteId = null;
+    try {
+      const { data: cliRow } = await sb.from('clientes').select('id').eq('email', email).maybeSingle();
+      clienteId = cliRow?.id || null;
+    } catch (_) {}
+
+    // busca dados dos 3 módulos em paralelo
     const [eqRes, boRes, ctRes] = await Promise.all([
-      sb.from('equipamentos').select('*').eq('cliente_email', email).order('created_at', {ascending:false}).catch(() => ({data:[]})),
-      sb.from('boletos').select('*').eq('cliente_email', email).order('vencimento', {ascending:false}).catch(() => ({data:[]})),
-      sb.from('contratos').select('*').eq('cliente_email', email).order('created_at', {ascending:false}).catch(() => ({data:[]})),
+      sb.from('cliente_maquinas').select('*').eq('cliente_email', email).order('created_at', {ascending:false}).catch(() => ({data:[]})),
+      clienteId
+        ? sb.from('boletos').select('*').eq('cliente_id', clienteId).order('vencimento', {ascending:false}).catch(() => ({data:[]}))
+        : Promise.resolve({data:[]}),
+      clienteId
+        ? sb.from('contratos').select('*').eq('cliente_id', clienteId).order('vigencia_inicio', {ascending:false}).catch(() => ({data:[]}))
+        : Promise.resolve({data:[]}),
     ]);
     const equips   = eqRes.data   || [];
     const boletos  = boRes.data   || [];
@@ -2150,7 +2161,7 @@ async function renderAdminClientes(root, sb, sess, usuario) {
             ${eq.numero_serie ? `<span class="cg-sub">S/N: ${escHtml(eq.numero_serie)}</span>` : ''}
             ${eq.data_compra  ? `<span class="cg-sub">Compra: ${dataBR(eq.data_compra)}</span>` : ''}
           </div>
-          ${rowDel('equipamentos', eq.id)}
+          ${rowDel('cliente_maquinas', eq.id)}
         </div>`).join('') : '<div class="cg-empty">Nenhum equipamento vinculado.</div>'}
       <div class="cg-add-section">
         <h4>Vincular equipamento</h4>
@@ -2176,7 +2187,7 @@ async function renderAdminClientes(root, sb, sess, usuario) {
           <div class="cg-item-main">
             <b>${brl(b.valor)}</b>
             <span class="cg-sub">Vence: ${dataBR(b.vencimento)}</span>
-            ${b.descricao ? `<span class="cg-sub">${escHtml(b.descricao)}</span>` : ''}
+            ${b.observacoes ? `<span class="cg-sub">${escHtml(b.observacoes)}</span>` : ''}
           </div>
           <span class="adm-st ${stCls}">${escHtml(stLab)}</span>
           ${rowDel('boletos', b.id)}
@@ -2209,9 +2220,9 @@ async function renderAdminClientes(root, sb, sess, usuario) {
         const stCls2 = {vigente:'adm-st-aprovado',encerrado:'adm-st-rejeitado',cancelado:'adm-st-rejeitado',a_vencer:'adm-st-pendente'}[ct.status]||'adm-st-aprovado';
         return `<div class="cg-item">
           <div class="cg-item-main">
-            <b>${escHtml(ct.tipo||'Contrato')}</b>
-            <span class="cg-sub">Início: ${dataBR(ct.vigencia_inicio)} · Fim: ${dataBR(ct.vigencia_fim)}</span>
-            ${ct.descricao ? `<span class="cg-sub">${escHtml(ct.descricao)}</span>` : ''}
+            <b>${ct.numero ? 'Nº ' + escHtml(ct.numero) : 'Contrato'}</b>
+            <span class="cg-sub">${dataBR(ct.vigencia_inicio)} → ${dataBR(ct.vigencia_fim)}</span>
+            ${ct.valor_mensal ? `<span class="cg-sub">${brl(ct.valor_mensal)}/mês · ${escHtml(ct.periodicidade||'')}</span>` : ''}
           </div>
           <span class="adm-st ${stCls2}">${escHtml(ct.status||'vigente')}</span>
           ${rowDel('contratos', ct.id)}
@@ -2220,12 +2231,23 @@ async function renderAdminClientes(root, sb, sess, usuario) {
       <div class="cg-add-section">
         <h4>Novo contrato</h4>
         <form id="cg-ct-form" class="cg-form">
-          <div class="pf-field"><label>Tipo</label><input id="cg-ct-tipo" type="text" value="Parceria comercial" maxlength="80"></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div class="pf-field"><label>Nº do contrato</label><input id="cg-ct-num" type="text" placeholder="Ex: CTL-2026-001" maxlength="60"></div>
+            <div class="pf-field"><label>Periodicidade</label>
+              <select id="cg-ct-per" class="select-native">
+                <option value="">—</option>
+                <option value="mensal">Mensal</option>
+                <option value="trimestral">Trimestral</option>
+                <option value="semestral">Semestral</option>
+                <option value="anual">Anual</option>
+              </select>
+            </div>
+          </div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
             <div class="pf-field"><label>Início da vigência</label><input id="cg-ct-ini" type="date"></div>
             <div class="pf-field"><label>Fim (opcional)</label><input id="cg-ct-fim" type="date"></div>
           </div>
-          <div class="pf-field"><label>Descrição</label><input id="cg-ct-desc" type="text" placeholder="Detalhes do contrato" maxlength="200"></div>
+          <div class="pf-field"><label>Valor mensal (R$)</label><input id="cg-ct-val" type="number" step="0.01" min="0" placeholder="0,00"></div>
           <div id="cg-ct-err" class="acf-err" hidden></div>
           <button type="submit" class="btn primary btn-sm">${svgIcon('plus','ic ic-sm')} Salvar contrato</button>
         </form>
@@ -2292,7 +2314,7 @@ async function renderAdminClientes(root, sb, sess, usuario) {
       const sb2 = e.target.querySelector('[type=submit]');
       const old = sb2.innerHTML; sb2.disabled = true; sb2.innerHTML = 'Vinculando…';
       try {
-        const { error } = await sb.from('equipamentos').insert({
+        const { error } = await sb.from('cliente_maquinas').insert({
           cliente_email: email,
           slug: selName.toLowerCase().replace(/\s+/g,'-'),
           name: selName,
@@ -2325,9 +2347,10 @@ async function renderAdminClientes(root, sb, sess, usuario) {
       const saveBtn = e.target.querySelector('[type=submit]');
       const old = saveBtn.innerHTML; saveBtn.disabled = true; saveBtn.innerHTML = 'Salvando…';
       try {
+        if (!clienteId) throw new Error('Cliente não encontrado na tabela clientes.');
         const { error } = await sb.from('boletos').insert({
-          cliente_email: email, valor, vencimento: venc,
-          competencia: comp || venc.slice(0,7), status: st, descricao: desc || null,
+          cliente_id: clienteId, valor, vencimento: venc,
+          competencia: comp || venc.slice(0,7), status: st, observacoes: desc || null,
         });
         if (error) throw error;
         UI.closeModal(mod); setTimeout(() => { mod.remove(); abrirGerenciar(email, nome); }, 350);
@@ -2342,19 +2365,23 @@ async function renderAdminClientes(root, sb, sess, usuario) {
     /* novo contrato */
     mod.querySelector('#cg-ct-form')?.addEventListener('submit', async e => {
       e.preventDefault();
-      const tipo = mod.querySelector('#cg-ct-tipo').value.trim() || 'Parceria comercial';
+      const num  = mod.querySelector('#cg-ct-num').value.trim();
+      const per  = mod.querySelector('#cg-ct-per').value;
       const ini  = mod.querySelector('#cg-ct-ini').value;
       const fim  = mod.querySelector('#cg-ct-fim').value;
-      const desc = mod.querySelector('#cg-ct-desc').value.trim();
+      const val  = parseFloat(mod.querySelector('#cg-ct-val').value) || null;
       const errEl= mod.querySelector('#cg-ct-err');
       errEl.hidden = true;
       const saveBtn = e.target.querySelector('[type=submit]');
       const old = saveBtn.innerHTML; saveBtn.disabled = true; saveBtn.innerHTML = 'Salvando…';
       try {
+        if (!clienteId) throw new Error('Cliente não encontrado na tabela clientes.');
         const { error } = await sb.from('contratos').insert({
-          cliente_email: email, tipo,
+          cliente_id: clienteId,
+          numero: num || null,
+          periodicidade: per || null,
           vigencia_inicio: ini || null, vigencia_fim: fim || null,
-          descricao: desc || null, status: 'vigente',
+          valor_mensal: val, status: 'vigente',
         });
         if (error) throw error;
         UI.closeModal(mod); setTimeout(() => { mod.remove(); abrirGerenciar(email, nome); }, 350);
@@ -2486,7 +2513,7 @@ async function initMeusEquipamentos() {
   try {
     const sb = await Portal.db();
     if (sb) {
-      const { data, error } = await sb.from('equipamentos').select('slug,name,marca_nome,segmento,cover');
+      const { data, error } = await sb.from('cliente_maquinas').select('slug,name,marca_nome,segmento,cover');
       if (!error && data) equips = data;
     }
   } catch (_) {}

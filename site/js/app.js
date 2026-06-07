@@ -1,7 +1,7 @@
 /* ============================================================
    APP — ícones (traçado), dados de exemplo e render da Início
    ============================================================ */
-const BUILD = 'spa91';
+const BUILD = 'spa92';
 try { console.log('%cPartnerZone • build ' + BUILD, 'background:#2f7ff2;color:#fff;padding:2px 8px;border-radius:4px;font-weight:700'); } catch (_) {}
 
 /* ---- MODO CLIENTE × ADMIN ----------------------------------------------
@@ -2905,8 +2905,15 @@ let _suportePoll = null;
 function clearSuportePoll() { if (_suportePoll) { clearInterval(_suportePoll); _suportePoll = null; } }
 window.clearSuportePoll = clearSuportePoll;
 
+let _suporteChannel = null;
+function clearSuporteChannel() {
+  if (_suporteChannel) { try { _suporteChannel.unsubscribe(); } catch (_) {} _suporteChannel = null; }
+}
+window.clearSuporteChannel = clearSuporteChannel;
+
 async function initSuporte(chamadoId) {
   clearSuportePoll();
+  clearSuporteChannel();
   const root = document.getElementById('suporte-page'); if (!root) return;
   root.innerHTML = `<div class="pf-loading">Carregando…</div>`;
   let ok = false;
@@ -3211,6 +3218,7 @@ async function renderSuporteDetalhe(root, sb, sess, chamadoId) {
       ${fichaHtml}
 
       <div class="cd-thread" id="cd-thread"></div>
+      <div class="cd-typing" id="cd-typing" hidden><span class="cd-typing-dots"><span></span><span></span><span></span></span> Atendente digitando…</div>
 
       ${replyBlock}
     </div>`;
@@ -3266,6 +3274,44 @@ async function renderSuporteDetalhe(root, sb, sess, chamadoId) {
       } catch (_) {}
     }, 15000);
   }
+
+  /* ------ Realtime Broadcast: "digitando…" bidirecional ------ */
+  clearSuporteChannel();
+  try {
+    const cliNomeRT = cliNome;
+    const typingEl  = root.querySelector('#cd-typing');
+
+    _suporteChannel = sb.channel('suporte-typing-' + chamadoId, {
+      config: { broadcast: { self: false } }
+    });
+
+    _suporteChannel
+      .on('broadcast', { event: 'typing' }, ({ payload }) => {
+        if (payload.role !== 'equipe' || !typingEl) return;
+        typingEl.hidden = !payload.typing;
+        if (payload.typing) {
+          clearTimeout(typingEl._t);
+          typingEl._t = setTimeout(() => { typingEl.hidden = true; }, 4000);
+        }
+      })
+      .subscribe();
+
+    if (!isEncerrado) {
+      const inputRT = root.querySelector('#cd-input');
+      if (inputRT) {
+        let _tt = null, _throttle = false;
+        const broadcast = (typing) => {
+          try { _suporteChannel.send({ type:'broadcast', event:'typing', payload:{ role:'cliente', nome: cliNomeRT, typing } }); } catch (_) {}
+        };
+        inputRT.addEventListener('input', () => {
+          if (!_throttle) { broadcast(true); _throttle = true; setTimeout(() => { _throttle = false; }, 1800); }
+          clearTimeout(_tt);
+          _tt = setTimeout(() => broadcast(false), 2500);
+        });
+        root.querySelector('#cd-send')?.addEventListener('click', () => { clearTimeout(_tt); broadcast(false); }, { capture: true });
+      }
+    }
+  } catch (_) {}
 }
 
 /* ============================================================

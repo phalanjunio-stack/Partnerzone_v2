@@ -1801,7 +1801,7 @@ async function renderAdminCadastros(root, sb, sess, usuario) {
       const old = saveBtn.innerHTML; saveBtn.disabled = true; saveBtn.innerHTML = 'Criando…';
       try {
         const { error: e1 } = await sb.from('clientes')
-          .insert({ nome, email, telefone: tel, cidade, status: 'ativo' });
+          .insert({ nome, email, telefone: tel, cidade, status: 'ativo', origem: 'partnerzone' });
         if (e1) throw e1;
         await sb.from('cadastros')
           .update({ status: 'aprovado', aprovado_por: sess.user.email }).eq('id', cadId);
@@ -1861,7 +1861,7 @@ async function renderAdminCadastros(root, sb, sess, usuario) {
       errEl.hidden = true;
       const old = saveBtn.innerHTML; saveBtn.disabled = true; saveBtn.innerHTML = 'Criando…';
       try {
-        const { error } = await sb.from('clientes').insert({ nome, email, telefone: tel, cidade, status });
+        const { error } = await sb.from('clientes').insert({ nome, email, telefone: tel, cidade, status, origem: 'partnerzone' });
         if (error) throw error;
         if (send) {
           try { await sb.auth.signInWithOtp({ email, options: { shouldCreateUser: true } }); } catch (_) {}

@@ -1,7 +1,7 @@
 /* ============================================================
    APP — ícones (traçado), dados de exemplo e render da Início
    ============================================================ */
-const BUILD = 'spa87';
+const BUILD = 'spa88';
 try { console.log('%cPartnerZone • build ' + BUILD, 'background:#2f7ff2;color:#fff;padding:2px 8px;border-radius:4px;font-weight:700'); } catch (_) {}
 
 /* ---- MODO CLIENTE × ADMIN ----------------------------------------------
@@ -1543,7 +1543,7 @@ async function openPerfilModal(cli, sess) {
     saveBtn.innerHTML = '<span class="spinner-sm"></span> Salvando…';
 
     try {
-      const sb = Portal.db();
+      const sb = await Portal.db();
       const { error } = await sb.from('clientes')
         .update({ nome: novoNome, telefone: novoTel, cidade: novaCidade })
         .eq('email', email.toLowerCase());
@@ -1574,7 +1574,7 @@ async function initAcesso() {
   const root = document.getElementById('acesso-page'); if (!root) return;
 
   let sb = null;
-  try { if (await Portal.configured()) sb = Portal.db(); } catch (_) {}
+  try { if (await Portal.configured()) sb = await Portal.db(); } catch (_) {}
 
   root.innerHTML = `
     <div class="acesso-wrap">

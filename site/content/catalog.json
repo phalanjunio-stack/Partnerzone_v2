@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-06-08T12:46:38.975Z",
+  "generatedAt": "2026-06-08T13:13:15.934Z",
   "source": "equipamentos: catalogo.db (completo) · materials: liberados (manifests + audio-metadata)",
   "marcas": [
     {
@@ -625,69 +625,6 @@
       "tamanho": "",
       "novo": true,
       "atualizadoEm": "2026-06-03T20:38:02.836Z"
-    },
-    {
-      "id": "114QM0PC7E-43X-7HY9wXT8HrrhUIJhJx",
-      "titulo": "Contourline Unyque",
-      "equipamento": "hipro",
-      "marca": "unyquepro",
-      "tipo": "audio",
-      "formato": "mp3",
-      "pasta": "Jingles",
-      "categoria": "Jingles",
-      "linha": null,
-      "tags": [
-        "alan",
-        "teste"
-      ],
-      "flags": [
-        "audio"
-      ],
-      "url": "content/media/114QM0PC7E-43X-7HY9wXT8HrrhUIJhJx.mp3",
-      "thumb": "https://lh3.googleusercontent.com/d/114QM0PC7E-43X-7HY9wXT8HrrhUIJhJx",
-      "tamanho": "",
-      "novo": true,
-      "atualizadoEm": "2026-06-08T12:46:38.975Z"
-    },
-    {
-      "id": "m_0005",
-      "titulo": "Bruma Sobre o Mar",
-      "equipamento": null,
-      "marca": null,
-      "tipo": "audio",
-      "formato": "mp3",
-      "pasta": "Áudio",
-      "categoria": "Músicas",
-      "linha": null,
-      "tags": [],
-      "flags": [
-        "audio"
-      ],
-      "url": "content/media/m_0005.mp3",
-      "thumb": "https://lh3.googleusercontent.com/d/13tZPbelvialTvKq8LV1DimUFT9ehs65w",
-      "tamanho": "",
-      "novo": true,
-      "atualizadoEm": "2026-06-06T15:10:03.090Z"
-    },
-    {
-      "id": "13tZPbelvialTvKq8LV1DimUFT9ehs65w",
-      "titulo": "Bruma Sobre o Mar",
-      "equipamento": null,
-      "marca": "unyquepro",
-      "tipo": "audio",
-      "formato": "mp3",
-      "pasta": "Áudio",
-      "categoria": "Músicas",
-      "linha": null,
-      "tags": [],
-      "flags": [
-        "audio"
-      ],
-      "url": "content/media/13tZPbelvialTvKq8LV1DimUFT9ehs65w.mp3",
-      "thumb": "https://lh3.googleusercontent.com/d/13tZPbelvialTvKq8LV1DimUFT9ehs65w",
-      "tamanho": "",
-      "novo": true,
-      "atualizadoEm": "2026-06-06T21:30:04.093Z"
     }
   ],
   "categorias": [
